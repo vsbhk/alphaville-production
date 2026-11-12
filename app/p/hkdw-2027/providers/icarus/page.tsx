@@ -1,4 +1,5 @@
 import { ProjectNav } from "@/components/ProjectNav";
+import { AlphavilleHeader } from "@/components/AlphavilleBrand";
 
 const lifecycle = [
   { label: "Empty", current: true },
@@ -11,14 +12,7 @@ const lifecycle = [
 export default function IcarusProductionPage() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <header className="border-b border-[var(--line)] bg-[var(--surface)]">
-        <div className="mx-auto flex min-h-[68px] max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-          <a href="/" className="text-[17px] font-semibold tracking-[-0.04em]" aria-label="Alphaville workspace sign in">
-            Alphaville<span className="ml-1 text-[var(--accent)]">.</span>
-          </a>
-          <p className="text-right text-xs font-medium text-[var(--muted)]">Private production workspace</p>
-        </div>
-      </header>
+      <AlphavilleHeader label="HKDW 2027 · Personal workspace" />
       <ProjectNav current="production" />
 
       <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">

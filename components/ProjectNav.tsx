@@ -16,7 +16,7 @@ export function ProjectNav({ current }: { current: ProjectSection }) {
             key={link.id}
             href={link.href}
             aria-current={current === link.id ? "page" : undefined}
-            className={`inline-flex min-h-12 items-center border-b-2 px-3 text-sm font-medium transition ${current === link.id ? "border-[var(--accent)] text-[var(--foreground)]" : "border-transparent text-[var(--muted)] hover:text-[var(--foreground)]"}`}
+            className={`inline-flex min-h-12 items-center border-b-2 px-3 text-sm font-medium ${current === link.id ? "border-[var(--accent)] text-[var(--foreground)]" : "border-transparent text-[var(--muted)] hover:text-[var(--foreground)]"}`}
           >
             {link.label}
           </a>

@@ -105,7 +105,7 @@ export function SponsorAssetIntake({ sponsors }: { sponsors: string[] }) {
         onDragOver={(event) => event.preventDefault()}
         onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsDragging(false); }}
         onDrop={handleDrop}
-        className={`mt-5 rounded-lg border-2 border-dashed p-6 text-center transition sm:p-8 ${isDragging ? "border-[var(--accent)] bg-[var(--accent)]/5" : "border-[var(--line-strong)] bg-[var(--background)]"}`}
+        className={`mt-5 rounded-lg border-2 border-dashed p-6 text-center sm:p-8 ${isDragging ? "border-[var(--accent)] bg-[var(--accent)]/5" : "border-[var(--line-strong)] bg-[var(--background)]"}`}
       >
         <input id="sponsor-files" className="sr-only" type="file" multiple accept={acceptedFiles} onChange={handleInputChange} />
         <p className="text-sm font-semibold">Drop files to add them to the intake</p>

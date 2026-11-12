@@ -1,6 +1,7 @@
 import { ProjectNav } from "@/components/ProjectNav";
 import { DayPlanner } from "@/components/DayPlanner";
 import { auth } from "@/auth";
+import { AlphavilleHeader } from "@/components/AlphavilleBrand";
 
 const eventCalendar = [
   { event: "Asia Pacific Championship", date: "Tue 17–Wed 18 Nov", activity: "Registration, measurement and equipment inspection · 09:00–17:30 at Clearwater Bay Golf & Country Club Marina. Crew weigh-in runs until 18:00." },
@@ -38,12 +39,7 @@ export default async function ProjectOverviewPage() {
   const canEdit = session?.user.role === "admin" || session?.user.role === "editor";
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <header className="border-b border-[var(--line)] bg-[var(--surface)]">
-        <div className="mx-auto flex min-h-[68px] max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-          <a href="/" className="text-[17px] font-semibold tracking-[-0.04em]" aria-label="Alphaville workspace sign in">Alphaville<span className="ml-1 text-[var(--accent)]">.</span></a>
-          <p className="text-right text-xs font-medium text-[var(--muted)]">Private production workspace</p>
-        </div>
-      </header>
+      <AlphavilleHeader label="HKDW 2027 · Personal workspace" />
       <ProjectNav current="overview" />
 
       <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">

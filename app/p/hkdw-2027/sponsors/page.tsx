@@ -1,15 +1,11 @@
 import { ProjectNav } from "@/components/ProjectNav";
+import { AlphavilleHeader } from "@/components/AlphavilleBrand";
 import { projectSponsors } from "@/lib/sponsors";
 
 export default async function SponsorsPage() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <header className="border-b border-[var(--line)] bg-[var(--surface)]">
-        <div className="mx-auto flex min-h-[68px] max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-          <a href="/" className="text-[17px] font-semibold tracking-[-0.04em]" aria-label="Alphaville workspace sign in">Alphaville<span className="ml-1 text-[var(--accent)]">.</span></a>
-          <p className="text-right text-xs font-medium text-[var(--muted)]">Private production workspace</p>
-        </div>
-      </header>
+      <AlphavilleHeader label="HKDW 2027 · Personal workspace" />
       <ProjectNav current="sponsors" />
 
       <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
@@ -22,8 +18,8 @@ export default async function SponsorsPage() {
         <section className="border-b border-[var(--line)] pb-8">
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Personal project records</p>
           <h1 className="text-4xl font-semibold leading-[1.08] tracking-[-0.05em] sm:text-5xl">Sponsors</h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--muted)]">Keep sponsor references and review notes in your private project workspace. No sponsor accounts or shared folders are connected.</p>
-          <p className="mt-5 max-w-3xl rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950">These are project reference records only. No sponsor submissions, files, emails or review histories have been imported.</p>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--muted)]">Collect sponsor information and working files in a private page for each organisation. No sponsor accounts or shared folders are connected.</p>
+          <p className="mt-5 max-w-3xl border border-[var(--line)] bg-[var(--surface)] p-4 text-sm leading-6">Files stay in this browser until you download the sponsor ZIP. Nothing is sent to Icarus automatically.</p>
         </section>
 
         <section className="py-8" aria-labelledby="roster-title">
@@ -37,9 +33,9 @@ export default async function SponsorsPage() {
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {projectSponsors.map((sponsor) => (
               <li key={sponsor.slug}>
-                <a href={`/p/hkdw-2027/sponsors/${sponsor.slug}`} className="flex min-h-20 items-center justify-between gap-3 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4 transition hover:border-[var(--accent)]">
+                <a href={`/p/hkdw-2027/sponsors/${sponsor.slug}`} className="flex min-h-20 items-center justify-between gap-3 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4 hover:border-[var(--accent)]">
                   <span className="text-sm font-semibold">{sponsor.name}</span>
-                  <span className="shrink-0 rounded-full bg-[var(--background)] px-2.5 py-1 text-[11px] font-medium text-[var(--muted)]">Open preview</span>
+                  <span className="shrink-0 bg-[var(--background)] px-2.5 py-1 text-[11px] font-medium text-[var(--muted)]">Open collection</span>
                 </a>
               </li>
             ))}
@@ -49,7 +45,7 @@ export default async function SponsorsPage() {
         <section className="border-t border-[var(--line)] py-8" aria-labelledby="review-model-title">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Personal use</p>
           <h2 id="review-model-title" className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Private notes for your own reference</h2>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--muted)]">Links and notes stay in your personal workspace. No sponsor accounts or Drive permissions are changed.</p>
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--muted)]">Download each sponsor’s information and uploaded files as a ZIP when the collection is ready. You decide when to share it with Icarus.</p>
         </section>
       </main>
 

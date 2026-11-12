@@ -16,8 +16,8 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "prod.alphaville.hk | HKDW 2027",
-  description: "Private production workspace for HKDW 2027 - Royal Hong Kong Yacht Club.",
+  title: "Alphaville | Personal workspace",
+  description: "Private Alphaville workspace.",
 };
 
 export default function RootLayout({
