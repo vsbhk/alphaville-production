@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 
 export function SignInForm({ googleReady, externalReady, nextPath, authError }: { googleReady: boolean; externalReady: boolean; nextPath: string; authError: boolean }) {
-  const [notice, setNotice] = useState(authError ? "Sign-in did not complete. Use an approved account or contact the workspace administrator." : "");
+  const [notice, setNotice] = useState(authError ? "Sign-in did not complete. Try the personal workspace owner’s Alphaville account." : "");
   const [busy, setBusy] = useState(false);
 
   async function passwordSignIn(event: FormEvent<HTMLFormElement>) {
@@ -13,7 +13,7 @@ export function SignInForm({ googleReady, externalReady, nextPath, authError }: 
     setBusy(true);
     const result = await signIn("credentials", { email: form.get("email"), password: form.get("password"), redirect: false });
     setBusy(false);
-    if (result?.error) setNotice("We couldn’t sign you in. Check your email and password or contact the workspace administrator.");
+    if (result?.error) setNotice("We couldn’t sign you in. Check that you’re using the personal workspace owner’s account.");
     else window.location.assign(nextPath);
   }
 

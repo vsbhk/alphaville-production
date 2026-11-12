@@ -28,7 +28,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
             Your project, in one place.
           </h1>
           <p className="mt-6 max-w-md text-base leading-7 text-[var(--muted)]">
-            Sign in with your approved email to reach your project materials.
+            Sign in with the owner’s Alphaville Google account to reach your personal workspace.
           </p>
 
           <div className="mt-12 border-l-2 border-[var(--accent)] pl-5">

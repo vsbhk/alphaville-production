@@ -126,7 +126,7 @@ export function SponsorWorkspace({ sponsorSlug, editable }: { sponsorSlug: strin
 
         {editable && <form onSubmit={addAsset} className="mt-6 border-t border-[var(--line)] pt-5">
           <h3 className="text-sm font-semibold">Add material or a Drive link</h3>
-          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Files are not uploaded here. Add a Drive link with access granted to the Alphaville team.</p>
+          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Add a Google Drive link for your own reference. No sponsor folders are connected or shared by this personal workspace.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="text-sm font-medium">Material name
               <input required value={title} onChange={(event) => setTitle(event.target.value)} className="mt-2 h-11 w-full rounded-md border border-[var(--line-strong)] bg-white px-3" />

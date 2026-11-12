@@ -73,9 +73,9 @@ export default async function ProjectOverviewPage() {
             <p className="mt-4 text-base leading-7 text-[var(--muted)]">Royal Hong Kong Yacht Club</p>
           </div>
           <aside className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-950">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em]">Access setup</p>
-            <p className="mt-2 text-sm font-semibold">Intended for approved RHKYC staff and ICARUS production contacts</p>
-            <p className="mt-2 text-xs leading-5">{canEdit ? "You have project editing access. Shared Google Workspace storage still needs to be connected before changes are shared." : "You have read-only project access. Planner editing and sponsor material controls are reserved for Alphaville staff."}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em]">Personal workspace</p>
+            <p className="mt-2 text-sm font-semibold">Private to the Alphaville owner account</p>
+            <p className="mt-2 text-xs leading-5">{canEdit ? "Your planner and project records are saved to your connected Google Workspace." : "Sign in with the owner account to open this private workspace."}</p>
           </aside>
         </section>
 

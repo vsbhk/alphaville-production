@@ -45,8 +45,8 @@ export default async function SponsorWorkspacePage({
         </section>
 
         <aside className="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm leading-6 text-amber-950">
-          <p className="font-semibold">Sponsor-specific access is enforced for approved accounts.</p>
-          <p className="mt-2">Sponsor records load from shared Google Sheets storage when configured. Files remain in Google Drive and must be shared with the Alphaville team.</p>
+          <p className="font-semibold">Personal workspace, visible only to your owner account.</p>
+          <p className="mt-2">Records are kept in the connected project data sheet. Drive links are saved for your own reference; this page does not change any folder permissions.</p>
         </aside>
 
         <SponsorWorkspace sponsorSlug={sponsor.slug} editable={canEdit} />

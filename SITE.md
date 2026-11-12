@@ -8,7 +8,7 @@ Private production workspace for Alphaville client projects.
 - **Sign-in page** (`/`) - Identifies the private workspace and the HKDW 2027 project, then asks visitors for their approved email address.
 - **Project overview** (`/p/hkdw-2027`) - Shows open action points, the confirmed filming period and daily 09:00–21:00 HKT window from 17–29 November 2026, an editable day-by-day plan preview, the published event calendar, the interview slot that needs time and meeting-point confirmation, and a project-specific contact directory.
 - **Sponsors** (`/p/hkdw-2027/sponsors`) - Shows the source roster and a drag-and-drop intake preview for sponsor material, including a Google Drive path for large files.
-- **Sponsor workspaces** (`/p/hkdw-2027/sponsors/{sponsor}`) - Separate page paths for each source-roster sponsor. Project routes and sponsor-level access checks are implemented. Editors can manage shared sponsor material links and approval status when Google Sheets is configured; file uploads and sponsor submissions remain unconnected.
+- **Sponsor workspaces** (`/p/hkdw-2027/sponsors/{sponsor}`) - Separate page paths for each source-roster sponsor. The personal workspace owner can manage links and approval notes stored in Google Sheets. Sponsor folders are not connected or shared by this personal tool.
 - **ICARUS production brief** (`/p/hkdw-2027/providers/icarus`) - Preview of provider-facing production information, with filming windows held for coordinator input, the single approval lifecycle, a safe venue-access reference, and the public media publication cadence.
 - **Deliverables** (`/p/hkdw-2027/deliverables`) - Contract recap for video production and distribution, with relative deadlines and separate provider assignments for ICARUS Sports, Kevin Rio and Takumi Images. Checklist status is wired to shared Google Sheets storage, with browser-only fallback until the sheet is configured.
 
@@ -18,6 +18,7 @@ Private production workspace for Alphaville client projects.
 - **Project label** - HKDW 2027 - Royal Hong Kong Yacht Club.
 
 ## Recent changes
+- 12 November 2026: Restricted website access to the personal Alphaville owner account. Collaborator and sponsor access was removed from the app allowlist; no collaborator notifications or Drive folder grants were made.
 - 12 November 2026: Added an environment-variable example and corrected workspace notes to distinguish completed role checks and shared-record wiring from the Google Sheet and sponsor-specific records still needed. Confirmed that Google OAuth variables are present in Vercel Production; end-to-end sign-in still needs verification. Updated sponsor and deliverables page messages to match the current code.
 - 12 November 2026: Added an explicit authenticated role gate for project routes. Alphaville editors can manage the planner and intake; project viewers are read-only; sponsor viewers are limited to their assigned sponsor path. Google OAuth and external password sign-in now show as unavailable until Vercel credentials and external password hashes are configured.
 - 12 November 2026: Removed the stale Supabase data client from planner persistence. The planner now reports that shared Google Workspace storage is not configured instead of attempting writes to Supabase.
@@ -49,9 +50,9 @@ Private production workspace for Alphaville client projects.
 - For local or Vercel configuration, use `.env.example` as the variable checklist. Add `https://prod.alphaville.hk/api/auth/callback/google` to the Google OAuth client’s authorized redirect URIs and set `AUTH_URL` to `https://prod.alphaville.hk`.
 
 ## Remaining setup
-- Confirm the Google OAuth consent screen and authorized redirect URI (`https://prod.alphaville.hk/api/auth/callback/google`), then verify sign-in end to end with an approved Alphaville account. The required OAuth variables are present in Vercel Production, but their values and working status have not been verified.
-- The production Google Sheets adapter uses Vercel OIDC workload identity. Configure the `GOOGLE_SHEET_ID`, `GCP_PROJECT_NUMBER`, `GCP_WORKLOAD_IDENTITY_POOL_ID`, `GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID`, and `GCP_SERVICE_ACCOUNT_EMAIL` values in Vercel Production. Share only the project data sheet with the service account. The app creates a `Project Data` tab on first use.
+- Verify Google sign-in end to end with alpha@alphaville.hk. Vercel now reports the OAuth provider as configured.
+- The production Google Sheets adapter uses Vercel OIDC workload identity and the project data sheet is shared with the service account. The app creates a `Project Data` tab on first use.
 - If external password sign-in is required, provide approved account emails and bcrypt password hashes in `EXTERNAL_ACCOUNTS_JSON`; do not store plain-text passwords.
 - Enter the production bookings, responsible teams and meeting points for 17–29 November 2026. Confirm Jerry Tam’s interview time and meeting point on 22 November.
-- Choose and configure private file storage for sponsor materials, connect the Alphaville intake mailbox, and migrate sponsor submissions and review history. The current intake only stages files and links in the browser.
+- Direct Drive uploads are intentionally not enabled in the personal workspace. Add or open Drive links while signed in to your own Google account.
 - Add delivery owners, review history, destinations and actual delivery dates to the shared deliverables workflow.
