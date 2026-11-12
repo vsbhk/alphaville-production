@@ -1,6 +1,6 @@
-export type ProjectRole = "admin" | "editor" | "viewer" | "sponsor-viewer";
+export type ProjectRole = "editor";
 
-export type ProjectAccess = { role: ProjectRole; sponsorSlug?: string };
+export type ProjectAccess = { role: ProjectRole };
 
 const personalWorkspaceOwner = "alpha@alphaville.hk";
 

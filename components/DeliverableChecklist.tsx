@@ -22,25 +22,32 @@ export function DeliverableChecklist({
 }) {
   const [delivered, setDelivered] = useState<Record<string, boolean>>({});
   const [ready, setReady] = useState(false);
-  const [syncMessage, setSyncMessage] = useState("Loading shared delivery status…");
+  const [cloudReady, setCloudReady] = useState(false);
+  const [syncMessage, setSyncMessage] = useState("Loading saved delivery status…");
 
   useEffect(() => {
     let cancelled = false;
     async function initialize() {
       try {
         const shared = await loadWorkspaceData<Record<string, boolean>>("deliverables");
-        const local = window.localStorage.getItem(STORAGE_KEY);
         if (cancelled) return;
+        let local: Record<string, boolean> | null = null;
+        try {
+          const saved = window.localStorage.getItem(STORAGE_KEY);
+          if (saved) local = JSON.parse(saved) as Record<string, boolean>;
+        } catch { /* The Google Sheet remains the source of truth. */ }
         if (shared) setDelivered(shared);
-        else if (local) setDelivered(JSON.parse(local) as Record<string, boolean>);
-        setSyncMessage(shared ? "Shared delivery status loaded." : "No shared delivery status found yet.");
+        else if (local) setDelivered(local);
+        setCloudReady(true);
+        setSyncMessage(shared ? "Saved delivery status loaded." : "No saved delivery status found yet.");
       } catch {
         if (!cancelled) {
           try {
             const saved = window.localStorage.getItem(STORAGE_KEY);
             if (saved) setDelivered(JSON.parse(saved) as Record<string, boolean>);
           } catch { /* Keep the checklist available in this page session. */ }
-          setSyncMessage("Shared Google Workspace storage is not configured. Status changes stay in this browser.");
+          setSyncMessage("Cloud storage is unavailable. Changes will stay in this browser until it reconnects.");
+          setCloudReady(false);
         }
       }
       if (!cancelled) setReady(true);
@@ -52,13 +59,14 @@ export function DeliverableChecklist({
   useEffect(() => {
     if (!ready || !editable) return;
     try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(delivered)); } catch { /* This page still reflects current edits. */ }
+    if (!cloudReady) return;
     const timer = window.setTimeout(() => {
       void saveWorkspaceData("deliverables", delivered)
-        .then(() => setSyncMessage("Delivery status saved to shared project storage."))
-        .catch(() => setSyncMessage("Shared Google Workspace storage is not configured. Status changes stay in this browser."));
+        .then(() => setSyncMessage("Changes saved to your private workspace."))
+        .catch(() => { setCloudReady(false); setSyncMessage("Cloud storage is unavailable. Changes stay in this browser until it reconnects."); });
     }, 500);
     return () => window.clearTimeout(timer);
-  }, [delivered, editable, ready]);
+  }, [delivered, editable, ready, cloudReady]);
 
   function toggle(id: string) {
     setDelivered((current) => {

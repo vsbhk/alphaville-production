@@ -5,8 +5,8 @@ Private production workspace for Alphaville client projects.
 ## What's on the site
 
 ### Pages
-- **Sign-in page** (`/`) - Identifies the private workspace and the HKDW 2027 project, then asks visitors for their approved email address.
-- **Project overview** (`/p/hkdw-2027`) - Shows open action points, the confirmed filming period and daily 09:00–21:00 HKT window from 17–29 November 2026, an editable day-by-day plan preview, the published event calendar, the interview slot that needs time and meeting-point confirmation, and a project-specific contact directory.
+- **Sign-in page** (`/`) - Opens the private workspace with the owner’s Alphaville Google account.
+- **Project overview** (`/p/hkdw-2027`) - Shows the project action points, filming period, daily activity plan, event calendar and interview slot for personal reference.
 - **Sponsors** (`/p/hkdw-2027/sponsors`) - Shows the source roster and a drag-and-drop intake preview for sponsor material, including a Google Drive path for large files.
 - **Sponsor workspaces** (`/p/hkdw-2027/sponsors/{sponsor}`) - Separate page paths for each source-roster sponsor. The personal workspace owner can manage links and approval notes stored in Google Sheets. Sponsor folders are not connected or shared by this personal tool.
 - **ICARUS production brief** (`/p/hkdw-2027/providers/icarus`) - Preview of provider-facing production information, with filming windows held for coordinator input, the single approval lifecycle, a safe venue-access reference, and the public media publication cadence.
@@ -52,7 +52,6 @@ Private production workspace for Alphaville client projects.
 ## Remaining setup
 - Verify Google sign-in end to end with alpha@alphaville.hk. Vercel now reports the OAuth provider as configured.
 - The production Google Sheets adapter uses Vercel OIDC workload identity and the project data sheet is shared with the service account. The app creates a `Project Data` tab on first use.
-- If external password sign-in is required, provide approved account emails and bcrypt password hashes in `EXTERNAL_ACCOUNTS_JSON`; do not store plain-text passwords.
 - Enter the production bookings, responsible teams and meeting points for 17–29 November 2026. Confirm Jerry Tam’s interview time and meeting point on 22 November.
 - Direct Drive uploads are intentionally not enabled in the personal workspace. Add or open Drive links while signed in to your own Google account.
 - Add delivery owners, review history, destinations and actual delivery dates to the shared deliverables workflow.

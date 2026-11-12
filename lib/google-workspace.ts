@@ -4,6 +4,11 @@ import { getVercelOidcToken } from "@vercel/oidc";
 
 const SHEET_NAME = "Project Data";
 const HEADERS = [["key", "payload_json", "updated_at", "updated_by"]];
+const SHEET_A1 = `'${SHEET_NAME.replaceAll("'", "''")}'`;
+
+function sheetRange(range: string) {
+  return `${SHEET_A1}!${range}`;
+}
 
 function spreadsheetId() {
   const id = process.env.GOOGLE_SHEET_ID;
@@ -45,11 +50,11 @@ async function ensureTable(client: sheets_v4.Sheets, id: string) {
       requestBody: { requests: [{ addSheet: { properties: { title: SHEET_NAME } } }] },
     });
   }
-  const header = await client.spreadsheets.values.get({ spreadsheetId: id, range: `${SHEET_NAME}!A1:D1` });
+  const header = await client.spreadsheets.values.get({ spreadsheetId: id, range: sheetRange("A1:D1") });
   if (!header.data.values?.length) {
     await client.spreadsheets.values.update({
       spreadsheetId: id,
-      range: `${SHEET_NAME}!A1:D1`,
+      range: sheetRange("A1:D1"),
       valueInputOption: "RAW",
       requestBody: { values: HEADERS },
     });
@@ -60,7 +65,7 @@ export async function getWorkspaceRecord(key: string): Promise<unknown | null> {
   const client = await sheetsClient();
   const id = spreadsheetId();
   await ensureTable(client, id);
-  const response = await client.spreadsheets.values.get({ spreadsheetId: id, range: `${SHEET_NAME}!A2:D` });
+  const response = await client.spreadsheets.values.get({ spreadsheetId: id, range: sheetRange("A2:D") });
   const row = (response.data.values ?? []).find((item) => item[0] === key);
   if (!row?.[1]) return null;
   return JSON.parse(String(row[1])) as unknown;
@@ -70,7 +75,7 @@ export async function putWorkspaceRecord(key: string, payload: unknown, email: s
   const client = await sheetsClient();
   const id = spreadsheetId();
   await ensureTable(client, id);
-  const values = await client.spreadsheets.values.get({ spreadsheetId: id, range: `${SHEET_NAME}!A2:D` });
+  const values = await client.spreadsheets.values.get({ spreadsheetId: id, range: sheetRange("A2:D") });
   const rows = values.data.values ?? [];
   const index = rows.findIndex((item) => item[0] === key);
   const row = [key, JSON.stringify(payload), new Date().toISOString(), email];
@@ -78,14 +83,14 @@ export async function putWorkspaceRecord(key: string, payload: unknown, email: s
     const rowNumber = index + 2;
     await client.spreadsheets.values.update({
       spreadsheetId: id,
-      range: `${SHEET_NAME}!A${rowNumber}:D${rowNumber}`,
+      range: sheetRange(`A${rowNumber}:D${rowNumber}`),
       valueInputOption: "RAW",
       requestBody: { values: [row] },
     });
   } else {
     await client.spreadsheets.values.append({
       spreadsheetId: id,
-      range: `${SHEET_NAME}!A:D`,
+      range: sheetRange("A:D"),
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
       requestBody: { values: [row] },

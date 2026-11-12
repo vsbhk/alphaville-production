@@ -88,17 +88,39 @@ export function DayPlanner({ editable = true }: { editable?: boolean }) {
   const [calendarEnd, setCalendarEnd] = useState(CONTRACT_DEADLINE);
   const [calendarStart, setCalendarStart] = useState(FIRST_DATE);
   const [ready, setReady] = useState(false);
-  const [syncMessage, setSyncMessage] = useState("Checking shared project storage…");
+  const [cloudReady, setCloudReady] = useState(false);
+  const [syncMessage, setSyncMessage] = useState("Loading your saved plan…");
 
   useEffect(() => {
     let cancelled = false;
     async function initialize() {
+      let shared: { activities?: Record<string, Activity[]>; calendarEnd?: string; calendarStart?: string } | null;
       try {
-        const shared = await loadWorkspaceData<{ activities?: Record<string, Activity[]>; calendarEnd?: string; calendarStart?: string }>("production-calendar");
-        const local = window.localStorage.getItem(STORAGE_KEY);
-        const parsed = (shared ?? (local ? JSON.parse(local) : null)) as { activities?: Record<string, Activity[]>; calendarEnd?: string; calendarStart?: string } | null;
+        shared = await loadWorkspaceData<{ activities?: Record<string, Activity[]>; calendarEnd?: string; calendarStart?: string }>("production-calendar");
+      } catch {
         if (cancelled) return;
-        if (parsed) {
+        try {
+          const local = window.localStorage.getItem(STORAGE_KEY);
+          if (local) {
+            const parsed = JSON.parse(local) as { activities?: Record<string, Activity[]>; calendarEnd?: string; calendarStart?: string };
+            if (parsed.activities) setActivities(parsed.activities);
+            if (parsed.calendarEnd) setCalendarEnd(parsed.calendarEnd);
+            if (parsed.calendarStart) setCalendarStart(parsed.calendarStart);
+          }
+        } catch { /* Keep the in-memory defaults if the local copy cannot be read. */ }
+        setCloudReady(false);
+        setSyncMessage("Cloud storage is unavailable. Changes will stay in this browser until it reconnects.");
+        setReady(true);
+        return;
+      }
+      if (cancelled) return;
+      let local: { activities?: Record<string, Activity[]>; calendarEnd?: string; calendarStart?: string } | null = null;
+      try {
+        const saved = window.localStorage.getItem(STORAGE_KEY);
+        if (saved) local = JSON.parse(saved) as { activities?: Record<string, Activity[]>; calendarEnd?: string; calendarStart?: string };
+      } catch { /* The Google Sheet remains the source of truth. */ }
+      const parsed = shared ?? local;
+      if (parsed) {
         if (parsed.activities) {
           const migrated = Object.fromEntries(Object.entries(parsed.activities).map(([date, entries]) => [
             date,
@@ -115,11 +137,9 @@ export function DayPlanner({ editable = true }: { editable?: boolean }) {
         if (parsed.calendarEnd && parsed.calendarEnd >= CONTRACT_DEADLINE) setCalendarEnd(parsed.calendarEnd);
         if (parsed.calendarStart && parsed.calendarStart <= FIRST_DATE) setCalendarStart(parsed.calendarStart);
         }
-        setSyncMessage(shared ? "Shared project plan loaded." : "No shared plan found yet; local browser copy loaded if available.");
-      } catch {
-        if (!cancelled) setSyncMessage("Shared storage unavailable. Changes may stay in this browser only.");
-      }
-      if (!cancelled) setReady(true);
+      setCloudReady(true);
+      setSyncMessage(shared ? "Saved project plan loaded." : "No saved plan found yet; local browser copy loaded if available.");
+      setReady(true);
     }
     void initialize();
     return () => { cancelled = true; };
@@ -132,13 +152,14 @@ export function DayPlanner({ editable = true }: { editable?: boolean }) {
     } catch {
       // The current page still reflects edits if browser storage is unavailable.
     }
+    if (!cloudReady) return;
     const timeout = window.setTimeout(() => {
       void saveWorkspaceData("production-calendar", { activities, calendarEnd, calendarStart })
-        .then(() => setSyncMessage("Changes saved to shared project storage."))
-        .catch(() => setSyncMessage("Could not save to shared storage. Changes remain only in this browser."));
+        .then(() => setSyncMessage("Changes saved to your private workspace."))
+        .catch(() => { setCloudReady(false); setSyncMessage("Cloud storage is unavailable. Changes stay in this browser until it reconnects."); });
     }, 600);
     return () => window.clearTimeout(timeout);
-  }, [activities, calendarEnd, calendarStart, ready, editable]);
+  }, [activities, calendarEnd, calendarStart, ready, editable, cloudReady]);
 
   function update(day: string, id: string, field: Field, value: string) {
     setActivities((current) => ({

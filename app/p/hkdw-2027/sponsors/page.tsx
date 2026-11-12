@@ -1,11 +1,7 @@
 import { ProjectNav } from "@/components/ProjectNav";
-import { SponsorAssetIntake } from "@/components/SponsorAssetIntake";
 import { projectSponsors } from "@/lib/sponsors";
-import { auth } from "@/auth";
 
 export default async function SponsorsPage() {
-  const session = await auth();
-  const canManage = session?.user.role === "admin" || session?.user.role === "editor";
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <header className="border-b border-[var(--line)] bg-[var(--surface)]">
@@ -50,14 +46,10 @@ export default async function SponsorsPage() {
           </ul>
         </section>
 
-        {canManage && <section className="border-t border-[var(--line)] py-8">
-          <SponsorAssetIntake sponsors={projectSponsors.map(({ name }) => name)} />
-        </section>}
-
         <section className="border-t border-[var(--line)] py-8" aria-labelledby="review-model-title">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Personal use</p>
           <h2 id="review-model-title" className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Private notes for your own reference</h2>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--muted)]">Links and notes are saved to the connected project data sheet for your account. This site does not invite sponsors or grant access to their Drive folders.</p>
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--muted)]">Links and notes stay in your personal workspace. No sponsor accounts or Drive permissions are changed.</p>
         </section>
       </main>
 

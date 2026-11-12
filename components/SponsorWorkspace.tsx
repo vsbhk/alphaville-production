@@ -30,29 +30,33 @@ export function SponsorWorkspace({ sponsorSlug, editable }: { sponsorSlug: strin
 
   useEffect(() => {
     let cancelled = false;
+    setReady(false);
+    setRecord(blankRecord);
+    setMessage("Loading your saved notes…");
     void loadWorkspaceData<SponsorRecord>(key).then((shared) => {
       if (cancelled) return;
       setRecord(shared && Array.isArray(shared.assets) ? shared : blankRecord);
-      setMessage(shared ? "Shared sponsor records loaded." : "No sponsor records have been added yet.");
+      setMessage(shared ? "Saved notes loaded." : "No notes have been added yet.");
       setReady(true);
     }).catch(() => {
       if (cancelled) return;
-      setMessage("Shared Google Workspace storage is not configured. Sponsor records cannot be loaded or saved yet.");
-      setReady(true);
+      setMessage("Your saved notes could not be loaded. Editing is paused to prevent replacing them; reload to try again.");
     });
     return () => { cancelled = true; };
   }, [key]);
 
-  async function save(next: SponsorRecord, successMessage: string) {
+  async function save(next: SponsorRecord, successMessage: string): Promise<boolean> {
     setSaving(true);
     setError("");
     try {
       await saveWorkspaceData(key, next);
       setRecord(next);
       setMessage(successMessage);
+      return true;
     } catch {
-      setError("Could not save to shared storage. Check the Google Sheet setup and try again.");
-      setMessage("Sponsor record was not saved.");
+      setError("Could not save your notes. Your unsaved entries are still here; try again.");
+      setMessage("Notes were not saved.");
+      return false;
     } finally {
       setSaving(false);
     }
@@ -81,7 +85,8 @@ export function SponsorWorkspace({ sponsorSlug, editable }: { sponsorSlug: strin
       note: note.trim(),
       approved: false,
     };
-    await save({ assets: [...record.assets, asset] }, "Material added to the shared sponsor record.");
+    const saved = await save({ assets: [...record.assets, asset] }, "Material added to your private notes.");
+    if (!saved) return;
     setTitle("");
     setDriveUrl("");
     setNote("");
@@ -89,7 +94,7 @@ export function SponsorWorkspace({ sponsorSlug, editable }: { sponsorSlug: strin
 
   function setApproval(id: string, approved: boolean) {
     const assets = record.assets.map((asset) => asset.id === id ? { ...asset, approved } : asset);
-    void save({ assets }, approved ? "Material marked approved." : "Material returned to awaiting review.");
+    void save({ assets }, approved ? "Material marked approved." : "Material returned to review.");
   }
 
   return (
@@ -147,7 +152,7 @@ export function SponsorWorkspace({ sponsorSlug, editable }: { sponsorSlug: strin
         </form>}
       </section>
 
-      <p className="text-xs leading-5 text-[var(--muted)]">Only approved project editors can change sponsor records. Sponsor viewers can read records for their assigned organisation only.</p>
+      <p className="text-xs leading-5 text-[var(--muted)]">These notes are private to your personal workspace. Drive links open using your existing Google Drive access.</p>
     </div>
   );
 }

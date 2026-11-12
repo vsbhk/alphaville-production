@@ -46,10 +46,10 @@ export default async function SponsorWorkspacePage({
 
         <aside className="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm leading-6 text-amber-950">
           <p className="font-semibold">Personal workspace, visible only to your owner account.</p>
-          <p className="mt-2">Records are kept in the connected project data sheet. Drive links are saved for your own reference; this page does not change any folder permissions.</p>
+          <p className="mt-2">Notes stay in your private workspace. Drive links open through your Google account’s existing access; this page does not change folder permissions.</p>
         </aside>
 
-        <SponsorWorkspace sponsorSlug={sponsor.slug} editable={canEdit} />
+        <SponsorWorkspace key={sponsor.slug} sponsorSlug={sponsor.slug} editable={canEdit} />
 
         <div className="mt-8">
           <a href="/p/hkdw-2027/sponsors" className="inline-flex min-h-11 items-center rounded-md border border-[var(--line-strong)] bg-[var(--surface)] px-4 text-sm font-semibold hover:border-[var(--accent)]">Back to sponsor directory</a>

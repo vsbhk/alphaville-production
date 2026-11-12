@@ -28,28 +28,9 @@ const actions = [
   },
   {
     title: "Sponsor material approval",
-    detail: "Alphaville Ltd holds approval rights for sponsor material in Phase 1. RHKYC client staff can view the production task list, action points and agreed calendar, but do not approve sponsor material.",
-    state: "Alphaville only",
+    detail: "Keep a private note of each sponsor item and its approval status.",
+    state: "Personal reference",
   },
-  {
-    title: "Record off-platform sponsor material",
-    detail: "The brief calls for an acknowledgement when sponsor assets arrive by email or chat, so pending intake is visible.",
-    state: "Not connected",
-  },
-  {
-    title: "Connect Alphaville email for sponsor intake",
-    detail: "Use the connected project mailbox to read sponsor correspondence and capture material for the correct sponsor workspace.",
-    state: "Mailbox not connected",
-  },
-];
-
-const contacts = [
-  { group: "Project coordinator", name: "Virgile · Alphaville Ltd", detail: "alpha@alphaville.hk" },
-  { group: "Client team · RHKYC", name: "Stella Ko · Koko Mueller · Wincy Hon", detail: "Contact details not included in this preview" },
-  { group: "Production provider · ICARUS Sports", name: "Nikitas Psimitis and the ICARUS team", detail: "Production service provider" },
-  { group: "Video daily recaps", name: "Kevin Rio", detail: "Separate team assignment" },
-  { group: "Photography", name: "Takumi Images", detail: "Photography provider" },
-  { group: "Sponsor contacts", name: "Bonnie Yeung · Lee Kum Kee; Miu Ng · XPENG", detail: "Sponsor-specific contact details stay within their own workspace" },
 ];
 
 export default async function ProjectOverviewPage() {
@@ -75,7 +56,7 @@ export default async function ProjectOverviewPage() {
           <aside className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-950">
             <p className="text-xs font-semibold uppercase tracking-[0.12em]">Personal workspace</p>
             <p className="mt-2 text-sm font-semibold">Private to the Alphaville owner account</p>
-            <p className="mt-2 text-xs leading-5">{canEdit ? "Your planner and project records are saved to your connected Google Workspace." : "Sign in with the owner account to open this private workspace."}</p>
+            <p className="mt-2 text-xs leading-5">{canEdit ? "Your private project plan and records are ready to use." : "Sign in with the owner account to open this private workspace."}</p>
           </aside>
         </section>
 
@@ -143,22 +124,6 @@ export default async function ProjectOverviewPage() {
 
         <DayPlanner editable={canEdit} />
 
-        <section className="border-t border-[var(--line)] py-8" aria-labelledby="contacts-title">
-          <div className="mb-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Project directory</p>
-            <h2 id="contacts-title" className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Contacts and teams</h2>
-          </div>
-          <ul className="grid gap-3 md:grid-cols-2">
-            {contacts.map((contact) => (
-              <li key={contact.group} className="rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--muted)]">{contact.group}</p>
-                <p className="mt-2 text-sm font-semibold">{contact.name}</p>
-                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{contact.detail}</p>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-4 text-xs leading-5 text-[var(--muted)]">This preview includes only contact details supplied for this project. The production directory must be available only to approved project members.</p>
-        </section>
       </main>
 
       <footer className="border-t border-[var(--line)] bg-[var(--surface)]">

@@ -5,7 +5,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
   const requestedPath = params.next ?? "/p/hkdw-2027";
   const nextPath = requestedPath.startsWith("/") && !requestedPath.startsWith("//") ? requestedPath : "/p/hkdw-2027";
   const googleReady = Boolean(process.env.AUTH_SECRET && process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
-  const externalReady = Boolean(process.env.EXTERNAL_ACCOUNTS_JSON && process.env.EXTERNAL_ACCOUNTS_JSON !== "[]");
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -41,10 +40,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
           <div className="mb-8">
             <p className="text-xs font-medium text-[var(--muted)]">HKDW 2027 - Royal Hong Kong Yacht Club</p>
             <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em]">Sign in</h2>
-            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Use the email address approved for this project.</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Use your Alphaville owner account.</p>
           </div>
 
-          <SignInForm googleReady={googleReady} externalReady={externalReady} nextPath={nextPath} authError={params.error === "Configuration" || params.error === "OAuthSignin"} />
+          <SignInForm googleReady={googleReady} nextPath={nextPath} authError={params.error === "Configuration" || params.error === "OAuthSignin"} />
         </section>
       </main>
 
