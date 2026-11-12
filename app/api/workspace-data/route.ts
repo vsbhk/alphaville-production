@@ -2,12 +2,15 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getProjectAccess } from "@/lib/project-access";
 import { getWorkspaceRecord, putWorkspaceRecord } from "@/lib/google-workspace";
+import { projectSponsors } from "@/lib/sponsors";
 
 const allowedKeys = new Set(["production-calendar", "deliverables"]);
 
 function permittedKey(key: string, role: string, sponsorSlug?: string) {
-  if (allowedKeys.has(key)) return role !== "sponsor-viewer";
-  return role === "sponsor-viewer" && Boolean(sponsorSlug) && key === `sponsor:${sponsorSlug}`;
+  if (allowedKeys.has(key)) return role === "admin" || role === "editor" || role === "viewer";
+  const requestedSponsor = key.startsWith("sponsor:") ? key.slice("sponsor:".length) : "";
+  if (!projectSponsors.some((sponsor) => sponsor.slug === requestedSponsor)) return false;
+  return role === "admin" || role === "editor" || (role === "sponsor-viewer" && sponsorSlug === requestedSponsor);
 }
 
 export async function GET(request: Request) {

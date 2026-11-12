@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { ProjectNav } from "@/components/ProjectNav";
+import { SponsorWorkspace } from "@/components/SponsorWorkspace";
 import { projectSponsors } from "@/lib/sponsors";
+import { auth } from "@/auth";
 
 export function generateStaticParams() {
   return projectSponsors.map(({ slug }) => ({ sponsor: slug }));
@@ -14,6 +16,8 @@ export default async function SponsorWorkspacePage({
   const { sponsor: sponsorSlug } = await params;
   const sponsor = projectSponsors.find(({ slug }) => slug === sponsorSlug);
   if (!sponsor) notFound();
+  const session = await auth();
+  const canEdit = session?.user.role === "admin" || session?.user.role === "editor";
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -42,20 +46,10 @@ export default async function SponsorWorkspacePage({
 
         <aside className="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm leading-6 text-amber-950">
           <p className="font-semibold">Sponsor-specific access is enforced for approved accounts.</p>
-          <p className="mt-2">Google OAuth credentials are present in Vercel Production, but end-to-end sign-in still needs verification. Sponsor submissions, files, contact information and review notes have not been connected to project storage.</p>
+          <p className="mt-2">Sponsor records load from shared Google Sheets storage when configured. Files remain in Google Drive and must be shared with the Alphaville team.</p>
         </aside>
 
-        <section className="mt-8 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5 sm:p-7">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Submission</p>
-          <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em]">Sponsor organisation’s materials</h2>
-          <p className="mt-3 text-sm leading-6 text-[var(--muted)]">Submission records are not connected yet. Once storage is configured, this page will contain only this sponsor’s contact details, assets, filming information and approval feedback.</p>
-        </section>
-
-        <section className="mt-5 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5 sm:p-7">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Review</p>
-          <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em]">Sponsor submission review</h2>
-          <p className="mt-3 text-sm leading-6 text-[var(--muted)]">No review status or notes are loaded. The intended review flow uses one approval state for each current item; replacements return to awaiting review.</p>
-        </section>
+        <SponsorWorkspace sponsorSlug={sponsor.slug} editable={canEdit} />
 
         <div className="mt-8">
           <a href="/p/hkdw-2027/sponsors" className="inline-flex min-h-11 items-center rounded-md border border-[var(--line-strong)] bg-[var(--surface)] px-4 text-sm font-semibold hover:border-[var(--accent)]">Back to sponsor directory</a>

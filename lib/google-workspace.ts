@@ -1,4 +1,6 @@
 import { google, type sheets_v4 } from "googleapis";
+import { ExternalAccountClient } from "google-auth-library";
+import { getVercelOidcToken } from "@vercel/oidc";
 
 const SHEET_NAME = "Project Data";
 const HEADERS = [["key", "payload_json", "updated_at", "updated_by"]];
@@ -9,15 +11,28 @@ function spreadsheetId() {
   return id;
 }
 
-function sheetsClient(): sheets_v4.Sheets {
-  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  if (!raw) throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON is not configured");
-  const credentials = JSON.parse(raw) as { client_email?: string; private_key?: string };
-  if (!credentials.client_email || !credentials.private_key) throw new Error("Google service account JSON is incomplete");
-  const auth = new google.auth.GoogleAuth({
-    credentials: { ...credentials, private_key: credentials.private_key.replace(/\\n/g, "\n") },
+async function sheetsClient(): Promise<sheets_v4.Sheets> {
+  const projectNumber = process.env.GCP_PROJECT_NUMBER;
+  const poolId = process.env.GCP_WORKLOAD_IDENTITY_POOL_ID;
+  const providerId = process.env.GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID;
+  const serviceAccountEmail = process.env.GCP_SERVICE_ACCOUNT_EMAIL;
+  if (!projectNumber || !poolId || !providerId || !serviceAccountEmail) {
+    throw new Error("Google workload identity is not configured");
+  }
+  const audience = `https://iam.googleapis.com/projects/${projectNumber}/locations/global/workloadIdentityPools/${poolId}/providers/${providerId}`;
+
+  const auth = ExternalAccountClient.fromJSON({
+    type: "external_account",
+    audience,
+    subject_token_type: "urn:ietf:params:oauth:token-type:jwt",
+    token_url: "https://sts.googleapis.com/v1/token",
+    service_account_impersonation_url: `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${serviceAccountEmail}:generateAccessToken`,
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+    subject_token_supplier: {
+      getSubjectToken: () => getVercelOidcToken({ audience }),
+    },
   });
+  if (!auth) throw new Error("Google workload identity configuration is invalid");
   return google.sheets({ version: "v4", auth });
 }
 
@@ -42,7 +57,7 @@ async function ensureTable(client: sheets_v4.Sheets, id: string) {
 }
 
 export async function getWorkspaceRecord(key: string): Promise<unknown | null> {
-  const client = sheetsClient();
+  const client = await sheetsClient();
   const id = spreadsheetId();
   await ensureTable(client, id);
   const response = await client.spreadsheets.values.get({ spreadsheetId: id, range: `${SHEET_NAME}!A2:D` });
@@ -52,7 +67,7 @@ export async function getWorkspaceRecord(key: string): Promise<unknown | null> {
 }
 
 export async function putWorkspaceRecord(key: string, payload: unknown, email: string) {
-  const client = sheetsClient();
+  const client = await sheetsClient();
   const id = spreadsheetId();
   await ensureTable(client, id);
   const values = await client.spreadsheets.values.get({ spreadsheetId: id, range: `${SHEET_NAME}!A2:D` });
