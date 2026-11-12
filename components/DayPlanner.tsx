@@ -96,7 +96,7 @@ export function DayPlanner() {
       try {
         const shared = await loadWorkspaceData<{ activities?: Record<string, Activity[]>; calendarEnd?: string; calendarStart?: string }>("production-calendar");
         const local = window.localStorage.getItem(STORAGE_KEY);
-        const parsed = shared ?? (local ? JSON.parse(local) : null);
+        const parsed = (shared ?? (local ? JSON.parse(local) : null)) as { activities?: Record<string, Activity[]>; calendarEnd?: string; calendarStart?: string } | null;
         if (cancelled) return;
         if (parsed) {
         if (parsed.activities) {

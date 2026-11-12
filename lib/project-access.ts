@@ -19,6 +19,10 @@ const externalViewers = new Set([
   "admin@icarus-sports.com",
 ]);
 
+const workspaceEditors = new Set([
+  "alpha@alphaville.hk",
+]);
+
 const sponsorViewers = new Map([
   ["bram.van.olphen@centraloceans.com", "central-oceans"],
 ]);
@@ -29,6 +33,7 @@ export function getProjectAccess(email: string | null | undefined): ProjectAcces
   if (externalViewers.has(normalized)) return { role: "viewer" };
   const sponsorSlug = sponsorViewers.get(normalized);
   if (sponsorSlug) return { role: "sponsor-viewer", sponsorSlug };
+  if (workspaceEditors.has(normalized)) return { role: "editor" };
   const domain = process.env.ALPHAVILLE_WORKSPACE_DOMAIN?.trim().toLowerCase();
   if (domain && normalized.endsWith(`@${domain}`)) return { role: "editor" };
   return null;

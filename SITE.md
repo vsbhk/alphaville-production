@@ -18,6 +18,7 @@ Private production workspace for Alphaville client projects.
 - **Project label** - HKDW 2027 - Royal Hong Kong Yacht Club.
 
 ## Recent changes
+- 12 November 2026: Added alpha@alphaville.hk as an explicitly approved Alphaville editor. Google sign-in verifies the alphaville.hk Workspace domain; production OAuth credentials still need configuration in Vercel.
 - 12 November 2026: Began replacing Supabase-only sign-in with Google Workspace sign-in for Alphaville and individual password sign-in for approved external viewers. Credentials and Google OAuth settings are not configured; Google Drive/Sheets storage and role enforcement are still incomplete.
 - 12 November 2026: Added Supabase email-link sign-in plumbing, a callback route, and server-side protection for project pages. Live sign-in remains disabled until Supabase credentials and approved-user settings are configured.
 - 12 November 2026: Added a Supabase SQL schema for project membership and shared workspace records, with row-level policies. The production calendar now loads and saves the shared record when the database schema and membership are configured; browser storage remains a fallback.

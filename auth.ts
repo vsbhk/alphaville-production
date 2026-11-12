@@ -14,7 +14,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   providers: [
     Google({
-      authorization: { params: { hd: process.env.ALPHAVILLE_WORKSPACE_DOMAIN ?? "" } },
+      authorization: { params: { hd: process.env.ALPHAVILLE_WORKSPACE_DOMAIN ?? "alphaville.hk" } },
       profile(profile) {
         return { id: profile.sub, name: profile.name, email: profile.email, image: profile.picture };
       },
@@ -37,7 +37,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!access) return false;
       if (account?.provider === "google") {
         const googleProfile = profile as { hd?: string; email_verified?: boolean } | undefined;
-        const domain = process.env.ALPHAVILLE_WORKSPACE_DOMAIN?.trim().toLowerCase();
+        const domain = (process.env.ALPHAVILLE_WORKSPACE_DOMAIN ?? "alphaville.hk").trim().toLowerCase();
         return Boolean(domain && googleProfile?.hd?.toLowerCase() === domain && googleProfile.email_verified);
       }
       return true;
