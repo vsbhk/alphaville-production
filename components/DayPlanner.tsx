@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { loadWorkspaceData, saveWorkspaceData } from "@/lib/workspace-sync";
 
 type Activity = {
   id: string;
@@ -85,13 +86,19 @@ export function DayPlanner() {
   const [selectedDate, setSelectedDate] = useState(FIRST_DATE);
   const [monthCursor, setMonthCursor] = useState(getInitialMonth(FIRST_DATE));
   const [calendarEnd, setCalendarEnd] = useState(CONTRACT_DEADLINE);
+  const [calendarStart, setCalendarStart] = useState(FIRST_DATE);
   const [ready, setReady] = useState(false);
+  const [syncMessage, setSyncMessage] = useState("Checking shared project storage…");
 
   useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as { activities?: Record<string, Activity[]>; calendarEnd?: string };
+    let cancelled = false;
+    async function initialize() {
+      try {
+        const shared = await loadWorkspaceData<{ activities?: Record<string, Activity[]>; calendarEnd?: string; calendarStart?: string }>("production-calendar");
+        const local = window.localStorage.getItem(STORAGE_KEY);
+        const parsed = shared ?? (local ? JSON.parse(local) : null);
+        if (cancelled) return;
+        if (parsed) {
         if (parsed.activities) {
           const migrated = Object.fromEntries(Object.entries(parsed.activities).map(([date, entries]) => [
             date,
@@ -106,21 +113,32 @@ export function DayPlanner() {
           setActivities(migrated);
         }
         if (parsed.calendarEnd && parsed.calendarEnd >= CONTRACT_DEADLINE) setCalendarEnd(parsed.calendarEnd);
+        if (parsed.calendarStart && parsed.calendarStart <= FIRST_DATE) setCalendarStart(parsed.calendarStart);
+        }
+        setSyncMessage(shared ? "Shared project plan loaded." : "No shared plan found yet; local browser copy loaded if available.");
+      } catch {
+        if (!cancelled) setSyncMessage("Shared storage unavailable. Changes may stay in this browser only.");
       }
-    } catch {
-      // Keep the planner usable for this page session if browser storage is unavailable.
+      if (!cancelled) setReady(true);
     }
-    setReady(true);
+    void initialize();
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
     if (!ready) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ activities, calendarEnd }));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ activities, calendarEnd, calendarStart }));
     } catch {
       // The current page still reflects edits if browser storage is unavailable.
     }
-  }, [activities, calendarEnd, ready]);
+    const timeout = window.setTimeout(() => {
+      void saveWorkspaceData("production-calendar", { activities, calendarEnd, calendarStart })
+        .then(() => setSyncMessage("Changes saved to shared project storage."))
+        .catch(() => setSyncMessage("Could not save to shared storage. Changes remain only in this browser."));
+    }, 600);
+    return () => window.clearTimeout(timeout);
+  }, [activities, calendarEnd, calendarStart, ready]);
 
   function update(day: string, id: string, field: Field, value: string) {
     setActivities((current) => ({
@@ -149,10 +167,10 @@ export function DayPlanner() {
     setActivities((current) => ({ ...current, [day]: (current[day] ?? []).filter((activity) => activity.id !== id) }));
   }
 
-  const allDates = calendarDays(FIRST_DATE, calendarEnd);
+  const allDates = calendarDays(calendarStart, calendarEnd);
   const weekStart = mondayOf(selectedDate);
   const weekDates = Array.from({ length: 7 }, (_, index) => addDays(weekStart, index))
-    .filter((date) => date >= FIRST_DATE && date <= calendarEnd);
+    .filter((date) => date >= calendarStart && date <= calendarEnd);
   const monthStart = toISO(monthCursor);
   const monthEndDate = new Date(Date.UTC(monthCursor.getUTCFullYear(), monthCursor.getUTCMonth() + 1, 0, 12));
   const monthEnd = toISO(monthEndDate);
@@ -169,7 +187,7 @@ export function DayPlanner() {
       return;
     }
     const next = addDays(selectedDate, direction * (view === "week" ? 7 : 1));
-    if (next >= FIRST_DATE && next <= calendarEnd) {
+    if (next >= calendarStart && next <= calendarEnd) {
       setSelectedDate(next);
       setMonthCursor(getInitialMonth(next));
     }
@@ -289,10 +307,11 @@ export function DayPlanner() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--muted)]">Calendar period</p>
-            <p className="mt-1 text-sm font-semibold">17 November to {formatDay(calendarEnd, { day: "numeric", month: "long", year: "numeric" })}</p>
+            <p className="mt-1 text-sm font-semibold">{formatDay(calendarStart, { day: "numeric", month: "long", year: "numeric" })} to {formatDay(calendarEnd, { day: "numeric", month: "long", year: "numeric" })}</p>
             <p className="mt-1 text-xs leading-5 text-[var(--muted)]">Includes the contract’s one-month unused-footage handover deadline. Extend the calendar if production or delivery work continues.</p>
           </div>
           <button type="button" onClick={() => setCalendarEnd((end) => addDays(end, 7))} className="min-h-11 rounded-md border border-[var(--line-strong)] px-4 text-sm font-semibold hover:border-[var(--accent)]">Extend 7 days</button>
+          <button type="button" onClick={() => { const start = addDays(calendarStart, -7); setCalendarStart(start); setSelectedDate(start); setMonthCursor(getInitialMonth(start)); }} className="min-h-11 rounded-md border border-[var(--line-strong)] px-4 text-sm font-semibold hover:border-[var(--accent)]">Add 7 earlier days</button>
         </div>
       </div>
 
@@ -321,7 +340,7 @@ export function DayPlanner() {
           <div className="grid grid-cols-7">
             {monthDates.map((day) => {
               const inMonth = dateFromISO(day).getUTCMonth() === monthCursor.getUTCMonth();
-              const inRange = day >= FIRST_DATE && day <= calendarEnd;
+              const inRange = day >= calendarStart && day <= calendarEnd;
               const dayActivities = activities[day] ?? [];
               return (
                 <button key={day} type="button" disabled={!inRange} onClick={() => { setSelectedDate(day); setView("day"); }} className={`min-h-20 border-b border-r border-[var(--line)] p-2 text-left sm:min-h-28 sm:p-3 ${inMonth ? "" : "bg-[var(--background)] text-[var(--muted)]"} ${inRange ? "hover:bg-amber-50" : "opacity-45"} ${day === selectedDate ? "ring-2 ring-inset ring-[var(--accent)]" : ""}`}>
@@ -337,7 +356,7 @@ export function DayPlanner() {
         <div className="space-y-3">{visibleDates.map((date) => renderDay(date, view === "day" || date === "2026-11-22"))}</div>
       )}
 
-      <p className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-xs leading-5 text-amber-950">Edits save in this browser only and are not shared with the project team. Sign-in and shared project storage for RHKYC and ICARUS are not connected.</p>
+      <p role="status" className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-xs leading-5 text-amber-950">{syncMessage}</p>
     </section>
   );
 }

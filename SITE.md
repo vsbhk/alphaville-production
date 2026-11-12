@@ -18,6 +18,9 @@ Private production workspace for Alphaville client projects.
 - **Project label** - HKDW 2027 - Royal Hong Kong Yacht Club.
 
 ## Recent changes
+- 12 November 2026: Added Supabase email-link sign-in plumbing, a callback route, and server-side protection for project pages. Live sign-in remains disabled until Supabase credentials and approved-user settings are configured.
+- 12 November 2026: Added a Supabase SQL schema for project membership and shared workspace records, with row-level policies. The production calendar now loads and saves the shared record when the database schema and membership are configured; browser storage remains a fallback.
+- 12 November 2026: Enforced the 30-file sponsor intake cap in the browser preview, added per-sponsor staged counts, made it possible to extend the production calendar earlier as well as later, and clarified that delivery statuses are local to this browser.
 - 12 November 2026: Replaced the starter page with the production workspace sign-in screen and the project identity from the build brief. The email sign-in service is not connected in this preview.
 - 12 November 2026: Added a provider production-brief preview using the new project route pattern. It contains no migrated sponsor records or sign-in protection yet; unknown filming windows and meeting points remain unconfirmed.
 - 12 November 2026: Added the deliverables page from the supplied contract recap. Relative deadlines are preserved, while unspecified owners, rounds, destinations and current statuses are left unrecorded.

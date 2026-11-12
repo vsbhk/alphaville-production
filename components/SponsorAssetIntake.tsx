@@ -5,6 +5,7 @@ import { ChangeEvent, DragEvent, useState } from "react";
 const allowedExtensions = new Set(["ai", "eps", "svg", "png", "jpg", "jpeg", "webp", "pdf", "doc", "docx", "txt"]);
 const acceptedFiles = ".ai,.eps,.svg,.png,.jpg,.jpeg,.webp,.pdf,.doc,.docx,.txt";
 const maxFileBytes = 3 * 1024 * 1024;
+const maxFilesPerSponsor = 30;
 
 type StagedFile = { file: File; sponsor: string; category: string };
 
@@ -55,6 +56,11 @@ export function SponsorAssetIntake({ sponsors }: { sponsors: string[] }) {
 
   function stageFiles() {
     if (!sponsor || selected.length === 0) return;
+    const existingCount = staged.filter((item) => item.sponsor === sponsor).length;
+    if (existingCount + selected.length > maxFilesPerSponsor) {
+      setError(`${sponsor} can have up to ${maxFilesPerSponsor} files staged in this preview. Remove ${existingCount + selected.length - maxFilesPerSponsor} file${existingCount + selected.length - maxFilesPerSponsor === 1 ? "" : "s"} first.`);
+      return;
+    }
     setStaged((current) => [...current, ...selected.map((file) => ({ file, sponsor, category }))]);
     setNotice(`${selected.length} file${selected.length === 1 ? "" : "s"} staged in this preview for ${sponsor}. Files are not saved to project storage.`);
     setSelected([]);
@@ -72,7 +78,7 @@ export function SponsorAssetIntake({ sponsors }: { sponsors: string[] }) {
       <div className="max-w-3xl">
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Material intake · preview only</p>
         <h2 id="asset-intake-title" className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Add sponsor material</h2>
-        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Choose the sponsor and file type first, then drop files here or browse. Supported files are up to 3 MB each. Up to 30 current files are allowed per sponsor.</p>
+        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Choose the sponsor and file type first, then drop files here or browse. Supported files are up to 3 MB each. Up to 30 files can be staged per sponsor in this browser preview.</p>
       </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -141,7 +147,7 @@ export function SponsorAssetIntake({ sponsors }: { sponsors: string[] }) {
 
       <div className="mt-5 border-t border-[var(--line)] pt-4">
         <p className="text-xs leading-5 text-[var(--muted)]">Privacy: this is an interactive design preview. Selected files and links are only held in browser memory and are not uploaded or stored. Sponsor-only access and project-scoped storage must be connected before using real material.</p>
-        {staged.length > 0 && <p className="mt-2 text-xs text-[var(--muted)]">{staged.length} file{staged.length === 1 ? "" : "s"} staged in this browser preview.</p>}
+        {staged.length > 0 && <p className="mt-2 text-xs text-[var(--muted)]">{staged.length} file{staged.length === 1 ? "" : "s"} staged in this browser preview. {sponsors.map((name) => `${name}: ${staged.filter((item) => item.sponsor === name).length}/30`).filter((line) => !line.endsWith("0/30")).join(" · ")}</p>}
       </div>
     </section>
   );

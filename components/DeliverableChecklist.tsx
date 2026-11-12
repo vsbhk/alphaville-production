@@ -65,9 +65,9 @@ export function DeliverableChecklist({
                   disabled={!ready}
                   onChange={() => toggle(id)}
                   className="h-5 w-5 accent-[var(--accent)]"
-                  aria-label={`${isDelivered ? "Mark not delivered" : "Mark delivered"}: ${item.title}`}
+                  aria-label={`${isDelivered ? "Clear local preview status" : "Record as delivered in this browser preview"}: ${item.title}`}
                 />
-                {isDelivered ? "Delivered" : "Mark delivered"}
+                {isDelivered ? "Marked delivered · this browser only" : "Record delivered · this browser only"}
               </label>
             </div>
           </article>

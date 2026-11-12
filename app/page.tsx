@@ -1,14 +1,7 @@
-"use client";
+import { SignInForm } from "@/components/SignInForm";
 
-import { FormEvent, useState } from "react";
-
-export default function Home() {
-  const [notice, setNotice] = useState("");
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setNotice("Email sign-in is not connected in this preview.");
-  }
+export default async function Home({ searchParams }: { searchParams: Promise<{ setup?: string }> }) {
+  const params = await searchParams;
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -47,27 +40,7 @@ export default function Home() {
             <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Use the email address approved for this project.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <label htmlFor="email" className="block text-sm font-medium">Email address</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              placeholder="name@example.com"
-              className="h-12 w-full rounded-md border border-[var(--line-strong)] bg-[var(--background)] px-3.5 text-base outline-none transition focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/10"
-            />
-            <button
-              type="submit"
-              className="h-12 w-full rounded-md bg-[var(--foreground)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--accent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
-            >
-              Continue
-            </button>
-            <p aria-live="polite" className="min-h-5 text-sm leading-5 text-[var(--muted)]">
-              {notice}
-            </p>
-          </form>
+          <SignInForm setupRequired={params.setup === "required"} />
         </section>
       </main>
 
