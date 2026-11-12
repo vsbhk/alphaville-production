@@ -80,7 +80,7 @@ function calendarDays(start: string, end: string) {
   return days;
 }
 
-export function DayPlanner() {
+export function DayPlanner({ editable = true }: { editable?: boolean }) {
   const [activities, setActivities] = useState<Record<string, Activity[]>>(initialActivities);
   const [view, setView] = useState<ViewMode>("week");
   const [selectedDate, setSelectedDate] = useState(FIRST_DATE);
@@ -126,7 +126,7 @@ export function DayPlanner() {
   }, []);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || !editable) return;
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ activities, calendarEnd, calendarStart }));
     } catch {
@@ -138,7 +138,7 @@ export function DayPlanner() {
         .catch(() => setSyncMessage("Could not save to shared storage. Changes remain only in this browser."));
     }, 600);
     return () => window.clearTimeout(timeout);
-  }, [activities, calendarEnd, calendarStart, ready]);
+  }, [activities, calendarEnd, calendarStart, ready, editable]);
 
   function update(day: string, id: string, field: Field, value: string) {
     setActivities((current) => ({
@@ -226,7 +226,7 @@ export function DayPlanner() {
         <div className="space-y-4 border-t border-[var(--line)] p-4 sm:p-5">
           <p className="rounded-md bg-[var(--background)] p-3 text-sm leading-6">Planning window: <strong>09:00–21:00 HKT</strong>. Use this for filming and post-production activity planning.</p>
           {dayActivities.map((activity, index) => (
-            <fieldset key={activity.id} className="rounded-lg border border-[var(--line)] p-4">
+            <fieldset key={activity.id} disabled={!editable} className="rounded-lg border border-[var(--line)] p-4 disabled:opacity-75">
               <legend className="px-2 text-sm font-semibold">Activity {index + 1}</legend>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
@@ -289,7 +289,7 @@ export function DayPlanner() {
           ))}
 
           {dayActivities.length === 0 && <p className="text-sm leading-6 text-[var(--muted)]">No task or location has been supplied for this day.</p>}
-          <button type="button" onClick={() => addActivity(day)} className="min-h-11 rounded-md border border-[var(--line-strong)] px-4 text-sm font-semibold hover:border-[var(--accent)]">Add activity</button>
+          {editable && <button type="button" onClick={() => addActivity(day)} className="min-h-11 rounded-md border border-[var(--line-strong)] px-4 text-sm font-semibold hover:border-[var(--accent)]">Add activity</button>}
         </div>
       </details>
     );
@@ -310,8 +310,10 @@ export function DayPlanner() {
             <p className="mt-1 text-sm font-semibold">{formatDay(calendarStart, { day: "numeric", month: "long", year: "numeric" })} to {formatDay(calendarEnd, { day: "numeric", month: "long", year: "numeric" })}</p>
             <p className="mt-1 text-xs leading-5 text-[var(--muted)]">Includes the contract’s one-month unused-footage handover deadline. Extend the calendar if production or delivery work continues.</p>
           </div>
-          <button type="button" onClick={() => setCalendarEnd((end) => addDays(end, 7))} className="min-h-11 rounded-md border border-[var(--line-strong)] px-4 text-sm font-semibold hover:border-[var(--accent)]">Extend 7 days</button>
-          <button type="button" onClick={() => { const start = addDays(calendarStart, -7); setCalendarStart(start); setSelectedDate(start); setMonthCursor(getInitialMonth(start)); }} className="min-h-11 rounded-md border border-[var(--line-strong)] px-4 text-sm font-semibold hover:border-[var(--accent)]">Add 7 earlier days</button>
+          {editable && <>
+            <button type="button" onClick={() => setCalendarEnd((end) => addDays(end, 7))} className="min-h-11 rounded-md border border-[var(--line-strong)] px-4 text-sm font-semibold hover:border-[var(--accent)]">Extend 7 days</button>
+            <button type="button" onClick={() => { const start = addDays(calendarStart, -7); setCalendarStart(start); setSelectedDate(start); setMonthCursor(getInitialMonth(start)); }} className="min-h-11 rounded-md border border-[var(--line-strong)] px-4 text-sm font-semibold hover:border-[var(--accent)]">Add 7 earlier days</button>
+          </>}
         </div>
       </div>
 
@@ -356,7 +358,7 @@ export function DayPlanner() {
         <div className="space-y-3">{visibleDates.map((date) => renderDay(date, view === "day" || date === "2026-11-22"))}</div>
       )}
 
-      <p role="status" className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-xs leading-5 text-amber-950">{syncMessage}</p>
+      <p role="status" className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-xs leading-5 text-amber-950">{editable ? syncMessage : "Read-only project view. Editing is reserved for Alphaville project staff."}</p>
     </section>
   );
 }

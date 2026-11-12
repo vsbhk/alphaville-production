@@ -1,8 +1,11 @@
 import { ProjectNav } from "@/components/ProjectNav";
 import { SponsorAssetIntake } from "@/components/SponsorAssetIntake";
 import { projectSponsors } from "@/lib/sponsors";
+import { auth } from "@/auth";
 
-export default function SponsorsPage() {
+export default async function SponsorsPage() {
+  const session = await auth();
+  const canManage = session?.user.role === "admin" || session?.user.role === "editor";
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <header className="border-b border-[var(--line)] bg-[var(--surface)]">
@@ -24,7 +27,7 @@ export default function SponsorsPage() {
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Sponsor workspaces · Design preview</p>
           <h1 className="text-4xl font-semibold leading-[1.08] tracking-[-0.05em] sm:text-5xl">Sponsors</h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--muted)]">A separate workspace is intended for each sponsor. Approved contacts should only see their own organisation’s material and review notes.</p>
-          <p className="mt-5 max-w-3xl rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950">Privacy is not enforced in this preview: sign-in and project-scoped storage are not connected. No sponsor submissions, files, emails or review histories have been imported.</p>
+          <p className="mt-5 max-w-3xl rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950">Sponsor records and file storage are not connected yet. No sponsor submissions, files, emails or review histories have been imported.</p>
         </section>
 
         <section className="py-8" aria-labelledby="roster-title">
@@ -47,9 +50,9 @@ export default function SponsorsPage() {
           </ul>
         </section>
 
-        <section className="border-t border-[var(--line)] py-8">
+        {canManage && <section className="border-t border-[var(--line)] py-8">
           <SponsorAssetIntake sponsors={projectSponsors.map(({ name }) => name)} />
-        </section>
+        </section>}
 
         <section className="border-t border-[var(--line)] py-8" aria-labelledby="review-model-title">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Sponsor review</p>

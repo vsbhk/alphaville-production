@@ -1,5 +1,6 @@
 import { ProjectNav } from "@/components/ProjectNav";
 import { DeliverableChecklist, type Deliverable } from "@/components/DeliverableChecklist";
+import { auth } from "@/auth";
 
 const videoProduction: Deliverable[] = [
   {
@@ -79,7 +80,9 @@ const distribution: Deliverable[] = [
   },
 ];
 
-export default function DeliverablesPage() {
+export default async function DeliverablesPage() {
+  const session = await auth();
+  const canEdit = session?.user.role === "admin" || session?.user.role === "editor";
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <header className="border-b border-[var(--line)] bg-[var(--surface)]">
@@ -117,7 +120,7 @@ export default function DeliverablesPage() {
               <h2 id="video-title" className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Video production</h2>
             </div>
           </div>
-          <DeliverableChecklist items={videoProduction} group="production" />
+          <DeliverableChecklist items={videoProduction} group="production" editable={canEdit} />
         </section>
 
         <section className="border-t border-[var(--line)] py-8" aria-labelledby="distribution-title">
@@ -127,7 +130,7 @@ export default function DeliverablesPage() {
               <h2 id="distribution-title" className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Media distribution</h2>
             </div>
           </div>
-          <DeliverableChecklist items={distribution} group="distribution" />
+          <DeliverableChecklist items={distribution} group="distribution" editable={canEdit} />
         </section>
 
         <section className="border-t border-[var(--line)] py-8" aria-labelledby="providers-title">

@@ -1,5 +1,6 @@
 import { ProjectNav } from "@/components/ProjectNav";
 import { DayPlanner } from "@/components/DayPlanner";
+import { auth } from "@/auth";
 
 const eventCalendar = [
   { date: "21–22 November", activity: "Registration, measurement and equipment inspection" },
@@ -46,7 +47,9 @@ const contacts = [
   { group: "Sponsor contacts", name: "Bonnie Yeung · Lee Kum Kee; Miu Ng · XPENG", detail: "Sponsor-specific contact details stay within their own workspace" },
 ];
 
-export default function ProjectOverviewPage() {
+export default async function ProjectOverviewPage() {
+  const session = await auth();
+  const canEdit = session?.user.role === "admin" || session?.user.role === "editor";
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <header className="border-b border-[var(--line)] bg-[var(--surface)]">
@@ -67,7 +70,7 @@ export default function ProjectOverviewPage() {
           <aside className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-950">
             <p className="text-xs font-semibold uppercase tracking-[0.12em]">Access setup</p>
             <p className="mt-2 text-sm font-semibold">Intended for approved RHKYC staff and ICARUS production contacts</p>
-            <p className="mt-2 text-xs leading-5">Sign-in and project access controls are not connected in this preview. Do not publish this page with project data yet.</p>
+            <p className="mt-2 text-xs leading-5">{canEdit ? "You have project editing access. Shared Google Workspace storage still needs to be connected before changes are shared." : "You have read-only project access. Planner editing and sponsor material controls are reserved for Alphaville staff."}</p>
           </aside>
         </section>
 
@@ -125,7 +128,7 @@ export default function ProjectOverviewPage() {
           </article>
         </section>
 
-        <DayPlanner />
+        <DayPlanner editable={canEdit} />
 
         <section className="border-t border-[var(--line)] py-8" aria-labelledby="contacts-title">
           <div className="mb-5">

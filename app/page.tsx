@@ -1,7 +1,11 @@
 import { SignInForm } from "@/components/SignInForm";
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ setup?: string }> }) {
+export default async function Home({ searchParams }: { searchParams: Promise<{ setup?: string; next?: string; error?: string }> }) {
   const params = await searchParams;
+  const requestedPath = params.next ?? "/p/hkdw-2027";
+  const nextPath = requestedPath.startsWith("/") && !requestedPath.startsWith("//") ? requestedPath : "/p/hkdw-2027";
+  const googleReady = Boolean(process.env.AUTH_SECRET && process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
+  const externalReady = Boolean(process.env.EXTERNAL_ACCOUNTS_JSON && process.env.EXTERNAL_ACCOUNTS_JSON !== "[]");
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -40,7 +44,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ s
             <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Use the email address approved for this project.</p>
           </div>
 
-          <SignInForm setupRequired={params.setup === "required"} />
+          <SignInForm googleReady={googleReady} externalReady={externalReady} nextPath={nextPath} authError={params.error === "Configuration" || params.error === "OAuthSignin"} />
         </section>
       </main>
 

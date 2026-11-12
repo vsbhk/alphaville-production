@@ -13,9 +13,11 @@ const STORAGE_KEY = "hkdw-2027-deliverables-delivered-v1";
 export function DeliverableChecklist({
   items,
   group,
+  editable = true,
 }: {
   items: Deliverable[];
   group: string;
+  editable?: boolean;
 }) {
   const [delivered, setDelivered] = useState<Record<string, boolean>>({});
   const [ready, setReady] = useState(false);
@@ -62,12 +64,12 @@ export function DeliverableChecklist({
                 <input
                   type="checkbox"
                   checked={isDelivered}
-                  disabled={!ready}
+                  disabled={!ready || !editable}
                   onChange={() => toggle(id)}
                   className="h-5 w-5 accent-[var(--accent)]"
                   aria-label={`${isDelivered ? "Clear local preview status" : "Record as delivered in this browser preview"}: ${item.title}`}
                 />
-                {isDelivered ? "Marked delivered · this browser only" : "Record delivered · this browser only"}
+                {isDelivered ? "Marked delivered · this browser only" : editable ? "Record delivered · this browser only" : "Not recorded"}
               </label>
             </div>
           </article>
