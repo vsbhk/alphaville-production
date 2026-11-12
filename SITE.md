@@ -21,6 +21,7 @@ Private production workspace for Alphaville client projects.
 - 12 November 2026: Added an explicit authenticated role gate for project routes. Alphaville editors can manage the planner and intake; project viewers are read-only; sponsor viewers are limited to their assigned sponsor path. Google OAuth and external password sign-in now show as unavailable until Vercel credentials and external password hashes are configured.
 - 12 November 2026: Removed the stale Supabase data client from planner persistence. The planner now reports that shared Google Workspace storage is not configured instead of attempting writes to Supabase.
 - 12 November 2026: Deployed the access-control update to the Vercel production project. Sign-in remains inactive until OAuth credentials are configured in Vercel.
+- 12 November 2026: Added a server-only Google Sheets data adapter and authenticated API with role-based read/write checks. The planner and delivery checklist now use the shared records API; configure a private Sheet, share it with the service account, and set `GOOGLE_SHEET_ID` and `GOOGLE_SERVICE_ACCOUNT_JSON` in Vercel to activate it.
 - 12 November 2026: Added alpha@alphaville.hk as an explicitly approved Alphaville editor. Google sign-in verifies the alphaville.hk Workspace domain; production OAuth credentials still need configuration in Vercel.
 - 12 November 2026: Began replacing Supabase-only sign-in with Google Workspace sign-in for Alphaville and individual password sign-in for approved external viewers. Credentials and Google OAuth settings are not configured; Google Drive/Sheets storage and role enforcement are still incomplete.
 - 12 November 2026: Added Supabase email-link sign-in plumbing, a callback route, and server-side protection for project pages. Live sign-in remains disabled until Supabase credentials and approved-user settings are configured.
@@ -43,4 +44,4 @@ Private production workspace for Alphaville client projects.
 - To change the displayed project name, update the project labels in `app/page.tsx`.
 - To change the page colors, update the color values near the top of `app/globals.css`.
 - To add a page, create a folder under `app` with a `page.tsx` file inside it.
-- For Vercel configuration, use `.env.example` as the variable checklist. Google OAuth needs the deployed domain with callback path `/api/auth/callback/google`.
+- For Vercel configuration, use `.env.example` as the variable checklist. When `prod.alphaville.hk` is live, add `https://prod.alphaville.hk/api/auth/callback/google` to the Google OAuth client’s authorized redirect URIs and set `AUTH_URL` to `https://prod.alphaville.hk`.
