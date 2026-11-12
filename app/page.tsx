@@ -73,7 +73,7 @@ export default function Home() {
 
       <footer className="border-t border-[var(--line)]">
         <div className="mx-auto flex min-h-16 max-w-6xl items-center px-5 sm:px-8">
-          <p className="text-xs text-[var(--muted)]">prod.alphaville.hk</p>
+          <p className="text-xs text-[var(--muted)]">prod.alphaville.hk · Push check</p>
         </div>
       </footer>
     </div>
