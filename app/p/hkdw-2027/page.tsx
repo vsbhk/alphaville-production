@@ -3,11 +3,16 @@ import { DayPlanner } from "@/components/DayPlanner";
 import { auth } from "@/auth";
 
 const eventCalendar = [
-  { date: "21–22 November", activity: "Registration, measurement and equipment inspection" },
-  { date: "22 November", activity: "Skippers’ briefing and opening ceremony" },
-  { date: "23–25 November", activity: "Championship racing" },
-  { date: "26 November", activity: "Lay day; racing only if needed" },
-  { date: "27–29 November", activity: "Championship racing, final races and prizegiving" },
+  { event: "Asia Pacific Championship", date: "Tue 17–Wed 18 Nov", activity: "Registration, measurement and equipment inspection · 09:00–17:30 at Clearwater Bay Golf & Country Club Marina. Crew weigh-in runs until 18:00." },
+  { event: "Asia Pacific Championship", date: "Wed 18 Nov", activity: "Skippers’ briefing · 18:00–19:00 at RHKYC Kellett Island. Opening ceremony · 19:00–21:30 at the RHKYC poolside." },
+  { event: "Asia Pacific Championship", date: "Thu 19 Nov", activity: "Championship racing begins. After-sailing drinks · 17:00–18:30 at Clearwater Bay Golf & Country Club." },
+  { event: "Asia Pacific Championship", date: "Fri 20 Nov", activity: "Championship racing. After-sailing drinks · 17:00–18:30 at Clearwater Bay Golf & Country Club." },
+  { event: "Asia Pacific Championship", date: "Sat 21 Nov", activity: "Final races and prizegiving. Prizegiving ceremony · 18:00–21:00 at Clearwater Bay Golf & Country Club." },
+  { event: "World Championship", date: "21–22 November", activity: "Registration, measurement and equipment inspection" },
+  { event: "World Championship", date: "22 November", activity: "Skippers’ briefing and opening ceremony" },
+  { event: "World Championship", date: "23–25 November", activity: "Championship racing" },
+  { event: "World Championship", date: "26 November", activity: "Lay day; racing only if needed" },
+  { event: "World Championship", date: "27–29 November", activity: "Championship racing, final races and prizegiving" },
 ];
 
 const actions = [
@@ -96,11 +101,15 @@ export default async function ProjectOverviewPage() {
           <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Calendar</p>
-              <h2 id="calendar-title" className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Event schedule and interview slot</h2>
+              <h2 id="calendar-title" className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Championship programme and interview slot</h2>
             </div>
-            <a href="https://www.dragonworld2027.com/media" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-sm font-semibold text-[var(--accent)] underline decoration-[var(--line-strong)] underline-offset-4">Media Centre</a>
+            <div className="flex flex-wrap gap-x-5 gap-y-2">
+              <a href="https://www.dragonworld2027.com/for-visitors" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-sm font-semibold text-[var(--accent)] underline decoration-[var(--line-strong)] underline-offset-4">Live public calendar</a>
+              <a href="https://www.dragonworld2027.com/for-competitors" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-sm font-semibold text-[var(--accent)] underline decoration-[var(--line-strong)] underline-offset-4">Competitor information</a>
+              <a href="https://www.racingrulesofsailing.org/documents/13241/event" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-sm font-semibold text-[var(--accent)] underline decoration-[var(--line-strong)] underline-offset-4">APC Official Notice Board</a>
+            </div>
           </div>
-          <p className="mb-4 max-w-3xl text-sm leading-6 text-[var(--muted)]">The event programme below is published information. It is separate from the production filming windows, which still need coordinator confirmation.</p>
+          <p className="mb-4 max-w-3xl text-sm leading-6 text-[var(--muted)]">Published event dates and times are shown in Hong Kong time (HKT) as a reference for production planning, not as supplier bookings. Work bookings belong in the private production calendar below, visible only to approved project members; supplier accounts are read-only.</p>
           <div className="mb-4 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Filming period</p>
             <p className="mt-2 text-lg font-semibold">Tuesday 17 November – Sunday 29 November 2026</p>
@@ -108,12 +117,16 @@ export default async function ProjectOverviewPage() {
           </div>
           <ol className="divide-y divide-[var(--line)] rounded-lg border border-[var(--line)] bg-[var(--surface)]">
             {eventCalendar.map((item) => (
-              <li key={item.date} className="grid gap-1 p-4 sm:grid-cols-[180px_minmax(0,1fr)] sm:gap-5 sm:p-5">
-                <p className="text-sm font-semibold">{item.date}</p>
+              <li key={`${item.event}-${item.date}`} className="grid gap-1 p-4 sm:grid-cols-[190px_minmax(0,1fr)] sm:gap-5 sm:p-5">
+                <div>
+                  <p className="text-sm font-semibold">{item.date}</p>
+                  <p className="mt-1 text-xs font-medium text-[var(--muted)]">{item.event}</p>
+                </div>
                 <p className="text-sm leading-6 text-[var(--muted)]">{item.activity}</p>
               </li>
             ))}
           </ol>
+          <p className="mt-3 text-xs leading-5 text-[var(--muted)]">Check the live calendar for changes. Racing documents and notices on the APC Official Notice Board prevail over this summary.</p>
           <article className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-5 text-amber-950">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h3 className="text-sm font-semibold">Interview slot · XPENG</h3>
