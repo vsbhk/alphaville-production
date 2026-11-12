@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 
-export function SignInForm({ googleReady, nextPath, authError }: { googleReady: boolean; nextPath: string; authError: boolean }) {
-  const [notice, setNotice] = useState(authError ? "Sign-in did not complete. Try the personal workspace owner’s Alphaville account." : "");
+export function SignInForm({ googleReady, nextPath, authError, onDark = false }: { googleReady: boolean; nextPath: string; authError: boolean; onDark?: boolean }) {
+  const [notice, setNotice] = useState(authError ? "Sign-in did not complete. Try the Alphaville owner account." : "");
 
   async function beginSignIn() {
     try {
@@ -14,8 +14,15 @@ export function SignInForm({ googleReady, nextPath, authError }: { googleReady: 
     }
   }
 
-  return <div className="space-y-5">
-    {googleReady ? <button type="button" onClick={() => void beginSignIn()} className="h-12 w-full rounded-md bg-[var(--foreground)] px-4 text-sm font-semibold text-white">Continue with your Google account</button> : <p className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm leading-5 text-amber-950">Google sign-in is not configured in this environment.</p>}
-    <p role="status" aria-live="polite" className="min-h-5 text-sm leading-5 text-[var(--muted)]">{notice}</p>
+  return <div className="w-full space-y-4">
+    <button
+      type="button"
+      onClick={() => void beginSignIn()}
+      disabled={!googleReady}
+      className={`min-h-12 w-full rounded-md border px-4 py-3 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 disabled:cursor-not-allowed disabled:opacity-60 ${onDark ? "border-white bg-white text-[#171717] focus-visible:outline-white" : "border-[var(--foreground)] bg-[var(--foreground)] text-white focus-visible:outline-[var(--foreground)]"}`}
+    >
+      Continue with Google
+    </button>
+    {notice && <p role="status" aria-live="polite" className={`text-center text-xs leading-4 ${onDark ? "text-white/75" : "text-[var(--muted)]"}`}>{notice}</p>}
   </div>;
 }

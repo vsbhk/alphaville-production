@@ -39,7 +39,7 @@ export default async function ProjectOverviewPage() {
   const canEdit = session?.user.role === "admin" || session?.user.role === "editor";
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <AlphavilleHeader label="HKDW 2027 · Personal workspace" />
+      <AlphavilleHeader label="HKDW 2027" />
       <ProjectNav current="overview" />
 
       <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
@@ -50,7 +50,7 @@ export default async function ProjectOverviewPage() {
             <p className="mt-4 text-base leading-7 text-[var(--muted)]">Royal Hong Kong Yacht Club</p>
           </div>
           <aside className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-950">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em]">Personal workspace</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em]">Owner access</p>
             <p className="mt-2 text-sm font-semibold">Private to the Alphaville owner account</p>
             <p className="mt-2 text-xs leading-5">{canEdit ? "Your private project plan and records are ready to use." : "Sign in with the owner account to open this private workspace."}</p>
           </aside>

@@ -12,7 +12,7 @@ const lifecycle = [
 export default function IcarusProductionPage() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <AlphavilleHeader label="HKDW 2027 · Personal workspace" />
+      <AlphavilleHeader label="HKDW 2027" />
       <ProjectNav current="production" />
 
       <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">

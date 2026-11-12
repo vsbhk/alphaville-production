@@ -5,7 +5,7 @@ import { projectSponsors } from "@/lib/sponsors";
 export default async function SponsorsPage() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <AlphavilleHeader label="HKDW 2027 · Personal workspace" />
+      <AlphavilleHeader label="HKDW 2027" />
       <ProjectNav current="sponsors" />
 
       <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">

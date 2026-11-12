@@ -86,7 +86,7 @@ export default async function DeliverablesPage() {
   const canEdit = session?.user.role === "admin" || session?.user.role === "editor";
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <AlphavilleHeader label="HKDW 2027 · Personal workspace" />
+      <AlphavilleHeader label="HKDW 2027" />
       <ProjectNav current="deliverables" />
 
       <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">

@@ -16,8 +16,8 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Alphaville | Personal workspace",
-  description: "Private Alphaville workspace.",
+  title: "Alphaville | Admin",
+  description: "Private Alphaville sign-in.",
 };
 
 export default function RootLayout({

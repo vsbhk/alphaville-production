@@ -136,7 +136,7 @@ export function SponsorAssetIntake({ sponsors }: { sponsors: string[] }) {
 
       <div className="mt-6 border-t border-[var(--line)] pt-5">
         <p className="text-sm font-semibold">Large files</p>
-        <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Use a Google Drive link for larger files. This personal workspace does not change Drive sharing permissions.</p>
+        <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Use a Google Drive link for larger files. This page does not change Drive sharing permissions.</p>
         <div className="mt-3 flex flex-col gap-3 sm:flex-row">
           <label className="sr-only" htmlFor="google-drive-link">Google Drive link</label>
           <input id="google-drive-link" type="url" value={driveLink} onChange={(event) => setDriveLink(event.target.value)} placeholder="Paste a Google Drive link" className="h-12 min-w-0 flex-1 rounded-md border border-[var(--line-strong)] bg-white px-3 text-base outline-none focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/10" />
