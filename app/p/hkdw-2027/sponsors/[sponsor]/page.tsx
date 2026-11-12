@@ -35,20 +35,20 @@ export default async function SponsorWorkspacePage({
         </nav>
 
         <section className="border-b border-[var(--line)] pb-8">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Sponsor workspace · Design preview</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Sponsor workspace · Records setup</p>
           <h1 className="text-4xl font-semibold leading-[1.08] tracking-[-0.05em]">{sponsor.name}</h1>
           <p className="mt-4 text-base leading-7 text-[var(--muted)]">HKDW 2027 - Royal Hong Kong Yacht Club</p>
         </section>
 
         <aside className="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-5 text-sm leading-6 text-amber-950">
-          <p className="font-semibold">Sponsor privacy is not active in this preview.</p>
-          <p className="mt-2">Sign-in and sponsor-level access checks are not connected. No submission details, files, contact information or review notes are loaded on this page.</p>
+          <p className="font-semibold">Sponsor-specific access is enforced for approved accounts.</p>
+          <p className="mt-2">Google OAuth credentials are present in Vercel Production, but end-to-end sign-in still needs verification. Sponsor submissions, files, contact information and review notes have not been connected to project storage.</p>
         </aside>
 
         <section className="mt-8 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5 sm:p-7">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Submission</p>
           <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em]">Sponsor organisation’s materials</h2>
-          <p className="mt-3 text-sm leading-6 text-[var(--muted)]">Submission records are not connected in this preview. When enabled, this page will contain only this sponsor’s contact details, assets, filming information and approval feedback.</p>
+          <p className="mt-3 text-sm leading-6 text-[var(--muted)]">Submission records are not connected yet. Once storage is configured, this page will contain only this sponsor’s contact details, assets, filming information and approval feedback.</p>
         </section>
 
         <section className="mt-5 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5 sm:p-7">

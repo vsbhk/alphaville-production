@@ -105,11 +105,11 @@ export default async function DeliverablesPage() {
         </nav>
 
         <section className="border-b border-[var(--line)] pb-8">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Contract recap · Design preview</p>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Contract recap · Shared tracking setup</p>
           <h1 className="text-4xl font-semibold leading-[1.08] tracking-[-0.05em] sm:text-5xl">Deliverables</h1>
           <p className="mt-4 text-base leading-7 text-[var(--muted)]">HKDW 2027 - Royal Hong Kong Yacht Club</p>
           <p className="mt-5 max-w-3xl rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4 text-sm leading-6">
-            This page records the deliverables in the supplied contract recap. Relative deadlines remain relative to the Event. Delivery checkboxes save in this browser only and are not shared with the project team yet.
+            This page records the deliverables in the supplied contract recap. Relative deadlines remain relative to the Event. Delivery status is ready to save to shared project storage when the Google Sheet is configured; until then, changes stay in this browser.
           </p>
         </section>
 
@@ -161,7 +161,7 @@ export default async function DeliverablesPage() {
           </div>
         </section>
 
-        <p className="border-t border-[var(--line)] py-6 text-sm leading-6 text-[var(--muted)]">Delivery owners, review history, destinations and actual delivery dates can be added when shared project tracking is connected.</p>
+        <p className="border-t border-[var(--line)] py-6 text-sm leading-6 text-[var(--muted)]">Delivery owners, review history, destinations and actual delivery dates still need to be added to the shared project tracking workflow.</p>
       </main>
 
       <footer className="border-t border-[var(--line)] bg-[var(--surface)]">
