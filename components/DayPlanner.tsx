@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { loadWorkspaceData, saveWorkspaceData } from "@/lib/workspace-sync";
 
 type Activity = {
@@ -18,6 +18,8 @@ type Activity = {
 };
 
 type ViewMode = "day" | "week" | "month";
+type ChatMessage = { id: string; role: "user" | "assistant"; text: string };
+type PlannerDraft = { day: string; activity: Activity };
 
 const STORAGE_KEY = "hkdw-2027-production-calendar-v1";
 const FIRST_DATE = "2026-11-17";
@@ -90,6 +92,11 @@ export function DayPlanner({ editable = true }: { editable?: boolean }) {
   const [ready, setReady] = useState(false);
   const [cloudReady, setCloudReady] = useState(false);
   const [syncMessage, setSyncMessage] = useState("Loading your saved plan…");
+  const [command, setCommand] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    { id: "planner-intro", role: "assistant", text: "Describe a schedule entry in plain language. I’ll prepare a private planner draft for you to review; no supplier is contacted." },
+  ]);
+  const [pendingDraft, setPendingDraft] = useState<PlannerDraft | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -186,6 +193,66 @@ export function DayPlanner({ editable = true }: { editable?: boolean }) {
 
   function removeActivity(day: string, id: string) {
     setActivities((current) => ({ ...current, [day]: (current[day] ?? []).filter((activity) => activity.id !== id) }));
+  }
+
+  function sendPlannerCommand(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const text = command.trim();
+    if (!text) return;
+    const normalized = text.toLowerCase();
+    const providers = ["Takumi Images", "ICARUS Sports", "Kevin Rio"];
+    const provider = providers.find((name) => normalized.includes(name.toLowerCase()));
+    const weekdayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    const weekday = weekdayNames.find((name) => normalized.includes(name));
+    const availableDates = calendarDays(calendarStart, calendarEnd);
+    const day = weekday
+      ? normalized.includes("opening") && weekday === "wednesday" && availableDates.includes("2026-11-18")
+        ? "2026-11-18"
+        : availableDates.find((date) => date >= selectedDate && dateFromISO(date).getUTCDay() === weekdayNames.indexOf(weekday))
+      : undefined;
+
+    setChatMessages((current) => [...current, { id: `user-${Date.now()}`, role: "user", text }]);
+    setCommand("");
+    setPendingDraft(null);
+
+    if (!provider || !day) {
+      const needs = [!provider ? "a crew name (Takumi Images, ICARUS Sports or Kevin Rio)" : "", !day ? "a weekday within the current calendar period" : ""].filter(Boolean).join(" and ");
+      setChatMessages((current) => [...current, { id: `assistant-${Date.now()}`, role: "assistant", text: `I couldn't prepare that draft yet. Please include ${needs}.` }]);
+      return;
+    }
+
+    const isOpening = normalized.includes("opening");
+    const knownOpening = isOpening && day === "2026-11-18";
+    const activity: Activity = {
+      id: `chat-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      task: isOpening ? "Opening ceremony coverage" : text,
+      start: "",
+      end: "",
+      lead: provider,
+      meetingPoint: knownOpening ? "RHKYC poolside" : "",
+      language: "",
+      languageNotes: "",
+      translationNeeded: "",
+      translationTo: "",
+      sourceNote: knownOpening
+        ? "Planner chat request. Public programme lists the opening ceremony on Wednesday 18 November, 19:00–21:30 HKT at the RHKYC poolside. The production planner window ends at 21:00 HKT. Confirm the crew coverage time and any schedule extension. This draft does not book or notify the supplier."
+        : "Planner chat request. Confirm the time and agreed meeting point before treating this as a booking. This draft does not book or notify the supplier.",
+    };
+    setPendingDraft({ day, activity });
+    const response = knownOpening
+      ? `I found the Wednesday 18 November opening ceremony at RHKYC poolside, 19:00–21:30 HKT. The planner window ends at 21:00, so I’ve left the crew coverage time blank. Review the draft below; confirming it adds a private planner entry only.`
+      : `I’ve prepared a draft for ${provider} on ${formatDay(day, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}. Add the time and agreed meeting point in the planner before treating it as a booking.`;
+    setChatMessages((current) => [...current, { id: `assistant-${Date.now()}`, role: "assistant", text: response }]);
+  }
+
+  function addPlannerDraft() {
+    if (!pendingDraft) return;
+    setActivities((current) => ({ ...current, [pendingDraft.day]: [...(current[pendingDraft.day] ?? []), pendingDraft.activity] }));
+    setSelectedDate(pendingDraft.day);
+    setMonthCursor(getInitialMonth(pendingDraft.day));
+    setView("day");
+    setChatMessages((current) => [...current, { id: `assistant-${Date.now()}`, role: "assistant", text: `Added a draft to ${formatDay(pendingDraft.day, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}. It is not a confirmed supplier booking; complete the missing details in the planner.` }]);
+    setPendingDraft(null);
   }
 
   const allDates = calendarDays(calendarStart, calendarEnd);
@@ -323,6 +390,34 @@ export function DayPlanner({ editable = true }: { editable?: boolean }) {
         <h2 id="day-planner-title" className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Production and delivery plan</h2>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--muted)]">Plan filming from 17 to 29 November, then keep recording editing, review, distribution and delivery work until all deliverables are complete.</p>
       </div>
+
+      <section className="mb-5 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4 sm:p-5" aria-labelledby="schedule-chat-title">
+        <div className="mb-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Private planning assistant</p>
+          <h3 id="schedule-chat-title" className="mt-2 text-lg font-semibold tracking-[-0.03em]">Add an activity by chat</h3>
+          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Describe who, when and what. Review the draft before it enters the calendar. This never contacts or books a supplier.</p>
+        </div>
+        <div className="max-h-72 space-y-3 overflow-y-auto rounded-md border border-[var(--line)] bg-[var(--background)] p-3" role="log" aria-live="polite" aria-label="Schedule assistant conversation">
+          {chatMessages.map((message) => <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+            <p className={`max-w-[90%] rounded-lg px-3 py-2 text-sm leading-6 sm:max-w-[80%] ${message.role === "user" ? "bg-[var(--foreground)] text-white" : "border border-[var(--line)] bg-white text-[var(--foreground)]"}`}>{message.text}</p>
+          </div>)}
+        </div>
+        {pendingDraft && <div className="mt-3 rounded-md border border-[var(--line-strong)] bg-white p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--muted)]">Draft for review · {formatDay(pendingDraft.day)}</p>
+          <p className="mt-2 text-sm font-semibold">{pendingDraft.activity.task}</p>
+          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Responsible: {pendingDraft.activity.lead}{pendingDraft.activity.meetingPoint ? ` · Location: ${pendingDraft.activity.meetingPoint}` : ""}</p>
+          {pendingDraft.activity.sourceNote && <p className="mt-3 border-l-2 border-[var(--accent)] pl-3 text-sm leading-6 text-[var(--muted)]">{pendingDraft.activity.sourceNote}</p>}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button type="button" onClick={addPlannerDraft} disabled={!editable || !ready} className="min-h-10 rounded-md bg-[var(--foreground)] px-4 text-sm font-semibold text-white disabled:opacity-50">Add draft to planner</button>
+            <button type="button" onClick={() => setPendingDraft(null)} className="min-h-10 rounded-md border border-[var(--line-strong)] px-4 text-sm font-semibold">Discard</button>
+          </div>
+        </div>}
+        <form onSubmit={sendPlannerCommand} className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <label htmlFor="planner-chat-command" className="sr-only">Describe a schedule entry</label>
+          <input id="planner-chat-command" value={command} onChange={(event) => setCommand(event.target.value)} disabled={!editable} placeholder="e.g. Book Takumi Images for Wednesday evening opening" className="h-11 min-w-0 flex-1 rounded-md border border-[var(--line-strong)] bg-white px-3 text-sm outline-none focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/10 disabled:opacity-60" />
+          <button type="submit" disabled={!editable || !command.trim()} className="min-h-11 rounded-md bg-[var(--foreground)] px-4 text-sm font-semibold text-white disabled:opacity-50">Prepare draft</button>
+        </form>
+      </section>
 
       <div className="mb-4 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
