@@ -14,6 +14,10 @@ export type SponsorAssetForArchive = {
   category: string;
   driveUrl: string;
   note: string;
+  status?: string;
+  source?: string;
+  receivedAt?: string;
+  usageClearance?: string;
   fileId?: string;
   fileName?: string;
   fileSize?: number;
@@ -112,12 +116,14 @@ export async function createSponsorArchive({
   sponsorName,
   sponsorSlug,
   details,
+  profile,
   assets,
   files,
 }: {
   sponsorName: string;
   sponsorSlug: string;
   details: SponsorDetails;
+  profile?: object;
   assets: SponsorAssetForArchive[];
   files: Map<string, StoredSponsorFile>;
 }): Promise<Blob> {
@@ -139,12 +145,25 @@ export async function createSponsorArchive({
     "NOTES",
     details.notes || "None",
     "",
+    "STRUCTURED SPONSOR PROFILE",
+    profile ? JSON.stringify(profile, null, 2) : "Not provided",
+    "",
     "FILES AND REFERENCES",
     ...assets.map((asset, index) => {
       const name = asset.fileName || asset.title;
       const filePart = asset.fileId ? `File: ${root}/files/${cleanName(asset.category)}/${String(index + 1).padStart(2, "0")}-${cleanName(name)}` : "No uploaded file";
       const linkPart = asset.driveUrl ? `Drive link (reference only; linked contents are not included): ${asset.driveUrl}` : "";
-      return [`${index + 1}. ${asset.title}`, `Category: ${asset.category}`, filePart, asset.note ? `Note: ${asset.note}` : "", linkPart].filter(Boolean).join("\n");
+      return [
+        `${index + 1}. ${asset.title}`,
+        `Category: ${asset.category}`,
+        `Status: ${asset.status ?? "Not reviewed"}`,
+        asset.source ? `Source: ${asset.source}` : "",
+        asset.receivedAt ? `Received: ${asset.receivedAt}` : "",
+        filePart,
+        asset.note ? `Note: ${asset.note}` : "",
+        asset.usageClearance ? `Usage clearance: ${asset.usageClearance}` : "",
+        linkPart,
+      ].filter(Boolean).join("\n");
     }),
   ];
 

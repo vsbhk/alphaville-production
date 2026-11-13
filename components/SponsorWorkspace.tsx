@@ -12,12 +12,51 @@ type SponsorAsset = {
   driveUrl: string;
   note: string;
   approved?: boolean;
+  status?: "Not reviewed" | "Needs input" | "Submitted" | "Approved";
+  source?: string;
+  receivedAt?: string;
+  usageClearance?: string;
   fileId?: string;
   fileName?: string;
   fileSize?: number;
 };
 
-type SponsorRecord = { details?: SponsorDetails; assets: SponsorAsset[]; updatedAt?: number };
+type SponsorContact = { type: string; name: string; role: string; email: string; phone: string };
+type ReviewStatus = "Not reviewed" | "Needs input" | "Submitted" | "Approved";
+type SponsorProfile = {
+  submissionSource: string;
+  submissionReceivedAt: string;
+  contacts: SponsorContact[];
+  brandGuidelines: string;
+  keyMessages: string;
+  boilerplate: string;
+  spokespersonName: string;
+  spokespersonTitle: string;
+  spokespersonBiography: string;
+  socialLinks: string;
+  mediaClearance: string;
+  storyPriorities: string;
+  preferredLocation: string;
+  alternateLocation: string;
+  requestedDate: string;
+  requestedTime: string;
+  timezone: string;
+  filmingConfirmation: string;
+  diaryContact: string;
+  badWeatherAlternative: string;
+  absenceAlternative: string;
+  finalApprover: string;
+  backupApprover: string;
+  approvalTurnaround: string;
+  captionLanguages: string;
+  spellingConfirmation: string;
+  usageRestrictions: string;
+  followUps: string;
+  reviewedBy: string;
+  reviewDate: string;
+  reviewStatuses: Record<string, ReviewStatus>;
+};
+type SponsorRecord = { details?: SponsorDetails; profile?: Partial<SponsorProfile>; assets: SponsorAsset[]; updatedAt?: number };
 type StorageMode = "cloud" | "local";
 
 const emptyDetails: SponsorDetails = {
@@ -28,19 +67,50 @@ const emptyDetails: SponsorDetails = {
   brief: "",
   notes: "",
 };
-const blankRecord: SponsorRecord = { details: emptyDetails, assets: [] };
+const emptyContact: SponsorContact = { type: "Primary", name: "", role: "", email: "", phone: "" };
+const profileSections = [
+  { id: "contacts", label: "Contacts" }, { id: "brand", label: "Brand materials" }, { id: "messages", label: "Key messages" },
+  { id: "boilerplate", label: "Boilerplate" }, { id: "spokespeople", label: "Spokespeople" }, { id: "media", label: "Media and clearance" },
+  { id: "story", label: "Story priorities" }, { id: "filming", label: "Filming" }, { id: "availability", label: "Availability" },
+  { id: "approval", label: "Film approval" },
+];
+const reviewStatuses: ReviewStatus[] = ["Not reviewed", "Needs input", "Submitted", "Approved"];
+const emptyProfile: SponsorProfile = {
+  submissionSource: "", submissionReceivedAt: "", contacts: [emptyContact], brandGuidelines: "", keyMessages: "", boilerplate: "", spokespersonName: "", spokespersonTitle: "",
+  spokespersonBiography: "", socialLinks: "", mediaClearance: "", storyPriorities: "", preferredLocation: "", alternateLocation: "",
+  requestedDate: "", requestedTime: "", timezone: "HKT", filmingConfirmation: "", diaryContact: "", badWeatherAlternative: "",
+  absenceAlternative: "", finalApprover: "", backupApprover: "", approvalTurnaround: "", captionLanguages: "", spellingConfirmation: "",
+  usageRestrictions: "", followUps: "", reviewedBy: "", reviewDate: "",
+  reviewStatuses: Object.fromEntries(profileSections.map(({ id }) => [id, "Not reviewed"])) as Record<string, ReviewStatus>,
+};
+const blankRecord: SponsorRecord = { details: emptyDetails, profile: emptyProfile, assets: [] };
 const categories = ["Logos", "Brand guidelines", "Text and Word documents", "People and photos", "Video and audio", "Other"];
 
 function normalizeRecord(saved: SponsorRecord | null): SponsorRecord {
-  return saved && Array.isArray(saved.assets)
-    ? { ...blankRecord, ...saved, details: { ...emptyDetails, ...saved.details } }
-    : blankRecord;
+  if (!saved || !Array.isArray(saved.assets)) return { ...blankRecord, profile: emptyProfile };
+  const details = { ...emptyDetails, ...saved.details };
+  const legacyContact = details.contactName || details.contactPhone
+    ? [{ ...emptyContact, name: details.contactName, phone: details.contactPhone }]
+    : emptyProfile.contacts;
+  return {
+    ...blankRecord,
+    ...saved,
+    details,
+    profile: {
+      ...emptyProfile,
+      ...saved.profile,
+      contacts: saved.profile?.contacts?.length ? saved.profile.contacts : legacyContact,
+      reviewStatuses: { ...emptyProfile.reviewStatuses, ...saved.profile?.reviewStatuses },
+    },
+    assets: saved.assets.map((asset) => ({ ...asset, status: asset.status ?? (asset.approved ? "Approved" : "Not reviewed") })),
+  };
 }
 
 export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { sponsorSlug: string; sponsorName: string; editable: boolean }) {
   const key = `sponsor:${sponsorSlug}`;
-  const [record, setRecord] = useState<SponsorRecord>(blankRecord);
+  const [record, setRecord] = useState<SponsorRecord>(() => normalizeRecord(null));
   const [details, setDetails] = useState<SponsorDetails>(emptyDetails);
+  const [profile, setProfile] = useState<SponsorProfile>(emptyProfile);
   const [ready, setReady] = useState(false);
   const [storageMode, setStorageMode] = useState<StorageMode>("cloud");
   const [message, setMessage] = useState("Loading sponsor collection…");
@@ -48,6 +118,9 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
   const [category, setCategory] = useState("Logos");
   const [driveUrl, setDriveUrl] = useState("");
   const [note, setNote] = useState("");
+  const [assetSource, setAssetSource] = useState("");
+  const [assetReceivedAt, setAssetReceivedAt] = useState("");
+  const [assetUsageClearance, setAssetUsageClearance] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -76,6 +149,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
       const fallback = localRecord ? local : blankRecord;
       setRecord(fallback);
       setDetails(fallback.details ?? emptyDetails);
+      setProfile({ ...emptyProfile, ...fallback.profile });
       setStorageMode("local");
       setMessage(localRecord
         ? "Google Sheets is unavailable. You’re using this browser’s saved draft; changes stay here until you sync."
@@ -87,6 +161,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
     if (localRecord && (local.updatedAt ?? 0) > (remote.updatedAt ?? 0)) {
       setRecord(local);
       setDetails(local.details ?? emptyDetails);
+      setProfile({ ...emptyProfile, ...local.profile });
       setStorageMode("local");
       setMessage("A newer browser draft is available. Review it, then sync it to Google Sheets when ready.");
       setReady(true);
@@ -95,6 +170,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
 
     setRecord(remote);
     setDetails(remote.details ?? emptyDetails);
+    setProfile({ ...emptyProfile, ...remote.profile });
     setStorageMode("cloud");
     setMessage(cloudRecord ? "Sponsor collection loaded." : "Start this sponsor’s private collection.");
     setReady(true);
@@ -116,6 +192,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
           await saveLocalSponsorRecord(key, updated).catch(() => undefined);
           setRecord(updated);
           setDetails(updated.details ?? emptyDetails);
+          setProfile({ ...emptyProfile, ...updated.profile });
           setMessage(successMessage);
           return true;
         } catch {
@@ -126,6 +203,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
       setStorageMode("local");
       setRecord(updated);
       setDetails(updated.details ?? emptyDetails);
+      setProfile({ ...emptyProfile, ...updated.profile });
       setMessage("Saved in this browser only. Sync it to Google Sheets when the connection is available.");
       return true;
     } catch {
@@ -161,7 +239,32 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
 
   async function saveDetails(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await save({ ...record, details }, "Sponsor details saved to your private workspace.");
+    const primaryContact = profile.contacts[0] ?? emptyContact;
+    const savedDetails = { ...details, contactName: primaryContact.name, contactPhone: primaryContact.phone };
+    await save({ ...record, details: savedDetails, profile }, "Sponsor profile saved to your private workspace.");
+  }
+
+  function updateProfile<K extends keyof SponsorProfile>(field: K, value: SponsorProfile[K]) {
+    setProfile((current) => ({ ...current, [field]: value }));
+  }
+
+  function updateContact(index: number, field: keyof SponsorContact, value: string) {
+    setProfile((current) => ({
+      ...current,
+      contacts: current.contacts.map((contact, contactIndex) => contactIndex === index ? { ...contact, [field]: value } : contact),
+    }));
+  }
+
+  function addContact() {
+    setProfile((current) => ({ ...current, contacts: [...current.contacts, { ...emptyContact, type: "Additional" }] }));
+  }
+
+  function removeContact(index: number) {
+    setProfile((current) => ({ ...current, contacts: current.contacts.filter((_, contactIndex) => contactIndex !== index) }));
+  }
+
+  function setReviewStatus(sectionId: string, status: ReviewStatus) {
+    setProfile((current) => ({ ...current, reviewStatuses: { ...current.reviewStatuses, [sectionId]: status } }));
   }
 
   function chooseFiles(event: ChangeEvent<HTMLInputElement>) {
@@ -189,9 +292,9 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
 
     const newAssets: SponsorAsset[] = selectedFiles.map((file) => {
       const id = globalThis.crypto.randomUUID();
-      return { id, fileId: id, fileName: file.name, fileSize: file.size, title: file.name, category, driveUrl: "", note: note.trim() };
+      return { id, fileId: id, fileName: file.name, fileSize: file.size, title: file.name, category, driveUrl: "", note: note.trim(), status: "Not reviewed", source: assetSource.trim(), receivedAt: assetReceivedAt, usageClearance: assetUsageClearance.trim() };
     });
-    if (cleanUrl) newAssets.push({ id: globalThis.crypto.randomUUID(), title: cleanTitle, category, driveUrl: cleanUrl, note: note.trim() });
+    if (cleanUrl) newAssets.push({ id: globalThis.crypto.randomUUID(), title: cleanTitle, category, driveUrl: cleanUrl, note: note.trim(), status: "Not reviewed", source: assetSource.trim(), receivedAt: assetReceivedAt, usageClearance: assetUsageClearance.trim() });
 
     try {
       for (const [index, file] of selectedFiles.entries()) await saveSponsorFile(file, newAssets[index].id);
@@ -208,6 +311,9 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
     setTitle("");
     setDriveUrl("");
     setNote("");
+    setAssetSource("");
+    setAssetReceivedAt("");
+    setAssetUsageClearance("");
     setSelectedFiles([]);
     const input = document.getElementById("sponsor-files") as HTMLInputElement | null;
     if (input) input.value = "";
@@ -228,7 +334,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
         const stored = await loadSponsorFile(asset.fileId);
         if (stored) files.set(asset.fileId, stored);
       }
-      const archive = await createSponsorArchive({ sponsorName, sponsorSlug, details: record.details ?? emptyDetails, assets: record.assets, files });
+      const archive = await createSponsorArchive({ sponsorName, sponsorSlug, details: record.details ?? emptyDetails, profile: record.profile, assets: record.assets, files });
       const url = URL.createObjectURL(archive);
       const anchor = document.createElement("a");
       anchor.href = url;
@@ -268,7 +374,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
 
         <form onSubmit={saveDetails} className="mt-5 border-t border-[var(--line)] pt-5">
           <h3 className="text-sm font-semibold">Sponsor information</h3>
-          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Keep the working details and requirements together with this sponsor’s materials.</p>
+          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Keep each sponsor submission, approval detail and production requirement in its own field.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="text-sm font-medium">Brand or company name
               <input value={details.brandName} onChange={(event) => setDetails({ ...details, brandName: event.target.value })} placeholder={sponsorName} className="mt-2 h-11 w-full border border-[var(--line-strong)] bg-white px-3" />
@@ -276,17 +382,241 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
             <label className="text-sm font-medium">Website
               <input value={details.website} onChange={(event) => setDetails({ ...details, website: event.target.value })} placeholder="https://" className="mt-2 h-11 w-full border border-[var(--line-strong)] bg-white px-3" />
             </label>
-            <label className="text-sm font-medium">Main contact
-              <input value={details.contactName} onChange={(event) => setDetails({ ...details, contactName: event.target.value })} className="mt-2 h-11 w-full border border-[var(--line-strong)] bg-white px-3" />
+            <label className="text-sm font-medium">Submission source / sender
+              <input value={profile.submissionSource} onChange={(event) => updateProfile("submissionSource", event.target.value)} placeholder="Email, sponsor portal, meeting, etc." className="mt-2 h-11 w-full border border-[var(--line-strong)] bg-white px-3" />
             </label>
-            <label className="text-sm font-medium sm:col-span-2">Contact phone
-              <input type="tel" value={details.contactPhone} onChange={(event) => setDetails({ ...details, contactPhone: event.target.value })} className="mt-2 h-11 w-full border border-[var(--line-strong)] bg-white px-3" />
+            <label className="text-sm font-medium">Submission received date
+              <input type="date" value={profile.submissionReceivedAt} onChange={(event) => updateProfile("submissionReceivedAt", event.target.value)} className="mt-2 h-11 w-full border border-[var(--line-strong)] bg-white px-3" />
             </label>
-            <label className="text-sm font-medium sm:col-span-2">Brief and requirements
-              <textarea value={details.brief} onChange={(event) => setDetails({ ...details, brief: event.target.value })} rows={4} className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
-            </label>
-            <label className="text-sm font-medium sm:col-span-2">Additional notes
-              <textarea value={details.notes} onChange={(event) => setDetails({ ...details, notes: event.target.value })} rows={3} className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
+          </div>
+          <label className="mt-3 block text-sm font-medium">Brief and requirements
+            <textarea value={details.brief} onChange={(event) => setDetails({ ...details, brief: event.target.value })} rows={3} className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
+          </label>
+          <label className="mt-3 block text-sm font-medium">Additional notes
+            <textarea value={details.notes} onChange={(event) => setDetails({ ...details, notes: event.target.value })} rows={2} className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
+          </label>
+
+          <aside className="mt-5 border border-[var(--line)] bg-[var(--background)] p-4" aria-labelledby="recommendations-title">
+            <h4 id="recommendations-title" className="text-sm font-semibold">Recommended intake checks</h4>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-[var(--muted)]">
+              <li>Record the source and received date for every file or text submission.</li>
+              <li>Confirm image, footage, logo and music usage rights, restrictions and expiry dates.</li>
+              <li>Track content review separately from filming-slot confirmation.</li>
+              <li>Get a named day-of contact and weather or absence alternative before filming.</li>
+              <li>Keep sponsor copy verbatim and record spelling, caption-language and turnaround expectations.</li>
+            </ul>
+          </aside>
+
+          <fieldset className="mt-5 border-t border-[var(--line)] pt-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <legend className="text-sm font-semibold">Production contacts</legend>
+              <label className="flex items-center gap-2 text-xs font-medium text-[var(--muted)]">Review status
+                <select value={profile.reviewStatuses.contacts} onChange={(event) => setReviewStatus("contacts", event.target.value as ReviewStatus)} disabled={!editable} className="h-9 border border-[var(--line-strong)] bg-white px-2 text-[var(--foreground)]">
+                  {reviewStatuses.map((status) => <option key={status}>{status}</option>)}
+                </select>
+              </label>
+            </div>
+            <p className="mt-1 text-xs leading-5 text-[var(--muted)]">Add primary, backup, day-of and approval contacts with their roles and direct details.</p>
+            <div className="mt-3 space-y-3">
+              {profile.contacts.map((contact, index) => <div key={`${index}-${contact.type}`} className="grid gap-3 border border-[var(--line)] p-3 sm:grid-cols-2">
+                <label className="text-sm font-medium">Contact type
+                  <input value={contact.type} onChange={(event) => updateContact(index, "type", event.target.value)} placeholder="Primary / Backup / PA" className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Name
+                  <input value={contact.name} onChange={(event) => updateContact(index, "name", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Role
+                  <input value={contact.role} onChange={(event) => updateContact(index, "role", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Email
+                  <input type="email" value={contact.email} onChange={(event) => updateContact(index, "email", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Phone
+                  <input type="tel" value={contact.phone} onChange={(event) => updateContact(index, "phone", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                {editable && profile.contacts.length > 1 && <button type="button" onClick={() => removeContact(index)} className="min-h-9 justify-self-start border border-[var(--line-strong)] px-3 text-xs font-semibold">Remove contact</button>}
+              </div>)}
+            </div>
+            {editable && <button type="button" onClick={addContact} className="mt-3 min-h-10 border border-[var(--line-strong)] bg-white px-3 text-sm font-semibold">Add contact</button>}
+          </fieldset>
+
+          <div className="mt-5 grid gap-5 border-t border-[var(--line)] pt-5">
+            <fieldset>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <legend className="text-sm font-semibold">Brand materials</legend>
+                <label className="flex items-center gap-2 text-xs font-medium text-[var(--muted)]">Review status
+                  <select value={profile.reviewStatuses.brand} onChange={(event) => setReviewStatus("brand", event.target.value as ReviewStatus)} disabled={!editable} className="h-9 border border-[var(--line-strong)] bg-white px-2 text-[var(--foreground)]">{reviewStatuses.map((status) => <option key={status}>{status}</option>)}</select>
+                </label>
+              </div>
+              <label className="mt-3 block text-sm font-medium">Brand guidelines and logo requirements
+                <textarea value={profile.brandGuidelines} onChange={(event) => updateProfile("brandGuidelines", event.target.value)} rows={3} placeholder="Guidelines, logo variants, formats, clear space and usage notes" className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
+              </label>
+            </fieldset>
+
+            <fieldset>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <legend className="text-sm font-semibold">Key messages</legend>
+                <label className="flex items-center gap-2 text-xs font-medium text-[var(--muted)]">Review status
+                  <select value={profile.reviewStatuses.messages} onChange={(event) => setReviewStatus("messages", event.target.value as ReviewStatus)} disabled={!editable} className="h-9 border border-[var(--line-strong)] bg-white px-2 text-[var(--foreground)]">{reviewStatuses.map((status) => <option key={status}>{status}</option>)}</select>
+                </label>
+              </div>
+              <label className="mt-3 block text-sm font-medium">Approved key messages
+                <textarea value={profile.keyMessages} onChange={(event) => updateProfile("keyMessages", event.target.value)} rows={6} placeholder="Keep each supplied point verbatim; separate points with a blank line." className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
+              </label>
+            </fieldset>
+
+            <fieldset>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <legend className="text-sm font-semibold">Boilerplate</legend>
+                <label className="flex items-center gap-2 text-xs font-medium text-[var(--muted)]">Review status
+                  <select value={profile.reviewStatuses.boilerplate} onChange={(event) => setReviewStatus("boilerplate", event.target.value as ReviewStatus)} disabled={!editable} className="h-9 border border-[var(--line-strong)] bg-white px-2 text-[var(--foreground)]">{reviewStatuses.map((status) => <option key={status}>{status}</option>)}</select>
+                </label>
+              </div>
+              <label className="mt-3 block text-sm font-medium">Boilerplate text and footnotes
+                <textarea value={profile.boilerplate} onChange={(event) => updateProfile("boilerplate", event.target.value)} rows={6} className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
+              </label>
+            </fieldset>
+
+            <fieldset>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <legend className="text-sm font-semibold">Spokespeople and social channels</legend>
+                <label className="flex items-center gap-2 text-xs font-medium text-[var(--muted)]">Review status
+                  <select value={profile.reviewStatuses.spokespeople} onChange={(event) => setReviewStatus("spokespeople", event.target.value as ReviewStatus)} disabled={!editable} className="h-9 border border-[var(--line-strong)] bg-white px-2 text-[var(--foreground)]">{reviewStatuses.map((status) => <option key={status}>{status}</option>)}</select>
+                </label>
+              </div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <label className="text-sm font-medium">Spokesperson name
+                  <input value={profile.spokespersonName} onChange={(event) => updateProfile("spokespersonName", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Title and organisation
+                  <input value={profile.spokespersonTitle} onChange={(event) => updateProfile("spokespersonTitle", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+              </div>
+              <label className="mt-3 block text-sm font-medium">Biography
+                <textarea value={profile.spokespersonBiography} onChange={(event) => updateProfile("spokespersonBiography", event.target.value)} rows={4} className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
+              </label>
+              <label className="mt-3 block text-sm font-medium">Social media URLs
+                <textarea value={profile.socialLinks} onChange={(event) => updateProfile("socialLinks", event.target.value)} rows={3} placeholder="One platform and URL per line" className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
+              </label>
+            </fieldset>
+
+            <fieldset>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <legend className="text-sm font-semibold">Media and clearance</legend>
+                <label className="flex items-center gap-2 text-xs font-medium text-[var(--muted)]">Review status
+                  <select value={profile.reviewStatuses.media} onChange={(event) => setReviewStatus("media", event.target.value as ReviewStatus)} disabled={!editable} className="h-9 border border-[var(--line-strong)] bg-white px-2 text-[var(--foreground)]">{reviewStatuses.map((status) => <option key={status}>{status}</option>)}</select>
+                </label>
+              </div>
+              <label className="mt-3 block text-sm font-medium">Usage clearance, restrictions and expiry
+                <textarea value={profile.mediaClearance} onChange={(event) => updateProfile("mediaClearance", event.target.value)} rows={3} placeholder="Record rights holder, permitted use, restrictions and expiry date." className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
+              </label>
+            </fieldset>
+
+            <fieldset>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <legend className="text-sm font-semibold">Story priorities</legend>
+                <label className="flex items-center gap-2 text-xs font-medium text-[var(--muted)]">Review status
+                  <select value={profile.reviewStatuses.story} onChange={(event) => setReviewStatus("story", event.target.value as ReviewStatus)} disabled={!editable} className="h-9 border border-[var(--line-strong)] bg-white px-2 text-[var(--foreground)]">{reviewStatuses.map((status) => <option key={status}>{status}</option>)}</select>
+                </label>
+              </div>
+              <label className="mt-3 block text-sm font-medium">Contribution, story and filming priorities
+                <textarea value={profile.storyPriorities} onChange={(event) => updateProfile("storyPriorities", event.target.value)} rows={3} className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
+              </label>
+            </fieldset>
+
+            <fieldset>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <legend className="text-sm font-semibold">Filming preferences</legend>
+                <label className="flex items-center gap-2 text-xs font-medium text-[var(--muted)]">Review status
+                  <select value={profile.reviewStatuses.filming} onChange={(event) => setReviewStatus("filming", event.target.value as ReviewStatus)} disabled={!editable} className="h-9 border border-[var(--line-strong)] bg-white px-2 text-[var(--foreground)]">{reviewStatuses.map((status) => <option key={status}>{status}</option>)}</select>
+                </label>
+              </div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <label className="text-sm font-medium">Preferred location
+                  <input value={profile.preferredLocation} onChange={(event) => updateProfile("preferredLocation", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Alternative location
+                  <input value={profile.alternateLocation} onChange={(event) => updateProfile("alternateLocation", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Requested date
+                  <input type="date" value={profile.requestedDate} onChange={(event) => updateProfile("requestedDate", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Requested time
+                  <input value={profile.requestedTime} onChange={(event) => updateProfile("requestedTime", event.target.value)} placeholder="e.g. 3:00–5:00 pm" className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Timezone
+                  <input value={profile.timezone} onChange={(event) => updateProfile("timezone", event.target.value)} placeholder="HKT" className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Sponsor confirmation / booking status
+                  <input value={profile.filmingConfirmation} onChange={(event) => updateProfile("filmingConfirmation", event.target.value)} placeholder="Pending sponsor confirmation / Not booked" className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <legend className="text-sm font-semibold">Availability and contingencies</legend>
+                <label className="flex items-center gap-2 text-xs font-medium text-[var(--muted)]">Review status
+                  <select value={profile.reviewStatuses.availability} onChange={(event) => setReviewStatus("availability", event.target.value as ReviewStatus)} disabled={!editable} className="h-9 border border-[var(--line-strong)] bg-white px-2 text-[var(--foreground)]">{reviewStatuses.map((status) => <option key={status}>{status}</option>)}</select>
+                </label>
+              </div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <label className="text-sm font-medium">Diarist / PA / day-of contact
+                  <input value={profile.diaryContact} onChange={(event) => updateProfile("diaryContact", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Bad-weather alternative
+                  <input value={profile.badWeatherAlternative} onChange={(event) => updateProfile("badWeatherAlternative", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium sm:col-span-2">Absence / rescheduling alternative
+                  <input value={profile.absenceAlternative} onChange={(event) => updateProfile("absenceAlternative", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <legend className="text-sm font-semibold">Film approval</legend>
+                <label className="flex items-center gap-2 text-xs font-medium text-[var(--muted)]">Review status
+                  <select value={profile.reviewStatuses.approval} onChange={(event) => setReviewStatus("approval", event.target.value as ReviewStatus)} disabled={!editable} className="h-9 border border-[var(--line-strong)] bg-white px-2 text-[var(--foreground)]">{reviewStatuses.map((status) => <option key={status}>{status}</option>)}</select>
+                </label>
+              </div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <label className="text-sm font-medium">Final approver
+                  <input value={profile.finalApprover} onChange={(event) => updateProfile("finalApprover", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Backup approver
+                  <input value={profile.backupApprover} onChange={(event) => updateProfile("backupApprover", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Expected turnaround
+                  <input value={profile.approvalTurnaround} onChange={(event) => updateProfile("approvalTurnaround", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Caption languages
+                  <input value={profile.captionLanguages} onChange={(event) => updateProfile("captionLanguages", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Confirmed name spellings
+                  <input value={profile.spellingConfirmation} onChange={(event) => updateProfile("spellingConfirmation", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Usage restrictions
+                  <input value={profile.usageRestrictions} onChange={(event) => updateProfile("usageRestrictions", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset className="border-t border-[var(--line)] pt-4">
+              <legend className="text-sm font-semibold">Latest review record</legend>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <label className="text-sm font-medium">Reviewed by
+                  <input value={profile.reviewedBy} onChange={(event) => updateProfile("reviewedBy", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Review date
+                  <input type="date" value={profile.reviewDate} onChange={(event) => updateProfile("reviewDate", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+              </div>
+              <p className="mt-2 text-xs leading-5 text-[var(--muted)]">Section statuses are saved independently. Record a reviewer and date whenever a review is completed.</p>
+            </fieldset>
+
+            <label className="block text-sm font-medium">Outstanding follow-ups and recommendations
+              <textarea value={profile.followUps} onChange={(event) => updateProfile("followUps", event.target.value)} rows={3} placeholder="List missing files, unanswered questions, owners and follow-up dates." className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
             </label>
           </div>
           {editable && <button type="submit" disabled={!ready || saving} className="mt-4 min-h-11 bg-[var(--foreground)] px-4 text-sm font-semibold text-white disabled:opacity-50">{saving ? "Saving…" : "Save sponsor information"}</button>}
@@ -308,8 +638,11 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
                 <li key={asset.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <p className="break-words text-sm font-semibold">{asset.fileName || asset.title}</p>
-                    <p className="mt-1 text-xs font-medium text-[var(--muted)]">{asset.category}{asset.fileSize ? ` · ${(asset.fileSize / (1024 * 1024)).toFixed(1)} MB` : " · Drive reference"}</p>
+                    <p className="mt-1 text-xs font-medium text-[var(--muted)]">{asset.category}{asset.fileSize ? ` · ${(asset.fileSize / (1024 * 1024)).toFixed(1)} MB` : " · Drive reference"} · {asset.status ?? (asset.approved ? "Approved" : "Not reviewed")}</p>
+                    {asset.source && <p className="mt-1 text-xs leading-5 text-[var(--muted)]">Source: {asset.source}</p>}
+                    {asset.receivedAt && <p className="text-xs leading-5 text-[var(--muted)]">Received: {asset.receivedAt}</p>}
                     {asset.note && <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{asset.note}</p>}
+                    {asset.usageClearance && <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Usage clearance: {asset.usageClearance}</p>}
                     {asset.driveUrl && <a className="mt-2 inline-block break-all text-sm font-medium underline underline-offset-4" href={asset.driveUrl} target="_blank" rel="noreferrer">Open Google Drive reference</a>}
                   </div>
                   {editable && <button type="button" disabled={!ready || saving} onClick={() => void removeAsset(asset)} className="min-h-10 shrink-0 border border-[var(--line-strong)] px-3 text-sm font-semibold disabled:opacity-50">Remove</button>}
@@ -336,6 +669,17 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
             </label>
             <label className="text-sm font-medium">Note for this material
               <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={2} className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
+            </label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="text-sm font-medium">Source / sender
+                <input value={assetSource} onChange={(event) => setAssetSource(event.target.value)} placeholder="Email, sponsor portal, OneDrive, etc." className="mt-2 h-11 w-full border border-[var(--line-strong)] bg-white px-3" />
+              </label>
+              <label className="text-sm font-medium">Date received
+                <input type="date" value={assetReceivedAt} onChange={(event) => setAssetReceivedAt(event.target.value)} className="mt-2 h-11 w-full border border-[var(--line-strong)] bg-white px-3" />
+              </label>
+            </div>
+            <label className="text-sm font-medium">Rights and usage clearance
+              <textarea value={assetUsageClearance} onChange={(event) => setAssetUsageClearance(event.target.value)} rows={2} placeholder="Permitted uses, restrictions, rights holder and expiry date" className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
             </label>
             <button type="submit" disabled={!ready || saving} className="min-h-11 justify-self-start bg-[var(--foreground)] px-4 text-sm font-semibold text-white disabled:opacity-50">{saving ? "Saving…" : "Add to sponsor collection"}</button>
           </form>}
