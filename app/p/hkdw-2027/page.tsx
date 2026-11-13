@@ -1,19 +1,45 @@
 import { ProjectNav } from "@/components/ProjectNav";
 import { DayPlanner } from "@/components/DayPlanner";
+import { EventProgramme, type CalendarDay } from "@/components/EventProgramme";
 import { auth } from "@/auth";
 import { AlphavilleHeader } from "@/components/AlphavilleBrand";
 
-const eventCalendar = [
-  { event: "Asia Pacific Championship", date: "Tue 17–Wed 18 Nov", activity: "Registration, measurement and equipment inspection · 09:00–17:30 at Clearwater Bay Golf & Country Club Marina. Crew weigh-in runs until 18:00." },
-  { event: "Asia Pacific Championship", date: "Wed 18 Nov", activity: "Skippers’ briefing · 18:00–19:00 at RHKYC Kellett Island. Opening ceremony · 19:00–21:30 at the RHKYC poolside." },
-  { event: "Asia Pacific Championship", date: "Thu 19 Nov", activity: "Championship racing begins. After-sailing drinks · 17:00–18:30 at Clearwater Bay Golf & Country Club." },
-  { event: "Asia Pacific Championship", date: "Fri 20 Nov", activity: "Championship racing. After-sailing drinks · 17:00–18:30 at Clearwater Bay Golf & Country Club." },
-  { event: "Asia Pacific Championship", date: "Sat 21 Nov", activity: "Final races and prizegiving. Prizegiving ceremony · 18:00–21:00 at Clearwater Bay Golf & Country Club." },
-  { event: "World Championship", date: "21–22 November", activity: "Registration, measurement and equipment inspection" },
-  { event: "World Championship", date: "22 November", activity: "Skippers’ briefing and opening ceremony" },
-  { event: "World Championship", date: "23–25 November", activity: "Championship racing" },
-  { event: "World Championship", date: "26 November", activity: "Lay day; racing only if needed" },
-  { event: "World Championship", date: "27–29 November", activity: "Championship racing, final races and prizegiving" },
+const eventCalendar: CalendarDay[] = [
+  { event: "Asia Pacific Championship", date: "Tue 17–Wed 18 Nov", activities: [
+    { title: "Registration, measurement and equipment inspection", time: "09:00–17:30", location: "Clearwater Bay Golf & Country Club Marina" },
+    { title: "Crew weigh-in", time: "Until 18:00" },
+  ] },
+  { event: "Asia Pacific Championship", date: "Wed 18 Nov", activities: [
+    { title: "Skippers’ briefing", time: "18:00–19:00", location: "RHKYC Kellett Island" },
+    { title: "Opening ceremony", time: "19:00–21:30", location: "RHKYC poolside" },
+  ] },
+  { event: "Asia Pacific Championship", date: "Thu 19 Nov", activities: [
+    { title: "Championship racing begins" },
+    { title: "After-sailing drinks", time: "17:00–18:30", location: "Clearwater Bay Golf & Country Club" },
+  ] },
+  { event: "Asia Pacific Championship", date: "Fri 20 Nov", activities: [
+    { title: "Championship racing" },
+    { title: "After-sailing drinks", time: "17:00–18:30", location: "Clearwater Bay Golf & Country Club" },
+  ] },
+  { event: "Asia Pacific Championship", date: "Sat 21 Nov", activities: [
+    { title: "Final races and prizegiving" },
+    { title: "Prizegiving ceremony", time: "18:00–21:00", location: "Clearwater Bay Golf & Country Club" },
+  ] },
+  { event: "World Championship", date: "21–22 November", activities: [
+    { title: "Registration, measurement and equipment inspection" },
+  ] },
+  { event: "World Championship", date: "22 November", activities: [
+    { title: "Skippers’ briefing and opening ceremony" },
+  ] },
+  { event: "World Championship", date: "23–25 November", activities: [
+    { title: "Championship racing" },
+  ] },
+  { event: "World Championship", date: "26 November", activities: [
+    { title: "Lay day; racing only if needed" },
+  ] },
+  { event: "World Championship", date: "27–29 November", activities: [
+    { title: "Championship racing, final races and prizegiving" },
+  ] },
 ];
 
 const actions = [
@@ -92,17 +118,7 @@ export default async function ProjectOverviewPage() {
             <p className="mt-2 text-lg font-semibold">Tuesday 17 November – Sunday 29 November 2026</p>
             <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Daily filming window: 09:00–21:00 HKT. Activity-specific times, responsible people or teams, and meeting points still need to be entered.</p>
           </div>
-          <ol className="divide-y divide-[var(--line)] rounded-lg border border-[var(--line)] bg-[var(--surface)]">
-            {eventCalendar.map((item) => (
-              <li key={`${item.event}-${item.date}`} className="grid gap-1 p-4 sm:grid-cols-[190px_minmax(0,1fr)] sm:gap-5 sm:p-5">
-                <div>
-                  <p className="text-sm font-semibold">{item.date}</p>
-                  <p className="mt-1 text-xs font-medium text-[var(--muted)]">{item.event}</p>
-                </div>
-                <p className="text-sm leading-6 text-[var(--muted)]">{item.activity}</p>
-              </li>
-            ))}
-          </ol>
+          <EventProgramme days={eventCalendar} />
           <p className="mt-3 text-xs leading-5 text-[var(--muted)]">Check the live calendar for changes. Racing documents and notices on the APC Official Notice Board prevail over this summary.</p>
           <article className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-5 text-amber-950">
             <div className="flex flex-wrap items-center justify-between gap-2">
