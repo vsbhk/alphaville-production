@@ -18,6 +18,8 @@ export type SponsorAssetForArchive = {
   source?: string;
   receivedAt?: string;
   usageClearance?: string;
+  accessInstructions?: string;
+  linkExpiry?: string;
   fileId?: string;
   fileName?: string;
   fileSize?: number;
@@ -152,7 +154,7 @@ export async function createSponsorArchive({
     ...assets.map((asset, index) => {
       const name = asset.fileName || asset.title;
       const filePart = asset.fileId ? `File: ${root}/files/${cleanName(asset.category)}/${String(index + 1).padStart(2, "0")}-${cleanName(name)}` : "No uploaded file";
-      const linkPart = asset.driveUrl ? `Drive link (reference only; linked contents are not included): ${asset.driveUrl}` : "";
+      const linkPart = asset.driveUrl ? `File link (reference only; linked contents are not included): ${asset.driveUrl}` : "";
       return [
         `${index + 1}. ${asset.title}`,
         `Category: ${asset.category}`,
@@ -162,6 +164,8 @@ export async function createSponsorArchive({
         filePart,
         asset.note ? `Note: ${asset.note}` : "",
         asset.usageClearance ? `Usage clearance: ${asset.usageClearance}` : "",
+        asset.accessInstructions ? `Access instructions: ${asset.accessInstructions}` : "",
+        asset.linkExpiry ? `Link expiry: ${asset.linkExpiry}` : "",
         linkPart,
       ].filter(Boolean).join("\n");
     }),

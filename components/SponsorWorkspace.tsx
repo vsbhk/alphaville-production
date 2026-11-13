@@ -16,6 +16,8 @@ type SponsorAsset = {
   source?: string;
   receivedAt?: string;
   usageClearance?: string;
+  accessInstructions?: string;
+  linkExpiry?: string;
   fileId?: string;
   fileName?: string;
   fileSize?: number;
@@ -40,8 +42,14 @@ type SponsorProfile = {
   alternateLocation: string;
   requestedDate: string;
   requestedTime: string;
+  alternateRequestedDate: string;
+  alternateRequestedTime: string;
   timezone: string;
+  stagingRequirements: string;
+  essentialFilmingMoments: string;
   filmingConfirmation: string;
+  interviewDuration: string;
+  availabilityNotes: string;
   diaryContact: string;
   badWeatherAlternative: string;
   absenceAlternative: string;
@@ -78,7 +86,8 @@ const reviewStatuses: ReviewStatus[] = ["Not reviewed", "Needs input", "Submitte
 const emptyProfile: SponsorProfile = {
   submissionSource: "", submissionReceivedAt: "", contacts: [emptyContact], brandGuidelines: "", keyMessages: "", boilerplate: "", spokespersonName: "", spokespersonTitle: "",
   spokespersonBiography: "", socialLinks: "", mediaClearance: "", storyPriorities: "", preferredLocation: "", alternateLocation: "",
-  requestedDate: "", requestedTime: "", timezone: "HKT", filmingConfirmation: "", diaryContact: "", badWeatherAlternative: "",
+  requestedDate: "", requestedTime: "", alternateRequestedDate: "", alternateRequestedTime: "", timezone: "HKT", filmingConfirmation: "", diaryContact: "", badWeatherAlternative: "",
+  stagingRequirements: "", essentialFilmingMoments: "", interviewDuration: "", availabilityNotes: "",
   absenceAlternative: "", finalApprover: "", backupApprover: "", approvalTurnaround: "", captionLanguages: "", spellingConfirmation: "",
   usageRestrictions: "", followUps: "", reviewedBy: "", reviewDate: "",
   reviewStatuses: Object.fromEntries(profileSections.map(({ id }) => [id, "Not reviewed"])) as Record<string, ReviewStatus>,
@@ -121,6 +130,8 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
   const [assetSource, setAssetSource] = useState("");
   const [assetReceivedAt, setAssetReceivedAt] = useState("");
   const [assetUsageClearance, setAssetUsageClearance] = useState("");
+  const [assetAccessInstructions, setAssetAccessInstructions] = useState("");
+  const [assetLinkExpiry, setAssetLinkExpiry] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -279,22 +290,24 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
     if (cleanUrl) {
       try {
         const parsed = new URL(cleanUrl);
-        if (parsed.protocol !== "https:" || !["drive.google.com", "docs.google.com"].includes(parsed.hostname)) throw new Error("Invalid Drive link");
+        const host = parsed.hostname.toLowerCase();
+        const allowedHost = ["drive.google.com", "docs.google.com", "dropbox.com", "www.dropbox.com", "wetransfer.com", "www.wetransfer.com", "we.tl", "1drv.ms", "onedrive.live.com"].includes(host) || host.endsWith(".sharepoint.com");
+        if (parsed.protocol !== "https:" || !allowedHost) throw new Error("Invalid file link");
       } catch {
-        setError("Use a valid Google Drive link, or clear the link field.");
+        setError("Use a valid HTTPS link from Google Drive, Dropbox, WeTransfer or OneDrive, or clear the link field.");
         return;
       }
     }
     if (selectedFiles.length === 0 && (!cleanUrl || !cleanTitle)) {
-      setError("Choose at least one file, or provide both a material name and Google Drive link.");
+      setError("Choose at least one file, or provide both a material name and file link.");
       return;
     }
 
     const newAssets: SponsorAsset[] = selectedFiles.map((file) => {
       const id = globalThis.crypto.randomUUID();
-      return { id, fileId: id, fileName: file.name, fileSize: file.size, title: file.name, category, driveUrl: "", note: note.trim(), status: "Not reviewed", source: assetSource.trim(), receivedAt: assetReceivedAt, usageClearance: assetUsageClearance.trim() };
+      return { id, fileId: id, fileName: file.name, fileSize: file.size, title: file.name, category, driveUrl: "", note: note.trim(), status: "Not reviewed", source: assetSource.trim(), receivedAt: assetReceivedAt, usageClearance: assetUsageClearance.trim(), accessInstructions: assetAccessInstructions.trim(), linkExpiry: assetLinkExpiry };
     });
-    if (cleanUrl) newAssets.push({ id: globalThis.crypto.randomUUID(), title: cleanTitle, category, driveUrl: cleanUrl, note: note.trim(), status: "Not reviewed", source: assetSource.trim(), receivedAt: assetReceivedAt, usageClearance: assetUsageClearance.trim() });
+    if (cleanUrl) newAssets.push({ id: globalThis.crypto.randomUUID(), title: cleanTitle, category, driveUrl: cleanUrl, note: note.trim(), status: "Not reviewed", source: assetSource.trim(), receivedAt: assetReceivedAt, usageClearance: assetUsageClearance.trim(), accessInstructions: assetAccessInstructions.trim(), linkExpiry: assetLinkExpiry });
 
     try {
       for (const [index, file] of selectedFiles.entries()) await saveSponsorFile(file, newAssets[index].id);
@@ -314,6 +327,8 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
     setAssetSource("");
     setAssetReceivedAt("");
     setAssetUsageClearance("");
+    setAssetAccessInstructions("");
+    setAssetLinkExpiry("");
     setSelectedFiles([]);
     const input = document.getElementById("sponsor-files") as HTMLInputElement | null;
     if (input) input.value = "";
@@ -538,6 +553,12 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
                 <label className="text-sm font-medium">Alternative location
                   <input value={profile.alternateLocation} onChange={(event) => updateProfile("alternateLocation", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
                 </label>
+                <label className="text-sm font-medium">Alternative location date
+                  <input type="date" value={profile.alternateRequestedDate} onChange={(event) => updateProfile("alternateRequestedDate", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Alternative location time
+                  <input value={profile.alternateRequestedTime} onChange={(event) => updateProfile("alternateRequestedTime", event.target.value)} placeholder="e.g. 3:00–5:00 pm" className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
                 <label className="text-sm font-medium">Requested date
                   <input type="date" value={profile.requestedDate} onChange={(event) => updateProfile("requestedDate", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
                 </label>
@@ -551,6 +572,14 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
                   <input value={profile.filmingConfirmation} onChange={(event) => updateProfile("filmingConfirmation", event.target.value)} placeholder="Pending sponsor confirmation / Not booked" className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
                 </label>
               </div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <label className="text-sm font-medium">Staging requirements
+                  <textarea value={profile.stagingRequirements} onChange={(event) => updateProfile("stagingRequirements", event.target.value)} rows={3} className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
+                </label>
+                <label className="text-sm font-medium">Essential moments to capture
+                  <textarea value={profile.essentialFilmingMoments} onChange={(event) => updateProfile("essentialFilmingMoments", event.target.value)} rows={3} className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
+                </label>
+              </div>
             </fieldset>
 
             <fieldset>
@@ -561,8 +590,14 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
                 </label>
               </div>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <label className="text-sm font-medium sm:col-span-2">Availability notes
+                  <textarea value={profile.availabilityNotes} onChange={(event) => updateProfile("availabilityNotes", event.target.value)} rows={2} placeholder="Availability statement from the sponsor" className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
+                </label>
                 <label className="text-sm font-medium">Diarist / PA / day-of contact
                   <input value={profile.diaryContact} onChange={(event) => updateProfile("diaryContact", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
+                </label>
+                <label className="text-sm font-medium">Interview duration
+                  <input value={profile.interviewDuration} onChange={(event) => updateProfile("interviewDuration", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
                 </label>
                 <label className="text-sm font-medium">Bad-weather alternative
                   <input value={profile.badWeatherAlternative} onChange={(event) => updateProfile("badWeatherAlternative", event.target.value)} className="mt-2 h-10 w-full border border-[var(--line-strong)] bg-white px-3" />
@@ -626,7 +661,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h3 className="text-sm font-semibold">Files and references</h3>
-              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Add source files and Drive references for the final handoff.</p>
+              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Add source files and file links for the final handoff.</p>
             </div>
             <button type="button" onClick={downloadZip} disabled={!ready || exporting} className="min-h-11 border border-[var(--foreground)] px-4 text-sm font-semibold disabled:opacity-50">{exporting ? "Preparing ZIP…" : "Download sponsor ZIP"}</button>
           </div>
@@ -638,12 +673,14 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
                 <li key={asset.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <p className="break-words text-sm font-semibold">{asset.fileName || asset.title}</p>
-                    <p className="mt-1 text-xs font-medium text-[var(--muted)]">{asset.category}{asset.fileSize ? ` · ${(asset.fileSize / (1024 * 1024)).toFixed(1)} MB` : " · Drive reference"} · {asset.status ?? (asset.approved ? "Approved" : "Not reviewed")}</p>
+                    <p className="mt-1 text-xs font-medium text-[var(--muted)]">{asset.category}{asset.fileSize ? ` · ${(asset.fileSize / (1024 * 1024)).toFixed(1)} MB` : asset.driveUrl ? " · File reference" : " · File pending"} · {asset.status ?? (asset.approved ? "Approved" : "Not reviewed")}</p>
                     {asset.source && <p className="mt-1 text-xs leading-5 text-[var(--muted)]">Source: {asset.source}</p>}
                     {asset.receivedAt && <p className="text-xs leading-5 text-[var(--muted)]">Received: {asset.receivedAt}</p>}
                     {asset.note && <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{asset.note}</p>}
                     {asset.usageClearance && <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Usage clearance: {asset.usageClearance}</p>}
-                    {asset.driveUrl && <a className="mt-2 inline-block break-all text-sm font-medium underline underline-offset-4" href={asset.driveUrl} target="_blank" rel="noreferrer">Open Google Drive reference</a>}
+                    {asset.accessInstructions && <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Access instructions: {asset.accessInstructions}</p>}
+                    {asset.linkExpiry && <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Link expiry: {asset.linkExpiry}</p>}
+                    {asset.driveUrl && <a className="mt-2 inline-block break-all text-sm font-medium underline underline-offset-4" href={asset.driveUrl} target="_blank" rel="noreferrer">Open file reference</a>}
                   </div>
                   {editable && <button type="button" disabled={!ready || saving} onClick={() => void removeAsset(asset)} className="min-h-10 shrink-0 border border-[var(--line-strong)] px-3 text-sm font-semibold disabled:opacity-50">Remove</button>}
                 </li>
@@ -661,11 +698,11 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
               <input id="sponsor-files" type="file" multiple onChange={chooseFiles} className="mt-2 block min-h-11 w-full border border-[var(--line-strong)] bg-white p-2 text-sm" />
             </label>
             {selectedFiles.length > 0 && <p className="text-xs leading-5 text-[var(--muted)]">{selectedFiles.length} file{selectedFiles.length === 1 ? "" : "s"} selected · stored in this browser until you download the ZIP.</p>}
-            <label className="text-sm font-medium">Material name for a Drive link
-              <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Required when adding a Drive link" className="mt-2 h-11 w-full border border-[var(--line-strong)] bg-white px-3" />
+            <label className="text-sm font-medium">Material name for a file link
+              <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Required when adding a file link" className="mt-2 h-11 w-full border border-[var(--line-strong)] bg-white px-3" />
             </label>
-            <label className="text-sm font-medium">Google Drive link (optional)
-              <input type="url" value={driveUrl} onChange={(event) => setDriveUrl(event.target.value)} placeholder="https://drive.google.com/..." className="mt-2 h-11 w-full border border-[var(--line-strong)] bg-white px-3" />
+            <label className="text-sm font-medium">File link (Google Drive, Dropbox, WeTransfer or OneDrive)
+              <input type="url" value={driveUrl} onChange={(event) => setDriveUrl(event.target.value)} placeholder="https://…" className="mt-2 h-11 w-full border border-[var(--line-strong)] bg-white px-3" />
             </label>
             <label className="text-sm font-medium">Note for this material
               <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={2} className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
@@ -681,6 +718,12 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
             <label className="text-sm font-medium">Rights and usage clearance
               <textarea value={assetUsageClearance} onChange={(event) => setAssetUsageClearance(event.target.value)} rows={2} placeholder="Permitted uses, restrictions, rights holder and expiry date" className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
             </label>
+              <label className="text-sm font-medium">Access instructions for large files
+                <textarea value={assetAccessInstructions} onChange={(event) => setAssetAccessInstructions(event.target.value)} rows={2} className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
+              </label>
+              <label className="text-sm font-medium">Link expiry date
+                <input type="date" value={assetLinkExpiry} onChange={(event) => setAssetLinkExpiry(event.target.value)} className="mt-2 h-11 w-full border border-[var(--line-strong)] bg-white px-3" />
+              </label>
             <button type="submit" disabled={!ready || saving} className="min-h-11 justify-self-start bg-[var(--foreground)] px-4 text-sm font-semibold text-white disabled:opacity-50">{saving ? "Saving…" : "Add to sponsor collection"}</button>
           </form>}
         </div>
