@@ -5,6 +5,11 @@ import { getWorkspaceRecord, putWorkspaceRecord } from "@/lib/google-workspace";
 import { projectSponsors } from "@/lib/sponsors";
 
 const allowedKeys = new Set(["production-calendar", "deliverables"]);
+const privateHeaders = { "Cache-Control": "private, no-store, max-age=0, must-revalidate" };
+
+function privateJson(body: unknown, status = 200) {
+  return NextResponse.json(body, { status, headers: privateHeaders });
+}
 
 function permittedKey(key: string) {
   if (allowedKeys.has(key)) return true;
@@ -15,37 +20,37 @@ function permittedKey(key: string) {
 export async function GET(request: Request) {
   const session = await auth();
   const access = getProjectAccess(session?.user.email);
-  if (!session?.user.email || !access) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user.email || !access) return privateJson({ error: "Unauthorized" }, 401);
 
   const key = new URL(request.url).searchParams.get("key") ?? "";
-  if (!permittedKey(key)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!permittedKey(key)) return privateJson({ error: "Forbidden" }, 403);
 
   try {
     const payload = await getWorkspaceRecord(key);
-    return NextResponse.json({ payload });
+    return privateJson({ payload });
   } catch {
-    return NextResponse.json({ error: "Private project storage is temporarily unavailable" }, { status: 503 });
+    return privateJson({ error: "Private project storage is temporarily unavailable" }, 503);
   }
 }
 
 export async function PUT(request: Request) {
   const session = await auth();
   const access = getProjectAccess(session?.user.email);
-  if (!session?.user.email || !access) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user.email || !access) return privateJson({ error: "Unauthorized" }, 401);
 
   let body: { key?: unknown; payload?: unknown };
   try { body = await request.json() as { key?: unknown; payload?: unknown }; }
-  catch { return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 }); }
+  catch { return privateJson({ error: "Invalid JSON body" }, 400); }
   const key = typeof body.key === "string" ? body.key : "";
-  if (!permittedKey(key)) return NextResponse.json({ error: "Invalid record key" }, { status: 400 });
+  if (!permittedKey(key)) return privateJson({ error: "Invalid record key" }, 400);
   const serialized = JSON.stringify(body.payload);
-  if (serialized === undefined) return NextResponse.json({ error: "Missing record payload" }, { status: 400 });
-  if (serialized.length > 500_000) return NextResponse.json({ error: "Record is too large" }, { status: 413 });
+  if (serialized === undefined) return privateJson({ error: "Missing record payload" }, 400);
+  if (serialized.length > 500_000) return privateJson({ error: "Record is too large" }, 413);
 
   try {
     await putWorkspaceRecord(key, body.payload, session.user.email);
-    return NextResponse.json({ ok: true });
+    return privateJson({ ok: true });
   } catch {
-    return NextResponse.json({ error: "Private project storage is temporarily unavailable" }, { status: 503 });
+    return privateJson({ error: "Private project storage is temporarily unavailable" }, 503);
   }
 }

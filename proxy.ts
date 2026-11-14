@@ -8,15 +8,21 @@ export const proxy = auth((request) => {
   if (!user) {
     const signInUrl = new URL("/", request.url);
     signInUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(signInUrl);
+    const response = NextResponse.redirect(signInUrl);
+    response.headers.set("Cache-Control", "private, no-store, max-age=0, must-revalidate");
+    return response;
   }
 
   const access = getProjectAccess(user.email);
   if (!access) {
-    return NextResponse.redirect(new URL("/", request.url));
+    const response = NextResponse.redirect(new URL("/", request.url));
+    response.headers.set("Cache-Control", "private, no-store, max-age=0, must-revalidate");
+    return response;
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  response.headers.set("Cache-Control", "private, no-store, max-age=0, must-revalidate");
+  return response;
 });
 
 export const config = { matcher: ["/p/:path*"] };
