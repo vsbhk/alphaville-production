@@ -177,7 +177,7 @@ export function DayPlanner({ editable = true }: { editable?: boolean }) {
 
   function addActivity(day: string) {
     const newActivity: Activity = {
-      id: `${day}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id: `${day}-${globalThis.crypto.randomUUID()}`,
       task: "",
       start: "",
       end: "",
@@ -224,7 +224,7 @@ export function DayPlanner({ editable = true }: { editable?: boolean }) {
     const isOpening = normalized.includes("opening");
     const knownOpening = isOpening && day === "2026-11-18";
     const activity: Activity = {
-      id: `chat-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id: `chat-${globalThis.crypto.randomUUID()}`,
       task: isOpening ? "Opening ceremony coverage" : text,
       start: "",
       end: "",

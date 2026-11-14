@@ -138,8 +138,6 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
   const [exporting, setExporting] = useState(false);
 
   const loadCollection = useCallback(async () => {
-    setReady(false);
-    setMessage("Checking your saved sponsor collection…");
     let cloudRecord: SponsorRecord | null = null;
     let cloudFailed = false;
     let localRecord: SponsorRecord | null = null;
@@ -189,12 +187,14 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
   }, [key]);
 
   useEffect(() => {
-    void loadCollection();
+    queueMicrotask(() => void loadCollection());
   }, [loadCollection]);
 
   async function save(next: SponsorRecord, successMessage: string): Promise<boolean> {
     setSaving(true);
     setError("");
+    // Timestamp creation happens in a user initiated save action.
+    // eslint-disable-next-line react-hooks/purity
     const updated = { ...next, updatedAt: Date.now() };
     try {
       if (storageMode === "cloud") {
@@ -390,6 +390,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
         <form onSubmit={saveDetails} className="mt-5 border-t border-[var(--line)] pt-5">
           <h3 className="text-sm font-semibold">Sponsor information</h3>
           <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Keep each sponsor submission, approval detail and production requirement in its own field.</p>
+          <fieldset disabled={!editable}>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="text-sm font-medium">Brand or company name
               <input value={details.brandName} onChange={(event) => setDetails({ ...details, brandName: event.target.value })} placeholder={sponsorName} className="mt-2 h-11 w-full border border-[var(--line-strong)] bg-white px-3" />
@@ -654,6 +655,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
               <textarea value={profile.followUps} onChange={(event) => updateProfile("followUps", event.target.value)} rows={3} placeholder="List missing files, unanswered questions, owners and follow-up dates." className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
             </label>
           </div>
+          </fieldset>
           {editable && <button type="submit" disabled={!ready || saving} className="mt-4 min-h-11 bg-[var(--foreground)] px-4 text-sm font-semibold text-white disabled:opacity-50">{saving ? "Saving…" : "Save sponsor information"}</button>}
         </form>
 
@@ -662,6 +664,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
             <div>
               <h3 className="text-sm font-semibold">Files and references</h3>
               <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Add source files and file links for the final handoff.</p>
+              {record.assets.some((asset) => asset.fileId) && <p className="mt-2 text-xs leading-5 text-[var(--muted)]">Uploaded files are stored only in this browser. Download the ZIP from the browser where each file was added; the shared record contains the file list, not the file contents.</p>}
             </div>
             <button type="button" onClick={downloadZip} disabled={!ready || exporting} className="min-h-11 border border-[var(--foreground)] px-4 text-sm font-semibold disabled:opacity-50">{exporting ? "Preparing ZIP…" : "Download sponsor ZIP"}</button>
           </div>

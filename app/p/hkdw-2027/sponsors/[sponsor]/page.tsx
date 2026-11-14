@@ -4,6 +4,7 @@ import { AlphavilleHeader } from "@/components/AlphavilleBrand";
 import { SponsorWorkspace } from "@/components/SponsorWorkspace";
 import { projectSponsors } from "@/lib/sponsors";
 import { auth } from "@/auth";
+import Link from "next/link";
 
 export function generateStaticParams() {
   return projectSponsors.map(({ slug }) => ({ sponsor: slug }));
@@ -27,9 +28,9 @@ export default async function SponsorWorkspacePage({
 
       <main className="mx-auto w-full min-w-0 max-w-4xl px-5 py-8 sm:px-8 sm:py-12">
         <nav aria-label="Breadcrumb" className="mb-8 text-sm text-[var(--muted)]">
-          <a className="underline decoration-[var(--line-strong)] underline-offset-4 hover:text-[var(--foreground)]" href="/p/hkdw-2027">HKDW 2027</a>
+          <Link className="underline decoration-[var(--line-strong)] underline-offset-4 hover:text-[var(--foreground)]" href="/p/hkdw-2027">HKDW 2027</Link>
           <span className="px-2" aria-hidden="true">/</span>
-          <a className="underline decoration-[var(--line-strong)] underline-offset-4 hover:text-[var(--foreground)]" href="/p/hkdw-2027/sponsors">Sponsors</a>
+          <Link className="underline decoration-[var(--line-strong)] underline-offset-4 hover:text-[var(--foreground)]" href="/p/hkdw-2027/sponsors">Sponsors</Link>
           <span className="px-2" aria-hidden="true">/</span>
           <span className="text-[var(--foreground)]">{sponsor.name}</span>
         </nav>
@@ -82,7 +83,7 @@ export default async function SponsorWorkspacePage({
         <SponsorWorkspace key={sponsor.slug} sponsorSlug={sponsor.slug} sponsorName={sponsor.name} editable={canEdit} />
 
         <div className="mt-8">
-          <a href="/p/hkdw-2027/sponsors" className="inline-flex min-h-11 items-center rounded-md border border-[var(--line-strong)] bg-[var(--surface)] px-4 text-sm font-semibold hover:border-[var(--accent)]">Back to sponsor directory</a>
+          <Link href="/p/hkdw-2027/sponsors" className="inline-flex min-h-11 items-center rounded-md border border-[var(--line-strong)] bg-[var(--surface)] px-4 text-sm font-semibold hover:border-[var(--accent)]">Back to sponsor directory</Link>
         </div>
       </main>
 

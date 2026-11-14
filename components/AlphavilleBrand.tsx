@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export function AlphavilleLogo({ onDark = false, size = "header" }: { onDark?: boolean; size?: "header" | "disk" }) {
   return (
@@ -20,9 +21,9 @@ export function AlphavilleHeader({ label }: { label?: string }) {
   return (
     <header className="border-b border-[var(--line)] bg-[var(--surface)]">
       <div className="mx-auto flex min-h-[68px] max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-        <a href="/" aria-label="Alphaville workspace sign in" className="inline-flex min-h-11 items-center">
+        <Link href="/" aria-label="Alphaville workspace sign in" className="inline-flex min-h-11 items-center">
           <AlphavilleLogo />
-        </a>
+        </Link>
         {label && <p className="text-right text-xs font-medium tracking-[0.04em] text-[var(--muted)]">{label}</p>}
       </div>
     </header>

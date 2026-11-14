@@ -1,5 +1,6 @@
 import { ProjectNav } from "@/components/ProjectNav";
 import { AlphavilleHeader } from "@/components/AlphavilleBrand";
+import Link from "next/link";
 
 const lifecycle = [
   { label: "Empty", current: true },
@@ -17,9 +18,9 @@ export default function IcarusProductionPage() {
 
       <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
         <nav aria-label="Breadcrumb" className="mb-8 text-sm text-[var(--muted)]">
-          <a className="underline decoration-[var(--line-strong)] underline-offset-4 hover:text-[var(--foreground)]" href="/">
+          <Link className="underline decoration-[var(--line-strong)] underline-offset-4 hover:text-[var(--foreground)]" href="/">
             Workspace
-          </a>
+          </Link>
           <span className="px-2" aria-hidden="true">/</span>
           <span>HKDW 2027</span>
           <span className="px-2" aria-hidden="true">/</span>
