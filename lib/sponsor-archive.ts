@@ -23,6 +23,7 @@ export type SponsorAssetForArchive = {
   fileId?: string;
   fileName?: string;
   fileSize?: number;
+  dropboxPath?: string;
 };
 
 const encoder = new TextEncoder();
@@ -153,8 +154,9 @@ export async function createSponsorArchive({
     "FILES AND REFERENCES",
     ...assets.map((asset, index) => {
       const name = asset.fileName || asset.title;
-      const filePart = asset.fileId ? `File: ${root}/files/${cleanName(asset.category)}/${String(index + 1).padStart(2, "0")}-${cleanName(name)}` : "No uploaded file";
+      const filePart = asset.fileId ? `File: ${root}/files/${cleanName(asset.category)}/${String(index + 1).padStart(2, "0")}-${cleanName(name)}` : asset.dropboxPath ? "File: stored in Dropbox (see Dropbox path below)" : "No uploaded file";
       const linkPart = asset.driveUrl ? `File link (reference only; linked contents are not included): ${asset.driveUrl}` : "";
+      const dropboxPart = asset.dropboxPath ? `Dropbox path (reference only; linked contents are not included): ${asset.dropboxPath}` : "";
       return [
         `${index + 1}. ${asset.title}`,
         `Category: ${asset.category}`,
@@ -167,6 +169,7 @@ export async function createSponsorArchive({
         asset.accessInstructions ? `Access instructions: ${asset.accessInstructions}` : "",
         asset.linkExpiry ? `Link expiry: ${asset.linkExpiry}` : "",
         linkPart,
+        dropboxPart,
       ].filter(Boolean).join("\n");
     }),
   ];

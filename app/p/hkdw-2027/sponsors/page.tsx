@@ -18,8 +18,8 @@ export default async function SponsorsPage() {
         <section className="border-b border-[var(--line)] pb-8">
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">Personal project records</p>
           <h1 className="text-4xl font-semibold leading-[1.08] tracking-[-0.05em] sm:text-5xl">Sponsors</h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--muted)]">Collect sponsor information and working files in a private page for each organisation. No sponsor accounts or shared folders are connected.</p>
-          <p className="mt-5 max-w-3xl border border-[var(--line)] bg-[var(--surface)] p-4 text-sm leading-6">Files stay in this browser until you download the sponsor ZIP. Nothing is sent to Icarus automatically.</p>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--muted)]">Collect sponsor information and working files in a private page for each organisation. Large files are uploaded to private sponsor folders in Dropbox when the connection is configured.</p>
+          <p className="mt-5 max-w-3xl border border-[var(--line)] bg-[var(--surface)] p-4 text-sm leading-6">Sponsor records stay in the private workspace; Dropbox holds uploaded files. Nothing is sent to Icarus automatically.</p>
         </section>
 
         <section className="py-8" aria-labelledby="roster-title">
@@ -45,7 +45,7 @@ export default async function SponsorsPage() {
         <section className="border-t border-[var(--line)] py-8" aria-labelledby="review-model-title">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Personal use</p>
           <h2 id="review-model-title" className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Private notes for your own reference</h2>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--muted)]">Download each sponsor’s information and uploaded files as a ZIP when the collection is ready. You decide when to share it with Icarus.</p>
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--muted)]">Download each sponsor’s information as a ZIP when the collection is ready. Dropbox files remain in their sponsor folders; you decide when to share them with Icarus.</p>
         </section>
       </main>
 

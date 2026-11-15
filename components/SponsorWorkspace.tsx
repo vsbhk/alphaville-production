@@ -1,9 +1,9 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, DragEvent, FormEvent, useCallback, useEffect, useState } from "react";
 import { loadWorkspaceData, saveWorkspaceData } from "@/lib/workspace-sync";
 import { createSponsorArchive, type SponsorDetails } from "@/lib/sponsor-archive";
-import { deleteSponsorFile, loadLocalSponsorRecord, loadSponsorFile, saveLocalSponsorRecord, saveSponsorFile, type StoredSponsorFile } from "@/lib/sponsor-file-store";
+import { deleteSponsorFile, loadLocalSponsorRecord, loadSponsorFile, saveLocalSponsorRecord, type StoredSponsorFile } from "@/lib/sponsor-file-store";
 
 type SponsorAsset = {
   id: string;
@@ -21,6 +21,7 @@ type SponsorAsset = {
   fileId?: string;
   fileName?: string;
   fileSize?: number;
+  dropboxPath?: string;
 };
 
 type SponsorContact = { type: string; name: string; role: string; email: string; phone: string };
@@ -95,6 +96,17 @@ const emptyProfile: SponsorProfile = {
 const blankRecord: SponsorRecord = { details: emptyDetails, profile: emptyProfile, assets: [] };
 const categories = ["Logos", "Brand guidelines", "Text and Word documents", "People and photos", "Video and audio", "Other"];
 
+function inferFileCategory(file: File) {
+  const name = file.name.toLowerCase();
+  const type = file.type.toLowerCase();
+  if (/\.(svg|ai|eps|psd)$/.test(name)) return "Logos";
+  if (/(brand|guideline|style.?guide|identity)/.test(name)) return "Brand guidelines";
+  if (type.startsWith("video/") || type.startsWith("audio/") || /\.(mp4|mov|m4v|avi|mkv|mp3|wav|aiff|m4a)$/.test(name)) return "Video and audio";
+  if (type.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp|heic|tif|tiff)$/.test(name)) return "People and photos";
+  if (/\.(doc|docx|odt|rtf|txt|pdf|ppt|pptx|xls|xlsx|csv)$/.test(name) || type.startsWith("text/")) return "Text and Word documents";
+  return "Other";
+}
+
 function normalizeRecord(saved: SponsorRecord | null): SponsorRecord {
   if (!saved || !Array.isArray(saved.assets)) return { ...blankRecord, profile: emptyProfile };
   const details = { ...emptyDetails, ...saved.details };
@@ -133,9 +145,11 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
   const [assetAccessInstructions, setAssetAccessInstructions] = useState("");
   const [assetLinkExpiry, setAssetLinkExpiry] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [dropboxConfigured, setDropboxConfigured] = useState(false);
 
   const loadCollection = useCallback(async () => {
     let cloudRecord: SponsorRecord | null = null;
@@ -189,6 +203,13 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
   useEffect(() => {
     queueMicrotask(() => void loadCollection());
   }, [loadCollection]);
+
+  useEffect(() => {
+    fetch("/api/dropbox/config", { cache: "no-store" })
+      .then(async (response) => response.ok ? response.json() as Promise<{ configured: boolean }> : { configured: false })
+      .then((result) => setDropboxConfigured(result.configured))
+      .catch(() => setDropboxConfigured(false));
+  }, []);
 
   async function save(next: SponsorRecord, successMessage: string): Promise<boolean> {
     setSaving(true);
@@ -283,6 +304,16 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
     setError("");
   }
 
+  function dropFiles(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setDragActive(false);
+    const files = Array.from(event.dataTransfer.files);
+    if (files.length) {
+      setSelectedFiles(files);
+      setError("");
+    }
+  }
+
   async function addMaterials(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const cleanTitle = title.trim();
@@ -303,24 +334,56 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
       return;
     }
 
-    const newAssets: SponsorAsset[] = selectedFiles.map((file) => {
-      const id = globalThis.crypto.randomUUID();
-      return { id, fileId: id, fileName: file.name, fileSize: file.size, title: file.name, category, driveUrl: "", note: note.trim(), status: "Not reviewed", source: assetSource.trim(), receivedAt: assetReceivedAt, usageClearance: assetUsageClearance.trim(), accessInstructions: assetAccessInstructions.trim(), linkExpiry: assetLinkExpiry };
-    });
+    const newAssets: SponsorAsset[] = [];
+    if (selectedFiles.length) {
+      if (!dropboxConfigured) {
+        setError("Dropbox is not connected yet. You can add a Dropbox link now, or connect Dropbox before uploading files.");
+        return;
+      }
+      setSaving(true);
+      setError("");
+      try {
+        for (const file of selectedFiles) {
+          const chunkSize = 4 * 1024 * 1024;
+          const uploadChunk = async (action: "start" | "append" | "finish", chunk: Blob, sessionId?: string, offset?: number) => {
+            const params = new URLSearchParams({ action, sponsor: sponsorSlug });
+            if (sessionId) params.set("session", sessionId);
+            if (offset !== undefined) params.set("offset", String(offset));
+            if (action === "finish") params.set("name", file.name);
+            const response = await fetch(`/api/dropbox/upload?${params.toString()}`, { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: chunk });
+            if (!response.ok) {
+              const result = await response.json().catch(() => ({})) as { error?: string };
+              throw new Error(result.error ?? `Dropbox upload failed for ${file.name}.`);
+            }
+            return response;
+          };
+          const first = file.slice(0, chunkSize);
+          const started = await uploadChunk("start", first);
+          if (!started.ok) throw new Error(`Dropbox could not start the upload for ${file.name}.`);
+          const { sessionId } = await started.json() as { sessionId: string };
+          let offset = first.size;
+          while (offset + chunkSize < file.size) {
+            const chunk = file.slice(offset, offset + chunkSize);
+            await uploadChunk("append", chunk, sessionId, offset);
+            offset += chunk.size;
+          }
+          const last = file.slice(offset);
+          const finished = await uploadChunk("finish", last, sessionId, offset);
+          const uploaded = await finished.json() as { path?: string; name?: string; size?: number };
+          const id = globalThis.crypto.randomUUID();
+          newAssets.push({ id, fileName: file.name, fileSize: uploaded.size ?? file.size, title: file.name, category: inferFileCategory(file), driveUrl: "", dropboxPath: uploaded.path, note: note.trim(), status: "Not reviewed", source: assetSource.trim(), receivedAt: assetReceivedAt, usageClearance: assetUsageClearance.trim(), accessInstructions: assetAccessInstructions.trim(), linkExpiry: assetLinkExpiry });
+        }
+      } catch (uploadError) {
+        setSaving(false);
+        setError(uploadError instanceof Error ? uploadError.message : "Dropbox upload failed. Try again.");
+        return;
+      }
+      setSaving(false);
+    }
     if (cleanUrl) newAssets.push({ id: globalThis.crypto.randomUUID(), title: cleanTitle, category, driveUrl: cleanUrl, note: note.trim(), status: "Not reviewed", source: assetSource.trim(), receivedAt: assetReceivedAt, usageClearance: assetUsageClearance.trim(), accessInstructions: assetAccessInstructions.trim(), linkExpiry: assetLinkExpiry });
 
-    try {
-      for (const [index, file] of selectedFiles.entries()) await saveSponsorFile(file, newAssets[index].id);
-    } catch {
-      setError("The browser could not store one of these files. Check available storage and try again.");
-      return;
-    }
-
     const saved = await save({ ...record, assets: [...record.assets, ...newAssets] }, "Files and references added to this sponsor’s collection.");
-    if (!saved) {
-      await Promise.all(newAssets.filter((asset) => asset.fileId).map((asset) => deleteSponsorFile(asset.id).catch(() => undefined)));
-      return;
-    }
+    if (!saved) return;
     setTitle("");
     setDriveUrl("");
     setNote("");
@@ -683,7 +746,8 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
                     {asset.usageClearance && <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Usage clearance: {asset.usageClearance}</p>}
                     {asset.accessInstructions && <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Access instructions: {asset.accessInstructions}</p>}
                     {asset.linkExpiry && <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Link expiry: {asset.linkExpiry}</p>}
-                    {asset.driveUrl && <a className="mt-2 inline-block break-all text-sm font-medium underline underline-offset-4" href={asset.driveUrl} target="_blank" rel="noreferrer">Open file reference</a>}
+                  {asset.dropboxPath && <a className="mt-2 inline-block break-all text-sm font-medium underline underline-offset-4" href={`/api/dropbox/open?sponsor=${encodeURIComponent(sponsorSlug)}&path=${encodeURIComponent(asset.dropboxPath)}`} target="_blank" rel="noreferrer">Open in Dropbox</a>}
+                  {asset.driveUrl && <a className="mt-2 inline-block break-all text-sm font-medium underline underline-offset-4" href={asset.driveUrl} target="_blank" rel="noreferrer">Open file reference</a>}
                   </div>
                   {editable && <button type="button" disabled={!ready || saving} onClick={() => void removeAsset(asset)} className="min-h-10 shrink-0 border border-[var(--line-strong)] px-3 text-sm font-semibold disabled:opacity-50">Remove</button>}
                 </li>
@@ -697,10 +761,18 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
                 {categories.map((item) => <option key={item}>{item}</option>)}
               </select>
             </label>
-            <label className="text-sm font-medium">Upload files
-              <input id="sponsor-files" type="file" multiple onChange={chooseFiles} className="mt-2 block min-h-11 w-full border border-[var(--line-strong)] bg-white p-2 text-sm" />
-            </label>
-            {selectedFiles.length > 0 && <p className="text-xs leading-5 text-[var(--muted)]">{selectedFiles.length} file{selectedFiles.length === 1 ? "" : "s"} selected · stored in this browser until you download the ZIP.</p>}
+            <div
+              onDragOver={(event) => { event.preventDefault(); if (dropboxConfigured) setDragActive(true); }}
+              onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragActive(false); }}
+              onDrop={dropFiles}
+              className={`border border-dashed p-4 ${dragActive ? "border-[var(--foreground)] bg-[var(--surface)]" : "border-[var(--line-strong)]"} ${!dropboxConfigured ? "opacity-60" : ""}`}
+            >
+              <label className="text-sm font-medium">Upload files to Dropbox
+                <input id="sponsor-files" type="file" multiple onChange={chooseFiles} disabled={!dropboxConfigured} className="mt-2 block min-h-11 w-full border border-[var(--line-strong)] bg-white p-2 text-sm disabled:opacity-50" />
+              </label>
+              <p className="mt-2 text-xs leading-5 text-[var(--muted)]">{dropboxConfigured ? `Drop multiple files here or choose files. Uploads go to ${sponsorName}’s restricted Dropbox folder; large files upload in resumable chunks. File types are categorized automatically.` : "Dropbox upload is not connected yet. Add the Dropbox app credentials to enable uploads."}</p>
+            </div>
+            {selectedFiles.length > 0 && <p className="text-xs leading-5 text-[var(--muted)]">{selectedFiles.length} file{selectedFiles.length === 1 ? "" : "s"} selected · will upload to Dropbox when added.</p>}
             <label className="text-sm font-medium">Material name for a file link
               <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Required when adding a file link" className="mt-2 h-11 w-full border border-[var(--line-strong)] bg-white px-3" />
             </label>
@@ -732,7 +804,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
         </div>
       </section>
 
-      <p className="text-xs leading-5 text-[var(--muted)]">The ZIP contains the sponsor information and uploaded files. Drive links are listed as references; their contents are not copied. Nothing is sent to Icarus from this page.</p>
+      <p className="text-xs leading-5 text-[var(--muted)]">The ZIP contains the sponsor information and any browser-local files. Dropbox files and external links are listed as references; their contents are not copied. Nothing is sent to Icarus from this page.</p>
     </div>
   );
 }

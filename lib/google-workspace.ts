@@ -24,7 +24,7 @@ async function sheetsClient(): Promise<sheets_v4.Sheets> {
   if (!projectNumber || !poolId || !providerId || !serviceAccountEmail) {
     throw new Error("Google workload identity is not configured");
   }
-  const audience = `https://iam.googleapis.com/projects/${projectNumber}/locations/global/workloadIdentityPools/${poolId}/providers/${providerId}`;
+  const audience = `//iam.googleapis.com/projects/${projectNumber}/locations/global/workloadIdentityPools/${poolId}/providers/${providerId}`;
 
   const auth = ExternalAccountClient.fromJSON({
     type: "external_account",

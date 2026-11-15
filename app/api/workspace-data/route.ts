@@ -11,6 +11,16 @@ function privateJson(body: unknown, status = 200) {
   return NextResponse.json(body, { status, headers: privateHeaders });
 }
 
+function logStorageFailure(operation: "read" | "write", error: unknown) {
+  const errorName = error instanceof Error ? error.name : "UnknownError";
+  const message = error instanceof Error ? error.message : String(error);
+  const safeMessage = message
+    .replace(/Bearer\s+\S+/gi, "Bearer [redacted]")
+    .replace(/(access_token|refresh_token|client_secret|authorization)[=: ]+[^\s&,]+/gi, "$1=[redacted]")
+    .slice(0, 300);
+  console.error(`[workspace-data] Google Sheets ${operation} failed`, errorName, safeMessage);
+}
+
 function permittedKey(key: string) {
   if (allowedKeys.has(key)) return true;
   const requestedSponsor = key.startsWith("sponsor:") ? key.slice("sponsor:".length) : "";
@@ -28,7 +38,8 @@ export async function GET(request: Request) {
   try {
     const payload = await getWorkspaceRecord(key);
     return privateJson({ payload });
-  } catch {
+  } catch (error) {
+    logStorageFailure("read", error);
     return privateJson({ error: "Private project storage is temporarily unavailable" }, 503);
   }
 }
@@ -50,7 +61,8 @@ export async function PUT(request: Request) {
   try {
     await putWorkspaceRecord(key, body.payload, session.user.email);
     return privateJson({ ok: true });
-  } catch {
+  } catch (error) {
+    logStorageFailure("write", error);
     return privateJson({ error: "Private project storage is temporarily unavailable" }, 503);
   }
 }
