@@ -200,7 +200,7 @@ export function DayPlanner({ editable = true }: { editable?: boolean }) {
     const text = command.trim();
     if (!text) return;
     const normalized = text.toLowerCase();
-    const providers = ["Takumi Images", "ICARUS Sports", "Kevin Rio"];
+    const providers = ["Graham Uden", "Grahamuden.com Ltd", "Takumi Images", "ICARUS Sports", "Kevin Rio"];
     const provider = providers.find((name) => normalized.includes(name.toLowerCase()));
     const weekdayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
     const weekday = weekdayNames.find((name) => normalized.includes(name));
@@ -216,7 +216,7 @@ export function DayPlanner({ editable = true }: { editable?: boolean }) {
     setPendingDraft(null);
 
     if (!provider || !day) {
-      const needs = [!provider ? "a crew name (Takumi Images, ICARUS Sports or Kevin Rio)" : "", !day ? "a weekday within the current calendar period" : ""].filter(Boolean).join(" and ");
+      const needs = [!provider ? "a crew name (Graham Uden, Takumi Images, ICARUS Sports or Kevin Rio)" : "", !day ? "a weekday within the current calendar period" : ""].filter(Boolean).join(" and ");
       setChatMessages((current) => [...current, { id: `assistant-${Date.now()}`, role: "assistant", text: `I couldn't prepare that draft yet. Please include ${needs}.` }]);
       return;
     }
@@ -414,7 +414,7 @@ export function DayPlanner({ editable = true }: { editable?: boolean }) {
         </div>}
         <form onSubmit={sendPlannerCommand} className="mt-3 flex flex-col gap-2 sm:flex-row">
           <label htmlFor="planner-chat-command" className="sr-only">Describe a schedule entry</label>
-          <input id="planner-chat-command" value={command} onChange={(event) => setCommand(event.target.value)} disabled={!editable} placeholder="e.g. Book Takumi Images for Wednesday evening opening" className="h-11 min-w-0 flex-1 rounded-md border border-[var(--line-strong)] bg-white px-3 text-sm outline-none focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/10 disabled:opacity-60" />
+          <input id="planner-chat-command" value={command} onChange={(event) => setCommand(event.target.value)} disabled={!editable} placeholder="e.g. Book Graham Uden for Wednesday evening" className="h-11 min-w-0 flex-1 rounded-md border border-[var(--line-strong)] bg-white px-3 text-sm outline-none focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent)]/10 disabled:opacity-60" />
           <button type="submit" disabled={!editable || !command.trim()} className="min-h-11 rounded-md bg-[var(--foreground)] px-4 text-sm font-semibold text-white disabled:opacity-50">Prepare draft</button>
         </form>
       </section>

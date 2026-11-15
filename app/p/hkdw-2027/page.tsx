@@ -1,6 +1,7 @@
 import { ProjectNav } from "@/components/ProjectNav";
 import { DayPlanner } from "@/components/DayPlanner";
 import { EventProgramme, type CalendarDay } from "@/components/EventProgramme";
+import { ProjectActionChecklist } from "@/components/ProjectActionChecklist";
 import { auth } from "@/auth";
 import { AlphavilleHeader } from "@/components/AlphavilleBrand";
 
@@ -42,24 +43,6 @@ const eventCalendar: CalendarDay[] = [
   ] },
 ];
 
-const actions = [
-  {
-    title: "Complete daily activity plans",
-    detail: "The filming period and daily 09:00–21:00 HKT window are set. Add each day’s task, responsible person or team, activity time, and agreed meeting point.",
-    state: "Task, team and place needed",
-  },
-  {
-    title: "Confirm the XPENG interview slot",
-    detail: "The source records 22 November for Jerry Tam’s interview. Exact time and meeting point still need confirmation. The requested vehicle display location is a preference, weather permitting.",
-    state: "Time and place not confirmed",
-  },
-  {
-    title: "Sponsor material approval",
-    detail: "Keep a private note of each sponsor item and its approval status.",
-    state: "Personal reference",
-  },
-];
-
 export default async function ProjectOverviewPage() {
   const session = await auth();
   const canEdit = session?.user.role === "admin" || session?.user.role === "editor";
@@ -85,19 +68,9 @@ export default async function ProjectOverviewPage() {
         <section className="py-8" aria-labelledby="actions-title">
           <div className="mb-5">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Task list · action points</p>
-            <h2 id="actions-title" className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Open items</h2>
+            <h2 id="actions-title" className="mt-2 text-2xl font-semibold tracking-[-0.04em]">To-do checklist</h2>
           </div>
-          <ul className="space-y-3">
-            {actions.map((action) => (
-              <li key={action.title} className="grid gap-3 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5 sm:grid-cols-[minmax(0,1fr)_220px] sm:items-start sm:gap-6">
-                <div>
-                  <h3 className="text-sm font-semibold">{action.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{action.detail}</p>
-                </div>
-                <p className="rounded-md bg-[var(--background)] px-3 py-2 text-sm font-medium">{action.state}</p>
-              </li>
-            ))}
-          </ul>
+          <ProjectActionChecklist editable={canEdit} />
         </section>
 
         <section className="border-t border-[var(--line)] py-8" aria-labelledby="calendar-title">

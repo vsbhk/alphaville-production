@@ -4,7 +4,7 @@ import { getProjectAccess } from "@/lib/project-access";
 import { getWorkspaceRecord, putWorkspaceRecord } from "@/lib/google-workspace";
 import { projectSponsors } from "@/lib/sponsors";
 
-const allowedKeys = new Set(["production-calendar", "deliverables"]);
+const allowedKeys = new Set(["production-calendar", "deliverables", "overview-tasks"]);
 const privateHeaders = { "Cache-Control": "private, no-store, max-age=0, must-revalidate" };
 
 function privateJson(body: unknown, status = 200) {

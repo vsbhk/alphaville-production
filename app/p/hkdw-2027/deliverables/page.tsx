@@ -153,6 +153,22 @@ export default async function DeliverablesPage() {
               </div>
               <p className="text-sm leading-6 text-[var(--muted)]">Photography provider.</p>
             </article>
+            <article className="grid gap-2 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5 sm:grid-cols-[220px_minmax(0,1fr)] sm:gap-6 sm:p-6">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--muted)]">Gala dinner photography</p>
+                <h3 className="mt-2 text-base font-semibold">Graham Uden</h3>
+                <p className="mt-1 text-sm text-[var(--muted)]">Grahamuden.com Ltd</p>
+              </div>
+              <div className="text-sm leading-6 text-[var(--muted)]">
+                <p>Hopewell Hotel gala dinner · Wednesday 25 November 2026 · 18:30–22:00.</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  <li>Two photographers; 15–20 social media images the same evening, with remaining images within four days.</li>
+                  <li>Second photographer also uploads images to a QR download link that evening and supplies about 200 selected images after the event.</li>
+                  <li>Quoted total: HK$11,930, including photography, post-production, taxis, editing and QR app access.</li>
+                </ul>
+                <p className="mt-2">Quote valid until 27 November 2026. Signature and return are requested; acceptance is not recorded here.</p>
+              </div>
+            </article>
           </div>
         </section>
 
