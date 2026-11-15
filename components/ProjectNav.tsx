@@ -11,15 +11,15 @@ const links: { id: ProjectSection; label: string; href: string }[] = [
 
 export function ProjectNav({ current }: { current: ProjectSection }) {
   return (
-    <div className="border-b border-white/15 bg-[var(--foreground)]">
+    <div className="border-b border-white/15 bg-black">
       <nav aria-label="Project sections" className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 px-5 sm:px-8">
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-x-6">
           {links.map((link) => (
             <a
               key={link.id}
               href={link.href}
               aria-current={current === link.id ? "page" : undefined}
-              className={`inline-flex min-h-12 items-center border-b-2 px-3 text-sm font-medium ${current === link.id ? "border-[var(--accent)] text-white" : "border-transparent text-white/70 hover:text-white"}`}
+              className={`inline-flex min-h-12 items-center border-b-2 text-sm font-medium ${current === link.id ? "border-[var(--accent)] text-white" : "border-transparent text-white/70 hover:text-white"}`}
             >
               {link.label}
             </a>

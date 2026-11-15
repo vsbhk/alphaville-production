@@ -9,16 +9,16 @@ export type CalendarDay = { event: string; date: string; activities: CalendarAge
 
 const STORAGE_KEY = "hkdw-2027-event-coverage-v1";
 const suppliers = ["ICARUS Sports", "Kevin Rio", "Takumi Images", "Graham Uden"];
-type CoverageAssignment = { supplier: string; start: string; end: string };
+type CoverageAssignment = { supplier: string; start: string; end: string; meetingPoint: string };
 type CoveragePlan = Record<string, CoverageAssignment[]>;
 
 function normalizeAssignments(saved: Record<string, unknown> | null): CoveragePlan {
   if (!saved) return {};
   return Object.fromEntries(Object.entries(saved).map(([key, value]) => [key, Array.isArray(value)
     ? value.flatMap((item) => typeof item === "string"
-      ? [{ supplier: item, start: "", end: "" }]
+      ? [{ supplier: item, start: "", end: "", meetingPoint: "" }]
       : item && typeof item === "object" && typeof (item as CoverageAssignment).supplier === "string"
-        ? [{ supplier: (item as CoverageAssignment).supplier, start: (item as CoverageAssignment).start ?? "", end: (item as CoverageAssignment).end ?? "" }]
+        ? [{ supplier: (item as CoverageAssignment).supplier, start: (item as CoverageAssignment).start ?? "", end: (item as CoverageAssignment).end ?? "", meetingPoint: (item as CoverageAssignment).meetingPoint ?? "" }]
         : [])
     : []]));
 }
@@ -83,7 +83,7 @@ export function EventProgramme({ days, editable = false }: { days: CalendarDay[]
     if (!supplier) return;
     setAssignments((current) => ({
       ...current,
-      [eventId]: current[eventId]?.some((item) => item.supplier === supplier) ? current[eventId] : [...(current[eventId] ?? []), { supplier, start: "", end: "" }],
+      [eventId]: current[eventId]?.some((item) => item.supplier === supplier) ? current[eventId] : [...(current[eventId] ?? []), { supplier, start: "", end: "", meetingPoint: "" }],
     }));
   }
 
@@ -91,7 +91,7 @@ export function EventProgramme({ days, editable = false }: { days: CalendarDay[]
     setAssignments((current) => ({ ...current, [eventId]: (current[eventId] ?? []).filter((item) => item.supplier !== supplier) }));
   }
 
-  function updateAssignment(eventId: string, supplier: string, field: "start" | "end", value: string) {
+  function updateAssignment(eventId: string, supplier: string, field: "start" | "end" | "meetingPoint", value: string) {
     setAssignments((current) => ({ ...current, [eventId]: (current[eventId] ?? []).map((item) => item.supplier === supplier ? { ...item, [field]: value } : item) }));
   }
 
@@ -180,7 +180,7 @@ function AgendaItems({
   ready: boolean;
   onAddSupplier: (eventId: string, supplier: string) => void;
   onRemoveSupplier: (eventId: string, supplier: string) => void;
-  onUpdateAssignment: (eventId: string, supplier: string, field: "start" | "end", value: string) => void;
+  onUpdateAssignment: (eventId: string, supplier: string, field: "start" | "end" | "meetingPoint", value: string) => void;
   compact?: boolean;
 }) {
   return (
@@ -211,8 +211,10 @@ function AgendaItems({
                     <span aria-hidden="true" className="text-[var(--muted)]">to</span>
                     <label className="sr-only" htmlFor={`end-${encodeURIComponent(day)}-${index}-${encodeURIComponent(assignment.supplier)}`}>Coverage end time for {assignment.supplier} on {activity.title}</label>
                     <input id={`end-${encodeURIComponent(day)}-${index}-${encodeURIComponent(assignment.supplier)}`} type="time" value={assignment.end} onChange={(event) => onUpdateAssignment(`${day}|${activity.title}|${index}`, assignment.supplier, "end", event.target.value)} disabled={!ready} className="h-8 rounded border border-[var(--line-strong)] bg-white px-1.5 text-xs disabled:opacity-50" />
+                    <label className="sr-only" htmlFor={`meeting-${encodeURIComponent(day)}-${index}-${encodeURIComponent(assignment.supplier)}`}>Meeting point for {assignment.supplier} on {activity.title}</label>
+                    <input id={`meeting-${encodeURIComponent(day)}-${index}-${encodeURIComponent(assignment.supplier)}`} type="text" value={assignment.meetingPoint} onChange={(event) => onUpdateAssignment(`${day}|${activity.title}|${index}`, assignment.supplier, "meetingPoint", event.target.value)} placeholder="Meeting point" disabled={!ready} className="h-8 w-36 rounded border border-[var(--line-strong)] bg-white px-2 text-xs disabled:opacity-50 sm:w-44" />
                     <button type="button" onClick={() => onRemoveSupplier(`${day}|${activity.title}|${index}`, assignment.supplier)} aria-label={`Remove ${assignment.supplier} from ${activity.title}`} className="px-1 font-semibold text-[var(--muted)]">×</button>
-                  </> : <span className="text-[var(--muted)]">{assignment.start && assignment.end ? `${assignment.start}–${assignment.end}` : "Time to be assigned"}</span>}
+                  </> : <span className="text-[var(--muted)]">{assignment.start && assignment.end ? `${assignment.start}–${assignment.end}` : "Time to be assigned"}{assignment.meetingPoint ? ` · ${assignment.meetingPoint}` : " · Meeting point to be assigned"}</span>}
                 </span>
               ))}
               {editable ? <label className="sr-only" htmlFor={`supplier-${encodeURIComponent(day)}-${index}`}>Add supplier to {activity.title}</label> : null}
