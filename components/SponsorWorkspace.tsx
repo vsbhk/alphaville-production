@@ -76,6 +76,8 @@ const yanmarUpdateId = "yanmar-paid-media-update-2026-11";
 const codeZeroUpdateId = "code-zero-media-update-2026-11";
 const centralOceansUpdateId = "central-oceans-media-update-2026-11";
 const shkUpdateId = "shk-title-sponsor-media-update-2026-11";
+const shkFilesUpdateId = "shk-local-source-assets-update-2026-11";
+const leeKumKeeUpdateId = "lee-kum-kee-media-update-2026-11";
 const xpengSocialUpdate = [
   "Overseas markets — Instagram and Facebook: @xpeng_global and @xpeng_hk.",
   "Selected key daily updates may be co-posted with @xpeng_hk.",
@@ -104,7 +106,7 @@ const xpengDirectSocialLinks = [
   "Bilibili: https://www.bilibili.com/video/BV1JfnX6KEEm/?vd_source=ca9bc52462aa2b5cbb53871a8598f7ba",
   "Douyin: https://www.douyin.com/user/self?modal_id=7700864890407275802",
   "Kuaishou: https://www.kuaishou.com/short-video/3xdc8x84mpri4w6?utm_source=video&utm_medium=video&utm_campaign=video",
-  "WeChat Channels: scan the WeChat QR image supplied by XPENG; direct link cannot be copied. QR image is not in this message.",
+  "WeChat Channels: scan the referenced WeChat QR image img_v3_0216r_124049b4-8e62-4db6-add2-1aa21f77452g.jpg; direct link cannot be copied. Confirm the image is in the sponsor collection.",
   "WeChat Official Account: platform listed for video posts; direct link not supplied.",
   "Hong Kong · XPENG HongKong Facebook: https://www.facebook.com/XPENGHK",
   "Hong Kong · XPENG HongKong Instagram: https://www.instagram.com/xpeng_hk/",
@@ -566,6 +568,68 @@ function applyShkSourceUpdate(record: SponsorRecord) {
   return { record: { ...record, details: updatedDetails, profile, sourceUpdates: [...(record.sourceUpdates ?? []), shkUpdateId] }, changed: true };
 }
 
+function applyShkFilesUpdate(record: SponsorRecord) {
+  if (record.sourceUpdates?.includes(shkFilesUpdateId)) return { record, changed: false };
+  const details = { ...emptyDetails, ...record.details };
+  const profile = { ...emptyProfile, ...record.profile, reviewStatuses: { ...emptyProfile.reviewStatuses, ...record.profile?.reviewStatuses } };
+  const inventory = "Local SHK Files folder inventory: logos — SHK_Capital_Partners_1.ai and shkcl cmyk hz standard.ai; Tony Edwards portraits — Tony-SHK-00001.jpg and Tony-SHK-00002.jpg; Scallywag sailing photos — SYHO23af_0342.jpg, ScallywagBigBoat1_high_res_Sailmedia.jpg, MSEA_2410ka_20032.jpg, _56A6442.jpg, MSEA_2410ka_20340.jpg, GIR25lb_12062435.jpg, GIR25lb_14209758.jpg and Andrea_Azzopardi-RMSR-2096.jpg. The local files are not yet in the shared production Dropbox collection.";
+  details.notes = appendSourceText(details.notes, inventory);
+  profile.brandGuidelines = appendSourceText(profile.brandGuidelines, "The local SHK Files folder contains the two logo files SHK_Capital_Partners_1.ai and shkcl cmyk hz standard.ai. No brand-guidelines document was present in that folder; the files are not yet in the production Dropbox collection.");
+  profile.mediaClearance = appendSourceText(profile.mediaClearance, "The local SHK Files folder contains two Tony Edwards portraits and eight Scallywag sailing photos. Alison’s email says the shared-folder photos are cleared for use; confirm permissions and move the files into the production Dropbox collection before use.");
+  profile.reviewStatuses.brand = "Needs input";
+  profile.reviewStatuses.media = "Needs input";
+  return { record: { ...record, details, profile, sourceUpdates: [...(record.sourceUpdates ?? []), shkFilesUpdateId] }, changed: true };
+}
+
+function applyLeeKumKeeSourceUpdate(record: SponsorRecord) {
+  if (record.sourceUpdates?.includes(leeKumKeeUpdateId)) return { record, changed: false };
+  const details = { ...emptyDetails, ...record.details };
+  const profile = { ...emptyProfile, ...record.profile, reviewStatuses: { ...emptyProfile.reviewStatuses, ...record.profile?.reviewStatuses } };
+  const updateNotes = [
+    "10–11 November email thread: Bonnie Yeung is the primary LKK contact. She named Mr. Dodie Hung, Executive Vice President – Corporate Affairs, Lee Kum Kee Sauce, as spokesperson and requested draft interview questions in advance and a review/approval window for films and interview clips before publication.",
+    "Bonnie offered call times on 11 November at 15:30, 12 November before 12:00 or at 16:00, and 13 November at 14:00. Bram said Virgile would revert; on 11 November Bram introduced Stella Ko for club-side deliverables. Whether the call happened and what was agreed are not recorded.",
+    "Bonnie says the event partnership press release with priority messages was attached, but it was not included in the forwarded text. Social collaboration was proposed using Lee Kum Kee HK (李錦記香港) and leekumkee.hk; platform-specific links were not supplied.",
+  ].join("\n");
+  const updatedDetails = {
+    ...details,
+    brandName: details.brandName || "Lee Kum Kee",
+    contactName: details.contactName || "Bonnie Yeung",
+    contactPhone: details.contactPhone || "+852 2660 4874",
+    website: details.website || "https://www.lkk.com",
+    brief: appendSourceText(details.brief, "Included standard sponsor media package at no additional cost: a dedicated 60–90-second sponsor film with 30-second and 15-second edits in landscape, portrait and square formats, a version without captions, and written permission for use on Lee Kum Kee’s channels. Review coordinated by the event team; final films within 15 days of the closing ceremony. Event-wide daily highlights, photography, race reports, a three-minute Inside Sailing feature, wider media distribution and post-event reporting are subject to editorial decisions. Optional additional brand content requires prior scope and cost agreement. Proposed Lee Kum Kee story: Hong Kong culinary heritage, food tasting/product presentation at the opening ceremony and an interview; confirm the activation details with LKK."),
+    notes: appendSourceText(details.notes, updateNotes),
+  };
+  profile.submissionSource = profile.submissionSource || "Email thread with Bonnie Yeung and Abraham C.J. van Olphen, 10–11 November 2026";
+  profile.submissionReceivedAt = profile.submissionReceivedAt || "2026-11-11";
+  profile.contacts = withSourceContacts(profile, [
+    { type: "Primary", name: "Bonnie Yeung", role: "Lee Kum Kee contact", email: "bonnie.yeung@lkk.com", phone: "+852 2660 4874" },
+    { type: "Additional", name: "Carmen Lang", role: "Copied on LKK media correspondence", email: "", phone: "" },
+    { type: "Additional", name: "Alice Zhong", role: "Copied on LKK media correspondence", email: "", phone: "" },
+    { type: "Additional", name: "Zinnia Chen", role: "Copied on LKK media correspondence", email: "", phone: "" },
+    { type: "Event delivery contact", name: "Stella Ko", role: "RHKYC contact for deliverables during and after the event", email: "stella.ko@rhkyc.org.hk", phone: "" },
+    { type: "Event contact", name: "Jeff Merrin", role: "RHKYC General Manager", email: "", phone: "" },
+  ]);
+  profile.spokespersonName = profile.spokespersonName || "Dodie Hung";
+  profile.spokespersonTitle = profile.spokespersonTitle || "Executive Vice President – Corporate Affairs, Lee Kum Kee Sauce";
+  profile.socialLinks = appendSourceText(profile.socialLinks, "Suggested joint collaboration/co-tagging: Lee Kum Kee HK (李錦記香港), leekumkee.hk. Confirm platforms and direct account links.");
+  profile.storyPriorities = appendSourceText(profile.storyPriorities, "Event team’s proposed angle: Hong Kong culinary heritage for an international sailing audience, with Lee Kum Kee’s planned food tasting/product presentation and an interview. Bonnie referenced an attached event partnership press release for LKK’s approved key messages; the file was not included in the forwarded email.");
+  profile.essentialFilmingMoments = appendSourceText(profile.essentialFilmingMoments, "Proposed capture: Lee Kum Kee food tasting and product presentation at the 22 November opening ceremony; confirm activation, location and timing with LKK.");
+  profile.filmingConfirmation = profile.filmingConfirmation || "Call and filming arrangements not confirmed in the supplied thread. Available call times of 11–13 November have passed; confirm whether a call took place and agree the production schedule.";
+  profile.availabilityNotes = profile.availabilityNotes || "Bonnie offered 11 Nov 15:30, 12 Nov before 12:00 or 16:00, and 13 Nov 14:00 for a planning call. Bram said Virgile would revert; no confirmed booking/outcome is shown.";
+  profile.finalApprover = profile.finalApprover || "Confirm film/interview approver and contact details.";
+  profile.approvalTurnaround = profile.approvalTurnaround || "LKK requests a review and approval window before film and interview-clip publication; agree the length of the window.";
+  profile.followUps = appendSourceText(profile.followUps, "Confirm whether the planning call took place and record decisions. Confirm the food tasting/product presentation at the 22 November opening ceremony and the filming schedule. Send draft interview questions to Bonnie before filming. Agree LKK’s review/approval window before publication. Provide the attached partnership press release/key messages and direct social links, and confirm the final approver and contact.");
+  profile.reviewStatuses.contacts = "Submitted";
+  profile.reviewStatuses.spokespeople = "Submitted";
+  profile.reviewStatuses.media = "Submitted";
+  profile.reviewStatuses.story = "Needs input";
+  profile.reviewStatuses.filming = "Needs input";
+  profile.reviewStatuses.availability = "Needs input";
+  profile.reviewStatuses.messages = "Needs input";
+  profile.reviewStatuses.approval = "Needs input";
+  return { record: { ...record, details: updatedDetails, profile, sourceUpdates: [...(record.sourceUpdates ?? []), leeKumKeeUpdateId] }, changed: true };
+}
+
 function applySponsorSourceUpdate(record: SponsorRecord, sponsorSlug: string) {
   if (sponsorSlug === "xpeng") {
     const initial = applyXpengSourceUpdate(record, sponsorSlug);
@@ -577,7 +641,11 @@ function applySponsorSourceUpdate(record: SponsorRecord, sponsorSlug: string) {
   if (sponsorSlug === "yanmar") return applyYanmarSourceUpdate(record);
   if (sponsorSlug === "code-zero") return applyCodeZeroSourceUpdate(record);
   if (sponsorSlug === "central-oceans") return applyCentralOceansSourceUpdate(record);
-  if (sponsorSlug === "sun-hung-kai-and-co") return applyShkSourceUpdate(record);
+  if (sponsorSlug === "sun-hung-kai-and-co") {
+    const source = applyShkSourceUpdate(record);
+    return applyShkFilesUpdate(source.record);
+  }
+  if (sponsorSlug === "lee-kum-kee") return applyLeeKumKeeSourceUpdate(record);
   return { record, changed: false };
 }
 

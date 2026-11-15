@@ -92,6 +92,9 @@ const eventCalendar: CalendarDay[] = [
       { title: "Arrival timing", detail: "WhatsApp screenshots suggest targeting XPENG media arrival at 16:00 or 16:30. Jerry Tam arriving at 17:00 was proposed, but an earlier arrival was recommended. Confirm the final call time and interview slot." },
       { title: "Press conference timing", detail: "The WhatsApp exchange refers to a 17:30 press conference; the supplied factsheet and tentative rundown give 18:30–19:00 / 18:15–19:00. Confirm the final schedule and meeting point." },
     ] },
+    { title: "Lee Kum Kee food tasting and product presentation · proposed", location: "Opening ceremony · RHKYC Kellett Island", runOfShow: [
+      { title: "Capture for sponsor film", detail: "The event team proposed filming Lee Kum Kee’s planned food tasting and product presentation as part of its opening-ceremony story. Confirm the activation details and timing with Bonnie Yeung." },
+    ] },
     { title: "Reception and buffet", time: "20:00–21:00", location: "RHKYC Kellett Island" },
   ] },
   { event: "World Championship", date: "Mon 23 Nov", activities: [
