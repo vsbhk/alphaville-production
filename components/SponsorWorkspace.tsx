@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, DragEvent, FormEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, DragEvent, FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { loadWorkspaceData, saveWorkspaceData } from "@/lib/workspace-sync";
 import { createSponsorArchive, type SponsorDetails } from "@/lib/sponsor-archive";
 import { deleteSponsorFile, loadLocalSponsorRecord, loadSponsorFile, saveLocalSponsorRecord, type StoredSponsorFile } from "@/lib/sponsor-file-store";
@@ -142,17 +142,24 @@ const emptyProfile: SponsorProfile = {
   reviewStatuses: Object.fromEntries(profileSections.map(({ id }) => [id, "Not reviewed"])) as Record<string, ReviewStatus>,
 };
 const blankRecord: SponsorRecord = { details: emptyDetails, profile: emptyProfile, assets: [] };
-const categories = ["Logos", "Brand guidelines", "Text and Word documents", "People and photos", "Video and audio", "Other"];
+const categories = ["Photography", "Video", "Logo", "Documents", "Other"];
 
 function inferFileCategoryFromName(fileName: string, fileType = "") {
   const name = fileName.toLowerCase();
   const type = fileType.toLowerCase();
-  if (/\.(svg|ai|eps|psd)$/.test(name)) return "Logos";
-  if (/(brand|guideline|style.?guide|identity)/.test(name)) return "Brand guidelines";
-  if (type.startsWith("video/") || type.startsWith("audio/") || /\.(mp4|mov|m4v|avi|mkv|mp3|wav|aiff|m4a)$/.test(name)) return "Video and audio";
-  if (type.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp|heic|tif|tiff)$/.test(name)) return "People and photos";
-  if (/\.(doc|docx|odt|rtf|txt|pdf|ppt|pptx|xls|xlsx|csv)$/.test(name) || type.startsWith("text/")) return "Text and Word documents";
+  if (/\.(svg|ai|eps|psd)$/.test(name) || /logo/.test(name)) return "Logo";
+  if (type.startsWith("video/") || type.startsWith("audio/") || /\.(mp4|mov|m4v|avi|mkv|mp3|wav|aiff|m4a)$/.test(name)) return "Video";
+  if (type.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp|heic|tif|tiff)$/.test(name)) return "Photography";
+  if (/(brand|guideline|style.?guide|identity)/.test(name) || /\.(doc|docx|odt|rtf|txt|pdf|ppt|pptx|xls|xlsx|csv)$/.test(name) || type.startsWith("text/")) return "Documents";
   return "Other";
+}
+
+function normalizeAssetCategory(category: string | undefined) {
+  if (category === "Logos") return "Logo";
+  if (category === "People and photos") return "Photography";
+  if (category === "Video and audio") return "Video";
+  if (category === "Brand guidelines" || category === "Text and Word documents") return "Documents";
+  return categories.includes(category ?? "") ? category as string : "Other";
 }
 
 function inferFileCategory(file: File) {
@@ -176,7 +183,7 @@ function normalizeRecord(saved: SponsorRecord | null): SponsorRecord {
       contacts: saved.profile?.contacts?.length ? saved.profile.contacts : legacyContact,
       reviewStatuses: { ...emptyProfile.reviewStatuses, ...saved.profile?.reviewStatuses },
     },
-    assets: saved.assets.map((asset) => ({ ...asset, status: asset.status ?? (asset.approved ? "Approved" : "Not reviewed") })),
+    assets: saved.assets.map((asset) => ({ ...asset, category: normalizeAssetCategory(asset.category), status: asset.status ?? (asset.approved ? "Approved" : "Not reviewed") })),
   };
 }
 
@@ -680,6 +687,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [dropboxConfigured, setDropboxConfigured] = useState(false);
+  const autoSyncStarted = useRef(false);
 
   const loadCollection = useCallback(async () => {
     let cloudRecord: SponsorRecord | null = null;
@@ -781,6 +789,26 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
       .then((result) => setDropboxConfigured(result.configured))
       .catch(() => setDropboxConfigured(false));
   }, []);
+
+  // syncDropboxContents reads the current record and save state; the effect rebinds listeners as those values change.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!editable || !ready || !dropboxConfigured) return;
+    const syncWhenAvailable = () => {
+      if (document.visibilityState !== "visible" || saving || syncingDropbox || unsavedChanges) return;
+      void syncDropboxContents(true);
+    };
+    if (!autoSyncStarted.current) {
+      autoSyncStarted.current = true;
+      syncWhenAvailable();
+    }
+    window.addEventListener("focus", syncWhenAvailable);
+    document.addEventListener("visibilitychange", syncWhenAvailable);
+    return () => {
+      window.removeEventListener("focus", syncWhenAvailable);
+      document.removeEventListener("visibilitychange", syncWhenAvailable);
+    };
+  }, [dropboxConfigured, editable, ready, record, saving, syncingDropbox, unsavedChanges]);
 
   async function save(next: SponsorRecord, successMessage: string): Promise<boolean> {
     setSaving(true);
@@ -970,11 +998,17 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
     if (saved && asset.fileId) await deleteSponsorFile(asset.fileId).catch(() => undefined);
   }
 
-  async function syncDropboxContents() {
+  async function updateAssetCategory(asset: SponsorAsset, nextCategory: string) {
+    if (asset.category === nextCategory) return;
+    const assets = record.assets.map((item) => item.id === asset.id ? { ...item, category: nextCategory } : item);
+    await save({ ...record, assets }, "File category updated.");
+  }
+
+  async function syncDropboxContents(automatic = false) {
     if (!dropboxConfigured || saving || syncingDropbox) return;
     setSyncingDropbox(true);
     setError("");
-    setMessage("Checking the sponsor’s Dropbox folder…");
+    if (!automatic) setMessage("Checking the sponsor’s Dropbox folder…");
     try {
       const response = await fetch(`/api/dropbox/list?sponsor=${encodeURIComponent(sponsorSlug)}`, { cache: "no-store" });
       const result = await response.json().catch(() => ({})) as {
@@ -1005,7 +1039,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
           fileName: matchingEntry.name,
           fileSize: matchingEntry.size,
           title: matchingEntry.name,
-          category: inferFileCategoryFromName(matchingEntry.name),
+          category: normalizeAssetCategory(asset.category) || inferFileCategoryFromName(matchingEntry.name),
           receivedAt: asset.receivedAt || matchingEntry.serverModified?.slice(0, 10),
         };
       });
@@ -1032,7 +1066,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
       }
 
       const missing = assets.filter((asset) => asset.dropboxMissing).length;
-      const successMessage = `Dropbox folder synced: ${entries.length} found · ${added} added · ${refreshed} refreshed · ${missing} missing from Dropbox.`;
+      const successMessage = `${automatic ? "Dropbox auto-sync" : "Dropbox folder synced"}: ${entries.length} found · ${added} added · ${refreshed} refreshed · ${missing} missing from Dropbox.`;
       await save(
         { ...record, assets, dropboxLastSyncedAt: new Date().toISOString() },
         successMessage,
@@ -1370,7 +1404,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h3 className="text-sm font-semibold">Files and references</h3>
-              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Add source files and file links for the final handoff.</p>
+              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Add source files and file links for the final handoff. Dropbox checks automatically when this page opens and when you return to it.</p>
               {record.assets.some((asset) => asset.fileId) && <p className="mt-2 text-xs leading-5 text-[var(--muted)]">Uploaded files are stored only in this browser. Download the ZIP from the browser where each file was added; the shared record contains the file list, not the file contents.</p>}
             </div>
             <div className="flex flex-wrap gap-2">
@@ -1398,7 +1432,13 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
                   {asset.dropboxPath && <a className="mt-2 inline-block break-all text-sm font-medium underline underline-offset-4" href={`/api/dropbox/open?sponsor=${encodeURIComponent(sponsorSlug)}&path=${encodeURIComponent(asset.dropboxPath)}`} target="_blank" rel="noreferrer">Open in Dropbox</a>}
                   {asset.driveUrl && <a className="mt-2 inline-block break-all text-sm font-medium underline underline-offset-4" href={asset.driveUrl} target="_blank" rel="noreferrer">Open file reference</a>}
                   </div>
-                  {editable && <button type="button" disabled={!ready || saving} onClick={() => void removeAsset(asset)} className="min-h-10 shrink-0 border border-[var(--line-strong)] px-3 text-sm font-semibold disabled:opacity-50">Remove</button>}
+                  {editable && <div className="flex shrink-0 items-center gap-2">
+                    <label className="sr-only" htmlFor={`asset-category-${asset.id}`}>Category for {asset.fileName || asset.title}</label>
+                    <select id={`asset-category-${asset.id}`} aria-label={`Category for ${asset.fileName || asset.title}`} value={normalizeAssetCategory(asset.category)} disabled={!ready || saving || syncingDropbox} onChange={(event) => void updateAssetCategory(asset, event.target.value)} className="h-10 max-w-40 border border-[var(--line-strong)] bg-white px-2 text-sm disabled:opacity-50">
+                      {categories.map((item) => <option key={item} value={item}>{item}</option>)}
+                    </select>
+                    <button type="button" disabled={!ready || saving || syncingDropbox} onClick={() => void removeAsset(asset)} className="min-h-10 border border-[var(--line-strong)] px-3 text-sm font-semibold disabled:opacity-50">Remove</button>
+                  </div>}
                 </li>
               ))}
             </ul>
