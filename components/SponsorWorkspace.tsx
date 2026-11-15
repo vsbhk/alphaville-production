@@ -21,7 +21,9 @@ type SponsorAsset = {
   fileId?: string;
   fileName?: string;
   fileSize?: number;
+  dropboxId?: string;
   dropboxPath?: string;
+  dropboxMissing?: boolean;
 };
 
 type SponsorContact = { type: string; name: string; role: string; email: string; phone: string };
@@ -65,7 +67,7 @@ type SponsorProfile = {
   reviewDate: string;
   reviewStatuses: Record<string, ReviewStatus>;
 };
-type SponsorRecord = { details?: SponsorDetails; profile?: Partial<SponsorProfile>; assets: SponsorAsset[]; updatedAt?: number; sourceUpdates?: string[] };
+type SponsorRecord = { details?: SponsorDetails; profile?: Partial<SponsorProfile>; assets: SponsorAsset[]; updatedAt?: number; sourceUpdates?: string[]; dropboxLastSyncedAt?: string };
 type StorageMode = "cloud" | "local";
 const xpengUpdateId = "xpeng-social-and-event-update-2026-11";
 const xpengProductionUpdateId = "xpeng-production-inputs-update-2026-11";
@@ -142,15 +144,19 @@ const emptyProfile: SponsorProfile = {
 const blankRecord: SponsorRecord = { details: emptyDetails, profile: emptyProfile, assets: [] };
 const categories = ["Logos", "Brand guidelines", "Text and Word documents", "People and photos", "Video and audio", "Other"];
 
-function inferFileCategory(file: File) {
-  const name = file.name.toLowerCase();
-  const type = file.type.toLowerCase();
+function inferFileCategoryFromName(fileName: string, fileType = "") {
+  const name = fileName.toLowerCase();
+  const type = fileType.toLowerCase();
   if (/\.(svg|ai|eps|psd)$/.test(name)) return "Logos";
   if (/(brand|guideline|style.?guide|identity)/.test(name)) return "Brand guidelines";
   if (type.startsWith("video/") || type.startsWith("audio/") || /\.(mp4|mov|m4v|avi|mkv|mp3|wav|aiff|m4a)$/.test(name)) return "Video and audio";
   if (type.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp|heic|tif|tiff)$/.test(name)) return "People and photos";
   if (/\.(doc|docx|odt|rtf|txt|pdf|ppt|pptx|xls|xlsx|csv)$/.test(name) || type.startsWith("text/")) return "Text and Word documents";
   return "Other";
+}
+
+function inferFileCategory(file: File) {
+  return inferFileCategoryFromName(file.name, file.type);
 }
 
 function normalizeRecord(saved: SponsorRecord | null): SponsorRecord {
@@ -670,6 +676,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [syncingDropbox, setSyncingDropbox] = useState(false);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [dropboxConfigured, setDropboxConfigured] = useState(false);
@@ -961,6 +968,81 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
   async function removeAsset(asset: SponsorAsset) {
     const saved = await save({ ...record, assets: record.assets.filter((item) => item.id !== asset.id) }, "Item removed from this sponsor’s collection.");
     if (saved && asset.fileId) await deleteSponsorFile(asset.fileId).catch(() => undefined);
+  }
+
+  async function syncDropboxContents() {
+    if (!dropboxConfigured || saving || syncingDropbox) return;
+    setSyncingDropbox(true);
+    setError("");
+    setMessage("Checking the sponsor’s Dropbox folder…");
+    try {
+      const response = await fetch(`/api/dropbox/list?sponsor=${encodeURIComponent(sponsorSlug)}`, { cache: "no-store" });
+      const result = await response.json().catch(() => ({})) as {
+        entries?: Array<{ id: string; name: string; path: string; size: number; serverModified?: string }>;
+        error?: string;
+      };
+      if (!response.ok || !Array.isArray(result.entries)) throw new Error(result.error ?? "Dropbox folder could not be read.");
+
+      const entries = result.entries;
+      const existingByDropboxId = new Map(record.assets.filter((asset) => asset.dropboxId).map((asset) => [asset.dropboxId as string, asset]));
+      const existingByPath = new Map(record.assets.filter((asset) => asset.dropboxPath).map((asset) => [asset.dropboxPath as string, asset]));
+      const matchedAssetIds = new Set<string>();
+      let added = 0;
+      let refreshed = 0;
+
+      const assets = record.assets.map((asset) => {
+        if (!asset.dropboxId && !asset.dropboxPath) return asset;
+        const matchingEntry = (asset.dropboxId && entries.find((entry) => entry.id === asset.dropboxId))
+          ?? (asset.dropboxPath && entries.find((entry) => entry.path === asset.dropboxPath));
+        if (!matchingEntry) return { ...asset, dropboxMissing: true };
+        matchedAssetIds.add(asset.id);
+        refreshed += 1;
+        return {
+          ...asset,
+          dropboxId: matchingEntry.id,
+          dropboxPath: matchingEntry.path,
+          dropboxMissing: false,
+          fileName: matchingEntry.name,
+          fileSize: matchingEntry.size,
+          title: matchingEntry.name,
+          category: inferFileCategoryFromName(matchingEntry.name),
+          receivedAt: asset.receivedAt || matchingEntry.serverModified?.slice(0, 10),
+        };
+      });
+
+      for (const entry of entries) {
+        const existing = existingByDropboxId.get(entry.id) ?? existingByPath.get(entry.path);
+        if (existing && matchedAssetIds.has(existing.id)) continue;
+        added += 1;
+        assets.push({
+          id: `dropbox:${entry.id}`,
+          dropboxId: entry.id,
+          dropboxPath: entry.path,
+          fileName: entry.name,
+          fileSize: entry.size,
+          title: entry.name,
+          category: inferFileCategoryFromName(entry.name),
+          driveUrl: "",
+          note: "Found in the sponsor’s Dropbox folder during sync.",
+          source: "Dropbox folder sync",
+          receivedAt: entry.serverModified?.slice(0, 10),
+          status: "Not reviewed",
+          dropboxMissing: false,
+        });
+      }
+
+      const missing = assets.filter((asset) => asset.dropboxMissing).length;
+      const successMessage = `Dropbox folder synced: ${entries.length} found · ${added} added · ${refreshed} refreshed · ${missing} missing from Dropbox.`;
+      await save(
+        { ...record, assets, dropboxLastSyncedAt: new Date().toISOString() },
+        successMessage,
+      );
+    } catch (syncError) {
+      setMessage("");
+      setError(syncError instanceof Error ? syncError.message : "Dropbox folder could not be read. Try again.");
+    } finally {
+      setSyncingDropbox(false);
+    }
   }
 
   async function downloadZip() {
@@ -1291,8 +1373,12 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
               <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Add source files and file links for the final handoff.</p>
               {record.assets.some((asset) => asset.fileId) && <p className="mt-2 text-xs leading-5 text-[var(--muted)]">Uploaded files are stored only in this browser. Download the ZIP from the browser where each file was added; the shared record contains the file list, not the file contents.</p>}
             </div>
-            <button type="button" onClick={downloadZip} disabled={!ready || exporting} className="min-h-11 border border-[var(--foreground)] px-4 text-sm font-semibold disabled:opacity-50">{exporting ? "Preparing ZIP…" : "Download sponsor ZIP"}</button>
+            <div className="flex flex-wrap gap-2">
+              {editable && <button type="button" onClick={() => void syncDropboxContents()} disabled={!ready || saving || syncingDropbox || !dropboxConfigured} className="min-h-11 border border-[var(--line-strong)] px-4 text-sm font-semibold disabled:opacity-50">{syncingDropbox ? "Checking Dropbox…" : "Sync Dropbox contents"}</button>}
+              <button type="button" onClick={downloadZip} disabled={!ready || exporting} className="min-h-11 border border-[var(--foreground)] px-4 text-sm font-semibold disabled:opacity-50">{exporting ? "Preparing ZIP…" : "Download sponsor ZIP"}</button>
+            </div>
           </div>
+          {record.dropboxLastSyncedAt && <p className="mt-2 text-xs leading-5 text-[var(--muted)]">Dropbox last checked: {new Date(record.dropboxLastSyncedAt).toLocaleString()}</p>}
           {record.assets.length === 0 ? (
             <p className="mt-4 text-sm leading-6 text-[var(--muted)]">No files or references have been added yet.</p>
           ) : (
@@ -1302,6 +1388,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
                   <div className="min-w-0">
                     <p className="break-words text-sm font-semibold">{asset.fileName || asset.title}</p>
                     <p className="mt-1 text-xs font-medium text-[var(--muted)]">{asset.category}{asset.fileSize ? ` · ${(asset.fileSize / (1024 * 1024)).toFixed(1)} MB` : asset.driveUrl ? " · File reference" : " · File pending"} · {asset.status ?? (asset.approved ? "Approved" : "Not reviewed")}</p>
+                    {asset.dropboxMissing && <p className="mt-1 text-xs font-semibold text-amber-800">Not found in Dropbox at last sync</p>}
                     {asset.source && <p className="mt-1 text-xs leading-5 text-[var(--muted)]">Source: {asset.source}</p>}
                     {asset.receivedAt && <p className="text-xs leading-5 text-[var(--muted)]">Received: {asset.receivedAt}</p>}
                     {asset.note && <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{asset.note}</p>}
