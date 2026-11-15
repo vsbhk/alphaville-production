@@ -3,20 +3,10 @@
 import { FormEvent, useEffect, useState } from "react";
 import { loadWorkspaceData, saveWorkspaceData } from "@/lib/workspace-sync";
 import { projectSponsors } from "@/lib/sponsors";
-
-type FollowUpStatus = "To request" | "Chaser sent" | "Awaiting reply" | "Received";
-type FollowUp = { id: string; owner: string; missing: string; status: FollowUpStatus };
+import { initialFollowUps, mergeFollowUps, type FollowUp, type FollowUpStatus } from "@/lib/information-followups";
 
 const STORAGE_KEY = "hkdw-2027-information-followups-v1";
 const statuses: FollowUpStatus[] = ["To request", "Chaser sent", "Awaiting reply", "Received"];
-const initialFollowUps: FollowUp[] = [
-  { id: "xpeng-interview-info", owner: "XPENG", missing: "Confirm the time and agreed meeting point for Jerry Tam’s interview on 22 November. The vehicle display location is a preference, not a confirmed meeting point.", status: "To request" },
-  { id: "world-press-conference-confirmations", owner: "Event organiser", missing: "Confirm the Dragon Association welcome speaker, final press-conference sponsor and attendee list, group-photo headcount, and final media call. The latest rundown is marked tentative; the press conference overlaps the official 18:00–19:00 skippers’ briefing.", status: "To request" },
-  { id: "shk-logos-brand", owner: "Sun Hung Kai & Co.", missing: "Upload both logo files and provide brand guidelines.", status: "To request" },
-  { id: "shk-media-access", owner: "Sun Hung Kai & Co.", missing: "Provide access to the cleared photos and video footage. For large files, provide a transfer link, access instructions and expiry date.", status: "To request" },
-  { id: "shk-filming-details", owner: "Sun Hung Kai & Co.", missing: "Confirm the proposed filming slot, then provide interview duration, a day-of/PA contact, and bad-weather and absence alternatives.", status: "To request" },
-  { id: "shk-approval-details", owner: "Sun Hung Kai & Co.", missing: "Confirm approval turnaround, caption languages, name spellings and usage restrictions. The source record says a follow-up was sent on 13 November 2026.", status: "Chaser sent" },
-];
 
 function chaserDraft(item: FollowUp) {
   return `Subject: HKDW 2027 production follow-up\n\nHello ${item.owner},\n\nWe’re preparing the production materials for the Hong Kong Dragon Championship. Could you please provide or confirm the following?\n\n${item.missing}\n\nPlease let us know if anything is not available yet.\n\nMany thanks`;
@@ -26,6 +16,14 @@ function sponsorHref(owner: string, id: string) {
   const normalize = (value: string) => value.toLowerCase().replace(/\s*\([^)]*\)/g, "").replace(/[^a-z0-9]/g, "");
   const sponsor = projectSponsors.find((candidate) => normalize(candidate.name) === normalize(owner));
   return sponsor ? `/p/hkdw-2027/sponsors/${sponsor.slug}?followup=${encodeURIComponent(id)}#missing-information` : null;
+}
+
+function followUpHref(item: FollowUp) {
+  const slug = item.sponsorSlug ?? projectSponsors.find((candidate) => {
+    const normalize = (value: string) => value.toLowerCase().replace(/\s*\([^)]*\)/g, "").replace(/[^a-z0-9]/g, "");
+    return normalize(candidate.name) === normalize(item.owner);
+  })?.slug;
+  return slug ? `/p/hkdw-2027/sponsors/${slug}?followup=${encodeURIComponent(item.id)}#missing-information` : sponsorHref(item.owner, item.id);
 }
 
 export function InformationFollowUpTracker({ editable }: { editable: boolean }) {
@@ -42,11 +40,11 @@ export function InformationFollowUpTracker({ editable }: { editable: boolean }) 
       try {
         const shared = await loadWorkspaceData<FollowUp[]>("information-followups");
         if (cancelled) return;
-        if (Array.isArray(shared)) setItems(shared);
+        if (Array.isArray(shared)) setItems(mergeFollowUps(shared));
         else {
           try {
             const local = window.localStorage.getItem(STORAGE_KEY);
-            if (local) setItems(JSON.parse(local) as FollowUp[]);
+            if (local) setItems(mergeFollowUps(JSON.parse(local) as FollowUp[]));
           } catch { /* Keep the source-backed starter list if the browser copy cannot be read. */ }
         }
         setCloudReady(true);
@@ -55,7 +53,7 @@ export function InformationFollowUpTracker({ editable }: { editable: boolean }) 
         if (cancelled) return;
         try {
           const local = window.localStorage.getItem(STORAGE_KEY);
-          if (local) setItems(JSON.parse(local) as FollowUp[]);
+          if (local) setItems(mergeFollowUps(JSON.parse(local) as FollowUp[]));
         } catch { /* Keep the source-backed starter list if the browser copy cannot be read. */ }
         setMessage("Cloud storage is unavailable. Follow-up changes stay in this browser.");
       }
@@ -118,7 +116,7 @@ export function InformationFollowUpTracker({ editable }: { editable: boolean }) 
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
             <button type="button" onClick={() => void copyChaser(item)} disabled={!ready || !item.owner.trim() || !item.missing.trim()} className="min-h-10 rounded-md border border-[var(--line-strong)] bg-white px-3 text-xs font-semibold disabled:opacity-50">Copy chaser draft</button>
-            {sponsorHref(item.owner, item.id) && <a href={sponsorHref(item.owner, item.id)!} className="inline-flex min-h-10 items-center rounded-md border border-[var(--line-strong)] bg-white px-3 text-xs font-semibold text-[var(--accent)] underline underline-offset-4">Open sponsor page · highlight missing info</a>}
+            {followUpHref(item) && <a href={followUpHref(item)!} className="inline-flex min-h-10 items-center rounded-md border border-[var(--line-strong)] bg-white px-3 text-xs font-semibold text-[var(--accent)] underline underline-offset-4">Open related page · highlight missing info</a>}
             {editable && <button type="button" onClick={() => setItems((current) => current.filter((row) => row.id !== item.id))} disabled={!ready} className="min-h-10 px-2 text-xs font-semibold text-[var(--muted)] underline underline-offset-4 disabled:opacity-50">Remove</button>}
             <details className="basis-full">
               <summary className="min-h-10 cursor-pointer py-2 text-xs font-semibold text-[var(--accent)] underline underline-offset-4">Preview email text</summary>

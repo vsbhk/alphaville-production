@@ -65,8 +65,23 @@ type SponsorProfile = {
   reviewDate: string;
   reviewStatuses: Record<string, ReviewStatus>;
 };
-type SponsorRecord = { details?: SponsorDetails; profile?: Partial<SponsorProfile>; assets: SponsorAsset[]; updatedAt?: number };
+type SponsorRecord = { details?: SponsorDetails; profile?: Partial<SponsorProfile>; assets: SponsorAsset[]; updatedAt?: number; sourceUpdates?: string[] };
 type StorageMode = "cloud" | "local";
+const xpengUpdateId = "xpeng-social-and-event-update-2026-11";
+const xpengSocialUpdate = [
+  "Overseas markets — Instagram and Facebook: @xpeng_global and @xpeng_hk.",
+  "Selected key daily updates may be co-posted with @xpeng_hk.",
+  "Hong Kong contact (handle as supplied): @~Elaine.",
+  "Mainland China account: @小鹏汽车.",
+  "Image posts: Weibo and Xiaohongshu.",
+  "Video posts: Weibo, Xiaohongshu, WeChat Official Account, WeChat Channels, Douyin, Kuaishou and Bilibili.",
+].join("\n");
+const xpengActivationUpdate = [
+  "22 Nov: all XPENG setup to be complete by 15:00 at RHKYC Kellett Island. The ARIDGE Land Aircraft Carrier will be displayed on the Turning Circle. X3, L03 and G9L stay onsite for display from 22 Nov until the event ends.",
+  "25 Nov: XPENG confirms a booth at the Hopewell Hotel gala dinner; booth dimensions are needed for the backdrop.",
+  "27 Nov: two X9s on standby from 13:30 at Clearwater Bay Marina to transfer VIPs to Kellett Island. XPENG executives are invited to present day prizes at the 18:00–20:00 prizegiving. No booth at prizegiving. The golf activity is cancelled; a spectator boat is arranged.",
+  "22 Nov media timing: WhatsApp messages suggest XPENG media arrival at 16:00–16:30; Jerry Tam arriving at 17:00 was proposed, but earlier arrival was recommended. The chat mentions a 17:30 press conference while the supplied factsheet/rundown list 18:15/18:30; confirm the final times.",
+].join("\n");
 
 const emptyDetails: SponsorDetails = {
   brandName: "",
@@ -108,7 +123,7 @@ function inferFileCategory(file: File) {
 }
 
 function normalizeRecord(saved: SponsorRecord | null): SponsorRecord {
-  if (!saved || !Array.isArray(saved.assets)) return { ...blankRecord, profile: emptyProfile };
+  if (!saved || !Array.isArray(saved.assets)) return { ...blankRecord, profile: emptyProfile, sourceUpdates: [] };
   const details = { ...emptyDetails, ...saved.details };
   const legacyContact = details.contactName || details.contactPhone
     ? [{ ...emptyContact, name: details.contactName, phone: details.contactPhone }]
@@ -116,6 +131,7 @@ function normalizeRecord(saved: SponsorRecord | null): SponsorRecord {
   return {
     ...blankRecord,
     ...saved,
+    sourceUpdates: saved.sourceUpdates ?? [],
     details,
     profile: {
       ...emptyProfile,
@@ -124,6 +140,26 @@ function normalizeRecord(saved: SponsorRecord | null): SponsorRecord {
       reviewStatuses: { ...emptyProfile.reviewStatuses, ...saved.profile?.reviewStatuses },
     },
     assets: saved.assets.map((asset) => ({ ...asset, status: asset.status ?? (asset.approved ? "Approved" : "Not reviewed") })),
+  };
+}
+
+function applyXpengSourceUpdate(record: SponsorRecord, sponsorSlug: string) {
+  if (sponsorSlug !== "xpeng" || record.sourceUpdates?.includes(xpengUpdateId)) return { record, changed: false };
+  const details = { ...emptyDetails, ...record.details };
+  const profile = { ...emptyProfile, ...record.profile, reviewStatuses: { ...emptyProfile.reviewStatuses, ...record.profile?.reviewStatuses } };
+  profile.socialLinks = profile.socialLinks.trim()
+    ? `${profile.socialLinks.trim()}\n\n${xpengSocialUpdate}`
+    : xpengSocialUpdate;
+  profile.reviewStatuses.spokespeople = "Submitted";
+  profile.followUps = profile.followUps.trim()
+    ? `${profile.followUps.trim()}\n\nEvent follow-up: organizer to provide XPENG’s 25 November gala booth dimensions for the backdrop.`
+    : "Event follow-up: organizer to provide XPENG’s 25 November gala booth dimensions for the backdrop.";
+  details.notes = details.notes.trim()
+    ? `${details.notes.trim()}\n\nXPENG event update:\n${xpengActivationUpdate}`
+    : xpengActivationUpdate;
+  return {
+    record: { ...record, details, profile, sourceUpdates: [...(record.sourceUpdates ?? []), xpengUpdateId] },
+    changed: true,
   };
 }
 
@@ -148,6 +184,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [dropboxConfigured, setDropboxConfigured] = useState(false);
 
@@ -168,41 +205,83 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
 
     const remote = normalizeRecord(cloudRecord);
     const local = normalizeRecord(localRecord);
+    function activateRecord(baseRecord: SponsorRecord, mode: StorageMode, successMessage: string) {
+      const sourceUpdate = applyXpengSourceUpdate(baseRecord, sponsorSlug);
+      let selected = sourceUpdate.record;
+      setStorageMode(mode);
+      setRecord(selected);
+      setDetails(selected.details ?? emptyDetails);
+      setProfile({ ...emptyProfile, ...selected.profile });
+      setMessage(sourceUpdate.changed ? "New XPENG account and event details loaded; saving the source update…" : successMessage);
+      setReady(true);
+      if (!sourceUpdate.changed || !editable) return;
+
+      const updated = { ...selected, updatedAt: Date.now() };
+      selected = updated;
+      setRecord(updated);
+      if (mode === "cloud") {
+        void saveWorkspaceData(key, updated)
+          .then(() => saveLocalSponsorRecord(key, updated).catch(() => undefined))
+          .then(() => setMessage("XPENG social accounts and event arrangements saved to the private workspace."))
+          .catch(() => {
+            setStorageMode("local");
+            void saveLocalSponsorRecord(key, updated).catch(() => undefined);
+            setMessage("XPENG details are in this browser draft; Google Sheets could not be updated. Sync the draft when available.");
+          });
+      } else {
+        void saveLocalSponsorRecord(key, updated)
+          .then(() => setMessage("XPENG details saved in this browser draft. Sync them to Google Sheets when available."))
+          .catch(() => setMessage("XPENG details are loaded in this page but could not be saved in the browser."));
+      }
+    }
+
     if (cloudFailed) {
-      const fallback = localRecord ? local : blankRecord;
-      setRecord(fallback);
-      setDetails(fallback.details ?? emptyDetails);
-      setProfile({ ...emptyProfile, ...fallback.profile });
-      setStorageMode("local");
-      setMessage(localRecord
+      const fallback = localRecord ? local : normalizeRecord(null);
+      activateRecord(fallback, "local", localRecord
         ? "Google Sheets is unavailable. You’re using this browser’s saved draft; changes stay here until you sync."
         : "Google Sheets is unavailable. You can start a browser-only draft and download its ZIP; it won’t replace the cloud record.");
-      setReady(true);
       return;
     }
 
     if (localRecord && (local.updatedAt ?? 0) > (remote.updatedAt ?? 0)) {
-      setRecord(local);
-      setDetails(local.details ?? emptyDetails);
-      setProfile({ ...emptyProfile, ...local.profile });
-      setStorageMode("local");
-      setMessage("A newer browser draft is available. Review it, then sync it to Google Sheets when ready.");
-      setReady(true);
+      activateRecord(local, "local", "A newer browser draft is available. Review it, then sync it to Google Sheets when ready.");
       return;
     }
 
-    setRecord(remote);
-    setDetails(remote.details ?? emptyDetails);
-    setProfile({ ...emptyProfile, ...remote.profile });
-    setStorageMode("cloud");
-    setMessage(cloudRecord ? "Sponsor collection loaded." : "Start this sponsor’s private collection.");
-    setReady(true);
-    if (cloudRecord) void saveLocalSponsorRecord(key, remote).catch(() => undefined);
-  }, [key]);
+    activateRecord(remote, "cloud", cloudRecord ? "Sponsor collection loaded." : "Start this sponsor’s private collection.");
+    if (cloudRecord && !remote.sourceUpdates?.includes(xpengUpdateId)) void saveLocalSponsorRecord(key, remote).catch(() => undefined);
+  }, [key, sponsorSlug, editable]);
 
   useEffect(() => {
     queueMicrotask(() => void loadCollection());
   }, [loadCollection]);
+
+  useEffect(() => {
+    if (!unsavedChanges) return;
+    const warnBeforeLeaving = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    const confirmInternalNavigation = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const link = target.closest("a[href]");
+      if (!(link instanceof HTMLAnchorElement) || link.target === "_blank") return;
+      const destination = new URL(link.href, window.location.href);
+      if (destination.origin !== window.location.origin || destination.href === window.location.href) return;
+      if (!window.confirm("You have unsaved sponsor information. Leave this page without saving?")) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+    window.addEventListener("beforeunload", warnBeforeLeaving);
+    document.addEventListener("click", confirmInternalNavigation, true);
+    return () => {
+      window.removeEventListener("beforeunload", warnBeforeLeaving);
+      document.removeEventListener("click", confirmInternalNavigation, true);
+    };
+  }, [unsavedChanges]);
 
   useEffect(() => {
     fetch("/api/dropbox/config", { cache: "no-store" })
@@ -223,8 +302,6 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
           await saveWorkspaceData(key, updated);
           await saveLocalSponsorRecord(key, updated).catch(() => undefined);
           setRecord(updated);
-          setDetails(updated.details ?? emptyDetails);
-          setProfile({ ...emptyProfile, ...updated.profile });
           setMessage(successMessage);
           return true;
         } catch {
@@ -234,8 +311,6 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
       await saveLocalSponsorRecord(key, updated);
       setStorageMode("local");
       setRecord(updated);
-      setDetails(updated.details ?? emptyDetails);
-      setProfile({ ...emptyProfile, ...updated.profile });
       setMessage("Saved in this browser only. Sync it to Google Sheets when the connection is available.");
       return true;
     } catch {
@@ -273,7 +348,8 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
     event.preventDefault();
     const primaryContact = profile.contacts[0] ?? emptyContact;
     const savedDetails = { ...details, contactName: primaryContact.name, contactPhone: primaryContact.phone };
-    await save({ ...record, details: savedDetails, profile }, "Sponsor profile saved to your private workspace.");
+    const saved = await save({ ...record, details: savedDetails, profile }, "Sponsor profile saved to your private workspace.");
+    if (saved) setUnsavedChanges(false);
   }
 
   function updateProfile<K extends keyof SponsorProfile>(field: K, value: SponsorProfile[K]) {
@@ -450,9 +526,10 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
           <span className="border border-[var(--line-strong)] px-3 py-1 text-xs font-medium text-[var(--muted)]">{record.assets.length} item{record.assets.length === 1 ? "" : "s"}</span>
         </div>
 
-        <form onSubmit={saveDetails} className="mt-5 border-t border-[var(--line)] pt-5">
+        <form onSubmit={saveDetails} onChange={() => setUnsavedChanges(true)} className="mt-5 border-t border-[var(--line)] pt-5">
           <h3 className="text-sm font-semibold">Sponsor information</h3>
           <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Keep each sponsor submission, approval detail and production requirement in its own field.</p>
+          {unsavedChanges && <p role="status" className="mt-3 border border-[var(--line-strong)] bg-[var(--background)] p-3 text-sm leading-5">You have unsaved changes. Save sponsor information before moving to another page; you’ll be prompted if you try to leave now.</p>}
           <fieldset disabled={!editable}>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="text-sm font-medium">Brand or company name
@@ -574,8 +651,8 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
               <label className="mt-3 block text-sm font-medium">Biography
                 <textarea value={profile.spokespersonBiography} onChange={(event) => updateProfile("spokespersonBiography", event.target.value)} rows={4} className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
               </label>
-              <label className="mt-3 block text-sm font-medium">Social media URLs
-                <textarea value={profile.socialLinks} onChange={(event) => updateProfile("socialLinks", event.target.value)} rows={3} placeholder="One platform and URL per line" className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
+              <label className="mt-3 block text-sm font-medium">Social media accounts and channels
+                <textarea value={profile.socialLinks} onChange={(event) => updateProfile("socialLinks", event.target.value)} rows={3} placeholder="Handles, platforms, URLs and co-posting notes" className="mt-2 w-full border border-[var(--line-strong)] bg-white p-3" />
               </label>
             </fieldset>
 

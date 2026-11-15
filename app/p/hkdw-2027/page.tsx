@@ -42,7 +42,8 @@ const eventCalendar: CalendarDay[] = [
     { title: "Final races · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
     { title: "Asia Pacific Championship prizegiving ceremony", time: "18:30–21:00", location: "Clearwater Bay Golf & Country Club marina lawn", runOfShow: [
       { title: "Timing to confirm", detail: "The preparation note gives 18:00; the public visitor programme lists 18:30–21:00. Confirm the MC call time with the organiser." },
-      { title: "Prize presenters", detail: "Ian Flemming (RHKYC) and Bram Van Olphen (IDA)." },
+      { title: "Prize presenters", detail: "Ian Flemming (RHKYC) and Bram Van Olphen (IDA). Joseph Chu, an HKDW committee member, reports that David Norton (RHKYC Commodore) is comfortable attending and offered to cover for Ian if needed. David has not been asked to give a speech." },
+      { title: "Related Yanmar dinner speech", detail: "Joseph offered to give the Yanmar dinner speech for David, but David plans to deliver it himself. Dinner date, venue and programme time are not listed here." },
       { title: "McLeod Asia Pacific Dragon Championship Trophy", detail: "Overall Open division: gold, silver and bronze medals for the first three teams (four medals of each colour)." },
       { title: "Gordon Ingate Asia Pacific Dragon Championship Trophy", detail: "Corinthian division: the note lists two bottles of white and two bottles of red Bimbadgen wine for the first three teams." },
     ] },
@@ -67,18 +68,27 @@ const eventCalendar: CalendarDay[] = [
       { time: "18:50–18:55", title: "Media transition to the Turning Circle", detail: "The tentative rundown says the opening ceremony will begin after media arrive." },
       { title: "Timing and schedule checks", detail: "This rundown is marked tentative and spans 18:15–19:00. The separate press factsheet lists 18:30–19:00; the MC script runs the conference from 18:30–18:50. The official skippers’ briefing is also scheduled for 18:00–19:00. Confirm the final media call and who covers each location." },
     ] },
-    { title: "Opening reception", time: "19:00–21:00", location: "Royal Hong Kong Yacht Club", runOfShow: [
+    { title: "Opening reception", time: "19:00–20:00", location: "RHKYC Kellett Island", runOfShow: [
       { time: "18:15–19:00", title: "Related press conference · tentative", detail: "Regatta Room, RHKYC. See the separate press-conference event for the MC rundown. Its tentative media transfer to the Turning Circle overlaps the 19:00 opening reception arrival." },
-      { time: "19:00", title: "Guest arrival", detail: "The ceremony is planned to begin when all guest speakers have arrived." },
+      { time: "19:00", title: "Guest arrival and ceremony begins", detail: "The organizer has confirmed the opening ceremony at Kellett Island from 19:00 to 20:00." },
       { time: "19:00–19:15", title: "Welcome speeches and Sail Onward cheque presentation", detail: "Bram Van Olphen; Rosanna Law, JP; David Norton; Meihan Cheung; and Tony Leung (confirmation pending). Tony Leung is also due to present a cheque to the local school sailing programme Sail Onward." },
       { time: "19:15", title: "Eye-dotting ceremony", detail: "Eight honorary guests: Timothy Fok Tsun Ting, Rosanna Law, Karl Kwok, David Norton, Tony Edwards, Meihan Cheung, Tony Leung and Bram Van Olphen. Dragon: Tony Leung and Bram Van Olphen. Lion 1: Timothy Fok and Rosanna Law. Lion 2: Karl Kwok and David Norton. Lion 3: Meihan Cheung and Tony Edwards." },
       { time: "19:20–19:30", title: "Lion dance" },
       { time: "19:30–19:40", title: "Dragon dance" },
       { title: "Organiser announcements and group photo", detail: "Hong Kong Sailing Federation; RHKYC; Hong Kong Dragon Association; Clearwater Bay Golf & Country Club; Hong Kong Tourism Board." },
       { title: "Sponsor announcements and group photo", detail: "SHK & Co.; SHK Capital Partners; Lee Kum Kee; Central Oceans; Code Zero; Hopewell Hotel; Brugse Zot; Chalmers; XPENG; Cathay Pacific; North Sails; Oakley; EVY; Tsit Wing Group; Pocari Sweat / Otsuka; and Sail Onward." },
-      { time: "20:00", title: "Ceremony closes; buffet follows", detail: "Buffet for sailors and paid guests begins after the ceremony." },
-      { title: "Schedule note", detail: "The preparation note gives a 20:00 ceremony close; the public visitor programme lists the opening reception through 21:00." },
+      { time: "20:00", title: "Ceremony closes; reception and buffet follow", detail: "The public visitor programme lists the overall reception through 21:00." },
     ] },
+    { title: "XPENG product and ARIDGE Land Aircraft Carrier display setup complete", time: "By 15:00", location: "RHKYC Kellett Island · Turning Circle", runOfShow: [
+      { title: "Setup deadline", detail: "XPENG says all setup will be complete by 15:00 on 22 November." },
+      { title: "ARIDGE Land Aircraft Carrier display", detail: "The ARIDGE Land Aircraft Carrier will be displayed on the Turning Circle at RHKYC on 22 November." },
+      { title: "Product vehicles", detail: "XPENG X3, L03 and G9L will remain onsite for display from 22 November until the event finishes. Exact positions are to be confirmed." },
+    ] },
+    { title: "XPENG media arrival and Jerry Tam interview · target time", time: "Target 16:00–16:30 arrival", location: "Kellett Island · meeting point to confirm", runOfShow: [
+      { title: "Arrival timing", detail: "WhatsApp screenshots suggest targeting XPENG media arrival at 16:00 or 16:30. Jerry Tam arriving at 17:00 was proposed, but an earlier arrival was recommended. Confirm the final call time and interview slot." },
+      { title: "Press conference timing", detail: "The WhatsApp exchange refers to a 17:30 press conference; the supplied factsheet and tentative rundown give 18:30–19:00 / 18:15–19:00. Confirm the final schedule and meeting point." },
+    ] },
+    { title: "Reception and buffet", time: "20:00–21:00", location: "RHKYC Kellett Island" },
   ] },
   { event: "World Championship", date: "Mon 23 Nov", activities: [
     { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
@@ -92,7 +102,9 @@ const eventCalendar: CalendarDay[] = [
   ] },
   { event: "World Championship", date: "Wed 25 Nov", activities: [
     { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
-    { title: "Championship gala dinner", time: "19:00–22:00", location: "Crystal Ballroom, Hopewell Hotel" },
+    { title: "Championship gala dinner", time: "19:00–22:00", location: "Crystal Ballroom, Hopewell Hotel", runOfShow: [
+      { title: "XPENG booth confirmed", detail: "XPENG confirms a booth at the gala dinner and needs the booth dimensions to prepare its backdrop. Event organiser to provide the confirmed width and depth." },
+    ] },
     ...dailyMediaDeadlines,
   ] },
   { event: "World Championship", date: "Thu 26 Nov", activities: [
@@ -102,7 +114,17 @@ const eventCalendar: CalendarDay[] = [
   ] },
   { event: "World Championship", date: "Fri 27 Nov", activities: [
     { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
-    { title: "Day prizegiving · presented by XPENG", time: "18:00–20:00", location: "Royal Hong Kong Yacht Club" },
+    { title: "Spectator boat for race viewing · golf cancelled", location: "Boarding point and schedule to confirm", runOfShow: [
+      { title: "Golf activity cancelled", detail: "The planned golf activity on 27 November has been cancelled; the organizer says a spectator boat is arranged." },
+    ] },
+    { title: "XPENG VIP vehicle transfer", time: "13:30 standby", location: "Clearwater Bay Marina → RHKYC Kellett Island", runOfShow: [
+      { title: "Two XPENG X9s on standby", detail: "XPENG will arrange two X9 vehicles at Clearwater Bay Marina for VIPs travelling to Kellett Island." },
+    ] },
+    { title: "Day prizegiving · presented by XPENG", time: "18:00–20:00", location: "RHKYC Kellett Island Clubhouse", runOfShow: [
+      { title: "XPENG executives invited to present day prizes", detail: "Confirm the executive attendees and presenter names." },
+      { title: "No XPENG booth", detail: "XPENG confirms there will be no booth at the prizegiving." },
+      { title: "XPENG vehicle display continues", detail: "The X3, L03 and G9L remain onsite for display from 22 November until the event finishes; confirm the final positions and collection plan." },
+    ] },
     ...dailyMediaDeadlines,
   ] },
   { event: "World Championship", date: "Sat 28 Nov", activities: [

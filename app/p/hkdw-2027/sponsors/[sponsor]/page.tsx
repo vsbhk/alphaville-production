@@ -81,7 +81,7 @@ export default async function SponsorWorkspacePage({
           <p className="mt-2 break-words text-[var(--muted)]">Collect this sponsor’s information and files here. When it is complete, download a ZIP and share it with Icarus yourself.</p>
         </aside>
 
-        <SponsorMissingInformation sponsorName={sponsor.name} />
+        <SponsorMissingInformation sponsorSlug={sponsor.slug} sponsorName={sponsor.name} />
 
         <SponsorWorkspace key={sponsor.slug} sponsorSlug={sponsor.slug} sponsorName={sponsor.name} editable={canEdit} />
 
