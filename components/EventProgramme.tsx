@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { loadWorkspaceData, saveWorkspaceData } from "@/lib/workspace-sync";
 
-export type CalendarAgendaItem = { title: string; time?: string; location?: string };
+export type CalendarRunOfShowItem = { time?: string; title: string; detail?: string };
+export type CalendarAgendaItem = { title: string; time?: string; location?: string; runOfShow?: CalendarRunOfShowItem[] };
 export type CalendarDay = { event: string; date: string; activities: CalendarAgendaItem[] };
 
 const STORAGE_KEY = "hkdw-2027-event-coverage-v1";
@@ -171,6 +172,15 @@ function AgendaItems({
           <div className="min-w-0">
             <p className="text-sm font-medium leading-6 text-[var(--foreground)]">{activity.title}</p>
             {activity.location && <p className="text-sm leading-5 text-[var(--muted)]">{activity.location}</p>}
+            {activity.runOfShow && <details className="mt-2 rounded-md border border-[var(--line)] bg-[var(--surface)] p-3">
+              <summary className="min-h-8 cursor-pointer text-xs font-semibold text-[var(--accent)]">View detailed event rundown</summary>
+              <ol className="mt-3 space-y-3">
+                {activity.runOfShow.map((item, rundownIndex) => <li key={`${item.time ?? "step"}-${rundownIndex}`} className="grid gap-1 border-l-2 border-[var(--line-strong)] pl-3 sm:grid-cols-[110px_minmax(0,1fr)] sm:gap-3">
+                  <span className="text-xs font-semibold tabular-nums text-[var(--foreground)]">{item.time ?? "After previous item"}</span>
+                  <span className="text-xs leading-5 text-[var(--foreground)]"><strong>{item.title}</strong>{item.detail && <span className="block text-[var(--muted)]">{item.detail}</span>}</span>
+                </li>)}
+              </ol>
+            </details>}
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <span className="text-xs font-medium text-[var(--muted)]">Coverage:</span>
               {(assignments[`${day}|${activity.title}|${index}`] ?? []).map((supplier) => (

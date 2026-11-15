@@ -10,6 +10,7 @@ const STORAGE_KEY = "hkdw-2027-information-followups-v1";
 const statuses: FollowUpStatus[] = ["To request", "Chaser sent", "Awaiting reply", "Received"];
 const initialFollowUps: FollowUp[] = [
   { id: "xpeng-interview-info", owner: "XPENG", missing: "Confirm the time and agreed meeting point for Jerry Tam’s interview on 22 November. The vehicle display location is a preference, not a confirmed meeting point.", status: "To request" },
+  { id: "world-press-conference-confirmations", owner: "Event organiser", missing: "Confirm the Dragon Association welcome speaker, final press-conference sponsor and attendee list, group-photo headcount, and final media call. The latest rundown is marked tentative; the press conference overlaps the official 18:00–19:00 skippers’ briefing.", status: "To request" },
   { id: "shk-logos-brand", owner: "Sun Hung Kai & Co.", missing: "Upload both logo files and provide brand guidelines.", status: "To request" },
   { id: "shk-media-access", owner: "Sun Hung Kai & Co.", missing: "Provide access to the cleared photos and video footage. For large files, provide a transfer link, access instructions and expiry date.", status: "To request" },
   { id: "shk-filming-details", owner: "Sun Hung Kai & Co.", missing: "Confirm the proposed filming slot, then provide interview duration, a day-of/PA contact, and bad-weather and absence alternatives.", status: "To request" },

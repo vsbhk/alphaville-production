@@ -6,6 +6,13 @@ import { InformationFollowUpTracker } from "@/components/InformationFollowUpTrac
 import { auth } from "@/auth";
 import { AlphavilleHeader } from "@/components/AlphavilleBrand";
 
+const dailyMediaDeadlines = [
+  { title: "Provisional results publication", time: "Within 30 minutes of the final boat finishing", location: "Official Notice Board and Media Centre" },
+  { title: "Daily race report publication deadline", time: "By 17:00 HKT", location: "Championship Media Centre" },
+  { title: "Captioned photo gallery publication deadline · 8–12 images", time: "By 21:00 HKT", location: "Championship Media Centre" },
+  { title: "Daily recap video publication", time: "Each evening", location: "Championship social channels" },
+];
+
 const eventCalendar: CalendarDay[] = [
   { event: "Asia Pacific Championship", date: "Tue 17 Nov", activities: [
     { title: "Registration, measurement and equipment inspection", time: "09:00–17:30", location: "Clearwater Bay Golf & Country Club Marina" },
@@ -15,19 +22,31 @@ const eventCalendar: CalendarDay[] = [
     { title: "Registration, measurement and equipment inspection", time: "09:00–17:30", location: "Clearwater Bay Golf & Country Club Marina" },
     { title: "Final registration and weigh-in after inspection", location: "Regatta Office, Clearwater Bay Golf & Country Club Marina" },
     { title: "Skippers’ briefing", time: "18:00–19:00", location: "RHKYC Kellett Island" },
-    { title: "Opening ceremony", time: "19:00–21:00", location: "Royal Hong Kong Yacht Club poolside" },
+    { title: "Opening ceremony", time: "19:00–21:00", location: "Royal Hong Kong Yacht Club poolside", runOfShow: [
+      { title: "Event attendance", detail: "64 entries and about 200 sailors are expected." },
+      { title: "Welcome speeches", detail: "David Norton (RHKYC Commodore) and Martin Cresswell (HKDA Class Captain) are intended invitees for the speeches." },
+      { title: "Sponsor arrangements", detail: "SHK & Co. sponsors Bimbadgen wines; wine-tasting note stands will be displayed. Sponsor representatives Anita and Alison Yeung are expected to attend." },
+    ] },
   ] },
   { event: "Asia Pacific Championship", date: "Thu 19 Nov", activities: [
     { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
     { title: "After-sailing drinks", time: "17:00–18:30", location: "Clearwater Bay Golf & Country Club" },
+    ...dailyMediaDeadlines,
   ] },
   { event: "Asia Pacific Championship", date: "Fri 20 Nov", activities: [
     { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
     { title: "After-sailing drinks", time: "17:00–18:30", location: "Clearwater Bay Golf & Country Club" },
+    ...dailyMediaDeadlines,
   ] },
   { event: "Asia Pacific Championship", date: "Sat 21 Nov", activities: [
     { title: "Final races · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
-    { title: "Asia Pacific Championship prizegiving ceremony", time: "18:30–21:00", location: "Clearwater Bay Golf & Country Club" },
+    { title: "Asia Pacific Championship prizegiving ceremony", time: "18:30–21:00", location: "Clearwater Bay Golf & Country Club marina lawn", runOfShow: [
+      { title: "Timing to confirm", detail: "The preparation note gives 18:00; the public visitor programme lists 18:30–21:00. Confirm the MC call time with the organiser." },
+      { title: "Prize presenters", detail: "Ian Flemming (RHKYC) and Bram Van Olphen (IDA)." },
+      { title: "McLeod Asia Pacific Dragon Championship Trophy", detail: "Overall Open division: gold, silver and bronze medals for the first three teams (four medals of each colour)." },
+      { title: "Gordon Ingate Asia Pacific Dragon Championship Trophy", detail: "Corinthian division: the note lists two bottles of white and two bottles of red Bimbadgen wine for the first three teams." },
+    ] },
+    ...dailyMediaDeadlines,
   ] },
   { event: "World Championship", date: "Sat 21 Nov", activities: [
     { title: "Registration, measurement and equipment inspection", time: "09:00–17:30", location: "Clearwater Bay Golf & Country Club Marina" },
@@ -36,34 +55,65 @@ const eventCalendar: CalendarDay[] = [
     { title: "Registration, measurement and equipment inspection", time: "09:00–17:30", location: "Clearwater Bay Golf & Country Club Marina" },
     { title: "World Championship crew weighing deadline", time: "By 17:30", location: "Regatta Office, Clearwater Bay Golf & Country Club Marina" },
     { title: "Skippers’ briefing", time: "18:00–19:00", location: "RHKYC Kellett Island" },
-    { title: "Opening reception", time: "19:00–21:00", location: "Royal Hong Kong Yacht Club" },
+    { title: "World Championship press conference · tentative rundown", time: "18:15–19:00", location: "Regatta Room, RHKYC Kellett Island", runOfShow: [
+      { time: "18:15", title: "MC arrival and briefing; media reception", detail: "The tentative rundown lists Wincy / PR, Lung / PR and Tim Pearson." },
+      { time: "18:20", title: "Sponsor and sailors arrive", detail: "Stella / Sponsorship in the tentative rundown." },
+      { time: "18:25", title: "MC asks guests to be seated", detail: "Tim Pearson." },
+      { time: "18:30–18:33", title: "Welcome remarks", detail: "Tim Pearson." },
+      { time: "18:33–18:35", title: "Dragon Association welcome speech", detail: "Speaker name is still shown as XXX in the script and needs confirmation." },
+      { time: "18:35–18:45", title: "Sailor sharing session", detail: "Andy Beadsworth (Provezza Dragon, Turkey) and Graham Bailey (Bluebottle, Great Britain)." },
+      { time: "18:45–18:47", title: "Group photo", detail: "The number of people is to be confirmed." },
+      { time: "18:47–18:50", title: "Close and direct media to the Turning Circle", detail: "Tim Pearson and PR team." },
+      { time: "18:50–18:55", title: "Media transition to the Turning Circle", detail: "The tentative rundown says the opening ceremony will begin after media arrive." },
+      { title: "Timing and schedule checks", detail: "This rundown is marked tentative and spans 18:15–19:00. The separate press factsheet lists 18:30–19:00; the MC script runs the conference from 18:30–18:50. The official skippers’ briefing is also scheduled for 18:00–19:00. Confirm the final media call and who covers each location." },
+    ] },
+    { title: "Opening reception", time: "19:00–21:00", location: "Royal Hong Kong Yacht Club", runOfShow: [
+      { time: "18:15–19:00", title: "Related press conference · tentative", detail: "Regatta Room, RHKYC. See the separate press-conference event for the MC rundown. Its tentative media transfer to the Turning Circle overlaps the 19:00 opening reception arrival." },
+      { time: "19:00", title: "Guest arrival", detail: "The ceremony is planned to begin when all guest speakers have arrived." },
+      { time: "19:00–19:15", title: "Welcome speeches and Sail Onward cheque presentation", detail: "Bram Van Olphen; Rosanna Law, JP; David Norton; Meihan Cheung; and Tony Leung (confirmation pending). Tony Leung is also due to present a cheque to the local school sailing programme Sail Onward." },
+      { time: "19:15", title: "Eye-dotting ceremony", detail: "Eight honorary guests: Timothy Fok Tsun Ting, Rosanna Law, Karl Kwok, David Norton, Tony Edwards, Meihan Cheung, Tony Leung and Bram Van Olphen. Dragon: Tony Leung and Bram Van Olphen. Lion 1: Timothy Fok and Rosanna Law. Lion 2: Karl Kwok and David Norton. Lion 3: Meihan Cheung and Tony Edwards." },
+      { time: "19:20–19:30", title: "Lion dance" },
+      { time: "19:30–19:40", title: "Dragon dance" },
+      { title: "Organiser announcements and group photo", detail: "Hong Kong Sailing Federation; RHKYC; Hong Kong Dragon Association; Clearwater Bay Golf & Country Club; Hong Kong Tourism Board." },
+      { title: "Sponsor announcements and group photo", detail: "SHK & Co.; SHK Capital Partners; Lee Kum Kee; Central Oceans; Code Zero; Hopewell Hotel; Brugse Zot; Chalmers; XPENG; Cathay Pacific; North Sails; Oakley; EVY; Tsit Wing Group; Pocari Sweat / Otsuka; and Sail Onward." },
+      { time: "20:00", title: "Ceremony closes; buffet follows", detail: "Buffet for sailors and paid guests begins after the ceremony." },
+      { title: "Schedule note", detail: "The preparation note gives a 20:00 ceremony close; the public visitor programme lists the opening reception through 21:00." },
+    ] },
   ] },
   { event: "World Championship", date: "Mon 23 Nov", activities: [
     { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
     { title: "Day prizegiving · presented by Code Zero", time: "17:00–18:00", location: "Clearwater Bay Golf & Country Club" },
+    ...dailyMediaDeadlines,
   ] },
   { event: "World Championship", date: "Tue 24 Nov", activities: [
     { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
     { title: "Day prizegiving · presented by SHK Capital Partners", time: "17:00–18:00", location: "Clearwater Bay Golf & Country Club" },
+    ...dailyMediaDeadlines,
   ] },
   { event: "World Championship", date: "Wed 25 Nov", activities: [
     { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
     { title: "Championship gala dinner", time: "19:00–22:00", location: "Crystal Ballroom, Hopewell Hotel" },
+    ...dailyMediaDeadlines,
   ] },
   { event: "World Championship", date: "Thu 26 Nov", activities: [
-    { title: "Lay day · racing only if required to complete the series", location: "Waters off the Ninepins" },
+    { title: "Lay day · racing only if required to complete the series", location: "Waters off the Ninepins", runOfShow: [
+      { title: "Conditional media deadlines", detail: "Only if the Race Committee schedules racing, apply the standard race-day deadlines: provisional results within 30 minutes of the final boat finishing, race report by 17:00 HKT, captioned gallery by 21:00 HKT, and recap video that evening." },
+    ] },
   ] },
   { event: "World Championship", date: "Fri 27 Nov", activities: [
     { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
     { title: "Day prizegiving · presented by XPENG", time: "18:00–20:00", location: "Royal Hong Kong Yacht Club" },
+    ...dailyMediaDeadlines,
   ] },
   { event: "World Championship", date: "Sat 28 Nov", activities: [
     { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
     { title: "Day prizegiving · presented by Lee Kum Kee", time: "17:00–18:00", location: "Clearwater Bay Golf & Country Club" },
+    ...dailyMediaDeadlines,
   ] },
   { event: "World Championship", date: "Sun 29 Nov", activities: [
     { title: "Final races · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
     { title: "Prizegiving and closing ceremony · approximate start", time: "Approx. 18:00", location: "Clearwater Bay Golf & Country Club" },
+    ...dailyMediaDeadlines,
   ] },
 ];
 
