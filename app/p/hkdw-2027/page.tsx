@@ -2,44 +2,68 @@ import { ProjectNav } from "@/components/ProjectNav";
 import { DayPlanner } from "@/components/DayPlanner";
 import { EventProgramme, type CalendarDay } from "@/components/EventProgramme";
 import { ProjectActionChecklist } from "@/components/ProjectActionChecklist";
+import { InformationFollowUpTracker } from "@/components/InformationFollowUpTracker";
 import { auth } from "@/auth";
 import { AlphavilleHeader } from "@/components/AlphavilleBrand";
 
 const eventCalendar: CalendarDay[] = [
-  { event: "Asia Pacific Championship", date: "Tue 17–Wed 18 Nov", activities: [
+  { event: "Asia Pacific Championship", date: "Tue 17 Nov", activities: [
     { title: "Registration, measurement and equipment inspection", time: "09:00–17:30", location: "Clearwater Bay Golf & Country Club Marina" },
-    { title: "Crew weigh-in", time: "Until 18:00" },
+    { title: "Final registration and weigh-in after inspection", location: "Regatta Office, Clearwater Bay Golf & Country Club Marina" },
   ] },
   { event: "Asia Pacific Championship", date: "Wed 18 Nov", activities: [
+    { title: "Registration, measurement and equipment inspection", time: "09:00–17:30", location: "Clearwater Bay Golf & Country Club Marina" },
+    { title: "Final registration and weigh-in after inspection", location: "Regatta Office, Clearwater Bay Golf & Country Club Marina" },
     { title: "Skippers’ briefing", time: "18:00–19:00", location: "RHKYC Kellett Island" },
-    { title: "Opening ceremony", time: "19:00–21:30", location: "RHKYC poolside" },
+    { title: "Opening ceremony", time: "19:00–21:00", location: "Royal Hong Kong Yacht Club poolside" },
   ] },
   { event: "Asia Pacific Championship", date: "Thu 19 Nov", activities: [
-    { title: "Championship racing begins" },
+    { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
     { title: "After-sailing drinks", time: "17:00–18:30", location: "Clearwater Bay Golf & Country Club" },
   ] },
   { event: "Asia Pacific Championship", date: "Fri 20 Nov", activities: [
-    { title: "Championship racing" },
+    { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
     { title: "After-sailing drinks", time: "17:00–18:30", location: "Clearwater Bay Golf & Country Club" },
   ] },
   { event: "Asia Pacific Championship", date: "Sat 21 Nov", activities: [
-    { title: "Final races and prizegiving" },
-    { title: "Prizegiving ceremony", time: "18:00–21:00", location: "Clearwater Bay Golf & Country Club" },
+    { title: "Final races · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
+    { title: "Asia Pacific Championship prizegiving ceremony", time: "18:30–21:00", location: "Clearwater Bay Golf & Country Club" },
   ] },
-  { event: "World Championship", date: "21–22 November", activities: [
-    { title: "Registration, measurement and equipment inspection" },
+  { event: "World Championship", date: "Sat 21 Nov", activities: [
+    { title: "Registration, measurement and equipment inspection", time: "09:00–17:30", location: "Clearwater Bay Golf & Country Club Marina" },
   ] },
-  { event: "World Championship", date: "22 November", activities: [
-    { title: "Skippers’ briefing and opening ceremony" },
+  { event: "World Championship", date: "Sun 22 Nov", activities: [
+    { title: "Registration, measurement and equipment inspection", time: "09:00–17:30", location: "Clearwater Bay Golf & Country Club Marina" },
+    { title: "World Championship crew weighing deadline", time: "By 17:30", location: "Regatta Office, Clearwater Bay Golf & Country Club Marina" },
+    { title: "Skippers’ briefing", time: "18:00–19:00", location: "RHKYC Kellett Island" },
+    { title: "Opening reception", time: "19:00–21:00", location: "Royal Hong Kong Yacht Club" },
   ] },
-  { event: "World Championship", date: "23–25 November", activities: [
-    { title: "Championship racing" },
+  { event: "World Championship", date: "Mon 23 Nov", activities: [
+    { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
+    { title: "Day prizegiving · presented by Code Zero", time: "17:00–18:00", location: "Clearwater Bay Golf & Country Club" },
   ] },
-  { event: "World Championship", date: "26 November", activities: [
-    { title: "Lay day; racing only if needed" },
+  { event: "World Championship", date: "Tue 24 Nov", activities: [
+    { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
+    { title: "Day prizegiving · presented by SHK Capital Partners", time: "17:00–18:00", location: "Clearwater Bay Golf & Country Club" },
   ] },
-  { event: "World Championship", date: "27–29 November", activities: [
-    { title: "Championship racing, final races and prizegiving" },
+  { event: "World Championship", date: "Wed 25 Nov", activities: [
+    { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
+    { title: "Championship gala dinner", time: "19:00–22:00", location: "Crystal Ballroom, Hopewell Hotel" },
+  ] },
+  { event: "World Championship", date: "Thu 26 Nov", activities: [
+    { title: "Lay day · racing only if required to complete the series", location: "Waters off the Ninepins" },
+  ] },
+  { event: "World Championship", date: "Fri 27 Nov", activities: [
+    { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
+    { title: "Day prizegiving · presented by XPENG", time: "18:00–20:00", location: "Royal Hong Kong Yacht Club" },
+  ] },
+  { event: "World Championship", date: "Sat 28 Nov", activities: [
+    { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
+    { title: "Day prizegiving · presented by Lee Kum Kee", time: "17:00–18:00", location: "Clearwater Bay Golf & Country Club" },
+  ] },
+  { event: "World Championship", date: "Sun 29 Nov", activities: [
+    { title: "Final races · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
+    { title: "Prizegiving and closing ceremony · approximate start", time: "Approx. 18:00", location: "Clearwater Bay Golf & Country Club" },
   ] },
 ];
 
@@ -73,11 +97,20 @@ export default async function ProjectOverviewPage() {
           <ProjectActionChecklist editable={canEdit} />
         </section>
 
+        <section className="border-t border-[var(--line)] py-8" aria-labelledby="follow-ups-title">
+          <div className="mb-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Outstanding information</p>
+            <h2 id="follow-ups-title" className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Who owes what</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--muted)]">Track missing information by sponsor or provider, update chase status, and copy a draft to review and send from your email.</p>
+          </div>
+          <InformationFollowUpTracker editable={canEdit} />
+        </section>
+
         <section className="border-t border-[var(--line)] py-8" aria-labelledby="calendar-title">
           <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Calendar</p>
-              <h2 id="calendar-title" className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Championship programme and interview slot</h2>
+              <h2 id="calendar-title" className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Official programme and coverage plan</h2>
             </div>
             <div className="flex flex-wrap gap-x-5 gap-y-2">
               <a href="https://www.dragonworld2027.com/for-visitors" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-sm font-semibold text-[var(--accent)] underline decoration-[var(--line-strong)] underline-offset-4">Live public calendar</a>
@@ -85,13 +118,13 @@ export default async function ProjectOverviewPage() {
               <a href="https://www.racingrulesofsailing.org/documents/13241/event" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-sm font-semibold text-[var(--accent)] underline decoration-[var(--line-strong)] underline-offset-4">APC Official Notice Board</a>
             </div>
           </div>
-          <p className="mb-4 max-w-3xl text-sm leading-6 text-[var(--muted)]">Published event dates and times are shown in Hong Kong time (HKT) as a reference for production planning, not as supplier bookings. Work bookings belong in the private production calendar below, visible only to approved project members; supplier accounts are read-only.</p>
+          <p className="mb-4 max-w-3xl text-sm leading-6 text-[var(--muted)]">Published event dates and times are shown in Hong Kong time (HKT). Expand a day and add a supplier beside each event that needs coverage. These assignments are for planning and do not confirm a supplier booking; record agreed work times and meeting points in the private production calendar below.</p>
           <div className="mb-4 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Filming period</p>
             <p className="mt-2 text-lg font-semibold">Tuesday 17 November – Sunday 29 November 2026</p>
             <p className="mt-2 text-sm leading-6 text-[var(--muted)]">Daily filming window: 09:00–21:00 HKT. Activity-specific times, responsible people or teams, and meeting points still need to be entered.</p>
           </div>
-          <EventProgramme days={eventCalendar} />
+          <EventProgramme days={eventCalendar} editable={canEdit} />
           <p className="mt-3 text-xs leading-5 text-[var(--muted)]">Check the live calendar for changes. Racing documents and notices on the APC Official Notice Board prevail over this summary.</p>
           <article className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-5 text-amber-950">
             <div className="flex flex-wrap items-center justify-between gap-2">
