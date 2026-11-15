@@ -4,16 +4,14 @@ import Link from "next/link";
 export function AlphavilleLogo({ onDark = false, size = "header" }: { onDark?: boolean; size?: "header" | "disk" }) {
   if (size === "header") {
     return (
-      <span className="relative block h-12 w-[clamp(150px,16vw,190px)] shrink-0 overflow-hidden" aria-label="Alphaville">
-        <Image
-          src="/alphaville-logo-lockup.svg"
-          width="624"
-          height="245"
-          alt="Alphaville"
-          className="absolute left-0 top-0 h-auto max-w-none"
-          style={{ width: "100%", filter: onDark ? "brightness(0) invert(1)" : undefined }}
-        />
-      </span>
+      <Image
+        src="/alphaville-wordmark.svg"
+        width="624"
+        height="242"
+        alt="Alphaville"
+        className="block h-auto max-w-full shrink-0"
+        style={{ width: "clamp(150px, 16vw, 190px)", filter: onDark ? "brightness(0) invert(1)" : undefined }}
+      />
     );
   }
   return (
