@@ -68,6 +68,14 @@ type SponsorProfile = {
 type SponsorRecord = { details?: SponsorDetails; profile?: Partial<SponsorProfile>; assets: SponsorAsset[]; updatedAt?: number; sourceUpdates?: string[] };
 type StorageMode = "cloud" | "local";
 const xpengUpdateId = "xpeng-social-and-event-update-2026-11";
+const xpengProductionUpdateId = "xpeng-production-inputs-update-2026-11";
+const hopewellUpdateId = "hopewell-media-and-gala-update-2026-11";
+const brugseZotUpdateId = "brugse-zot-media-update-2026-11";
+const chalmersUpdateId = "chalmers-media-update-2026-11";
+const yanmarUpdateId = "yanmar-paid-media-update-2026-11";
+const codeZeroUpdateId = "code-zero-media-update-2026-11";
+const centralOceansUpdateId = "central-oceans-media-update-2026-11";
+const shkUpdateId = "shk-title-sponsor-media-update-2026-11";
 const xpengSocialUpdate = [
   "Overseas markets — Instagram and Facebook: @xpeng_global and @xpeng_hk.",
   "Selected key daily updates may be co-posted with @xpeng_hk.",
@@ -81,6 +89,27 @@ const xpengActivationUpdate = [
   "25 Nov: XPENG confirms a booth at the Hopewell Hotel gala dinner; booth dimensions are needed for the backdrop.",
   "27 Nov: two X9s on standby from 13:30 at Clearwater Bay Marina to transfer VIPs to Kellett Island. XPENG executives are invited to present day prizes at the 18:00–20:00 prizegiving. No booth at prizegiving. The golf activity is cancelled; a spectator boat is arranged.",
   "22 Nov media timing: WhatsApp messages suggest XPENG media arrival at 16:00–16:30; Jerry Tam arriving at 17:00 was proposed, but earlier arrival was recommended. The chat mentions a 17:30 press conference while the supplied factsheet/rundown list 18:15/18:30; confirm the final times.",
+].join("\n");
+const hopewellMediaPackage = "Included sponsor film at no additional cost: dedicated 60–90-second film, plus 30-second and 15-second edits in landscape, portrait and square formats; a version without captions; and written permission for Hopewell to use the films on its own channels. Films are published on the championship’s official channels after approval, not screened at the event. Master files will be supplied for Hopewell to publish at the same time or later. Filming is planned during 21–29 November 2026; final films are due within 15 days of the closing ceremony, by mid-December. Event team coordinates review. Longer brand features, more detailed interviews or extra activation filming are optional and require scope and cost agreement in advance.";
+const hopewellFollowUps = "Awaiting from Hopewell: nominated production contact; priority messages and brand guidelines; preferred spokesperson, short biography and photo; social handles and tagging/sharing preferences; existing footage or photos with usage permissions; and the hospitality moments to capture, including the gala dinner. Event team to send a proposed filming/content schedule in writing once these arrive.";
+const brugseZotMediaPackage = "Included sponsor film at no additional cost under the existing sponsorship: dedicated 60–90-second film plus 30-second and 15-second edits in landscape, portrait and square formats, a version without captions, and written permission for Brugse Zot to use the films on its channels. Final films are due within 15 days of the closing ceremony, with review coordinated by the event team. Daily highlights, photography and race reports; a three-minute Inside Sailing event feature; wider news footage and event programming distribution; and a post-event media report are event-wide coverage, subject to editorial decisions. The longer championship documentary tells the event-wide story, with sponsor logos at the end, not a dedicated brand feature. Any bespoke extended content is optional and priced only after advance agreement.";
+const chalmersMediaPackage = "Included sponsor film at no additional cost: dedicated 60–90-second film plus 30-second and 15-second edits in landscape, portrait and square formats, a version without captions, and written permission to use the films on Chalmers’ channels. Final films are due within 15 days of the closing ceremony, with review coordinated by the event team. Suggested story: specially labelled event wines with sailing footage, the wines at championship hospitality events, and a short interview. Instagram/Facebook cross-promotion and coordinated tags can be arranged. Daily highlights, photography, race reports, a three-minute Inside Sailing feature, news footage and longer event programming distribution to TV, streaming and inflight channels, and a post-event report are event-wide coverage, subject to editorial decisions. Broadcast and inflight channels reach North America and Europe; digital distribution covers the USA, Canada, UK and South East Asia. Optional bespoke extended content requires advance scope and cost agreement.";
+const yanmarPaidMediaScope = "SPECIAL COMMERCIAL ARRANGEMENT — All Yanmar media and branding production is paid separately and is outside the standard no-cost sponsor-film package. Confirm a separate scope, quote and approval before production. The 12 September 2026 email discusses a press release for mid/end September, an A4 programme-booklet advertisement with artwork due 30 September, and a bespoke sponsor video at additional pricing. It asks for quality Yanmar sailing images for a mockup, advice on the draft press release, confirmation of social handles and collaboration, a Chinese release for Xiaohongshu, bleed guidance for the A4 artwork, and advice on sharing daily reels, video and photos. The status of those September deadlines is unknown and must be confirmed.";
+const codeZeroMediaPackage = "Included sponsor film at no additional cost under the existing sponsorship: a dedicated 60–90-second film, 30-second and 15-second edits in landscape, portrait and square formats, a version without captions, and written permission to use the film on CODE ZERO’s own channels. Final films are due within 15 days of the closing ceremony, with review coordinated by the event team. Suggested story: official event apparel in use, interview with Marc Blees or another chosen spokesperson, and Marc’s personal participation in the Dragon fleet if his racing schedule allows. Daily highlights, photography and race reports, the three-minute Inside Sailing event feature, wider event-media distribution and a post-event report are event-wide, subject to editorial decisions. Any optional extended brand content requires advance agreement on scope and cost.";
+const centralOceansMediaPackage = "Included standard sponsor film package: dedicated 60–90-second film plus 30-second and 15-second edits in landscape, portrait and square formats, a version without captions, and written permission for Central Oceans to use the films on its channels. Final films are due within 15 days of the closing ceremony, with review coordinated by the event team. Championship-wide media includes daily highlights, photography and race reports, a three-minute Inside Sailing event feature, wider distribution to digital, television, streaming and inflight channels, and a post-event media report. Third-party publication is subject to editorial decisions.";
+const xpengDirectSocialLinks = [
+  "Mainland China · @小鹏汽车",
+  "Weibo: https://weibo.com/5710264970/RosDlAi69",
+  "Xiaohongshu: https://xhslink.cn/o/2C3ZTgRSGDi",
+  "Bilibili: https://www.bilibili.com/video/BV1JfnX6KEEm/?vd_source=ca9bc52462aa2b5cbb53871a8598f7ba",
+  "Douyin: https://www.douyin.com/user/self?modal_id=7700864890407275802",
+  "Kuaishou: https://www.kuaishou.com/short-video/3xdc8x84mpri4w6?utm_source=video&utm_medium=video&utm_campaign=video",
+  "WeChat Channels: scan the WeChat QR image supplied by XPENG; direct link cannot be copied. QR image is not in this message.",
+  "WeChat Official Account: platform listed for video posts; direct link not supplied.",
+  "Hong Kong · XPENG HongKong Facebook: https://www.facebook.com/XPENGHK",
+  "Hong Kong · XPENG HongKong Instagram: https://www.instagram.com/xpeng_hk/",
+  "Global · XPENG Facebook: https://www.facebook.com/XPengMotorsGlobal",
+  "Global · XPENG Instagram: https://www.instagram.com/xpeng_global/",
 ].join("\n");
 
 const emptyDetails: SponsorDetails = {
@@ -163,6 +192,395 @@ function applyXpengSourceUpdate(record: SponsorRecord, sponsorSlug: string) {
   };
 }
 
+function applyXpengProductionUpdate(record: SponsorRecord) {
+  if (record.sourceUpdates?.includes(xpengProductionUpdateId)) return { record, changed: false };
+  const details = { ...emptyDetails, ...record.details };
+  const profile = { ...emptyProfile, ...record.profile, reviewStatuses: { ...emptyProfile.reviewStatuses, ...record.profile?.reviewStatuses } };
+  const updateNotes = [
+    "Miu Ng provided production contacts, the XPENG brand mission/vision, Jerry Tam as spokesperson, direct social links and an initial 22 November interview plan.",
+    "Elaine Chan Yeeling says the company logo and brand guidelines were sent previously. Elaine will send available media assets because Dropbox and WeTransfer are inaccessible in mainland China.",
+    "The preliminary plan is 2–3 social posts using on-site imagery between 22 and 29 November. Video publication timing will be set after the final-cut schedule is confirmed.",
+  ].join("\n");
+  const updatedDetails = {
+    ...details,
+    brandName: details.brandName || "XPENG",
+    contactName: details.contactName || "Miu Ng",
+    contactPhone: details.contactPhone || "+86 186 6662 7849",
+    website: details.website || "https://www.xpeng.com/",
+    brief: appendSourceText(details.brief, "XPENG was founded in 2014. Brand mission: “We are the Explorer of Mobility in the World of Physical AI.” Vision: “To Become a Smart Technology Company Beloved by Users Worldwide.”"),
+    notes: appendSourceText(details.notes, updateNotes),
+  };
+  profile.submissionSource = appendSourceText(profile.submissionSource, "XPENG production details supplied by Miu Ng, 15 November 2026");
+  profile.submissionReceivedAt = profile.submissionReceivedAt || "2026-11-15";
+  profile.contacts = withSourceContacts(profile, [
+    { type: "Primary · APAC Brand Marketing", name: "Miu Ng", role: "Senior Brand Manager, APAC Brand Marketing", email: "wuxy4@xiaopeng.com", phone: "+86 186 6662 7849" },
+    { type: "Global Brand Marketing", name: "Shuning", role: "Senior Brand Manager, Global Brand Marketing", email: "lisn8@xiaopeng.com", phone: "" },
+    { type: "Hong Kong distributor", name: "Elaine Chan Yeeling", role: "Senior Brand Manager, XPENG Hong Kong General Distributor", email: "elaine.chan.yeeling@sime.com", phone: "" },
+    { type: "Interview scheduling", name: "Grace", role: "Coordinate Jerry Tam’s 22 November schedule; direct details not supplied", email: "", phone: "" },
+  ]);
+  profile.brandGuidelines = appendSourceText(profile.brandGuidelines, "Elaine confirms the XPENG company logo and brand guidelines were sent previously. Check that the files are accessible in this sponsor collection.");
+  profile.keyMessages = appendSourceText(profile.keyMessages, "XPENG, founded in 2014: “We are the Explorer of Mobility in the World of Physical AI.” Vision: “To Become a Smart Technology Company Beloved by Users Worldwide.”");
+  profile.spokespersonName = profile.spokespersonName || "Jerry Tam";
+  profile.spokespersonTitle = profile.spokespersonTitle || "APAC General Manager, XPENG";
+  profile.socialLinks = appendSourceText(profile.socialLinks.replace(xpengSocialUpdate, "").trim(), xpengDirectSocialLinks);
+  profile.storyPriorities = appendSourceText(profile.storyPriorities, "XPENG’s sponsorship of the 2027 Hong Kong Dragon World Championship marks a key milestone for XPENG Hong Kong. Sailing’s pioneering spirit resonates with XPENG’s brand vision. The partnership is intended to engage Hong Kong’s elite audience, build stronger local affinity and showcase XPENG in a lifestyle-led context.");
+  profile.preferredLocation = profile.preferredLocation || "Next to XPENG vehicle models, weather permitting. This is a location preference, not the confirmed interview meeting point.";
+  profile.requestedDate = profile.requestedDate || "2026-11-22";
+  profile.filmingConfirmation = appendSourceText(profile.filmingConfirmation, "XPENG says Jerry Tam’s interview is scheduled for 22 November; exact time and meeting point remain to be confirmed with Grace.");
+  profile.diaryContact = profile.diaryContact || "Grace (contact details to obtain)";
+  profile.availabilityNotes = appendSourceText(profile.availabilityNotes, "Contact Grace to confirm Jerry Tam’s schedule on 22 November. Preliminary XPENG social plan: 2–3 posts using on-site imagery between 22 and 29 November; video dates to follow once the final-cut timeline is confirmed.");
+  profile.mediaClearance = appendSourceText(profile.mediaClearance, "Available assets are pending delivery by Elaine. Dropbox and WeTransfer are inaccessible in mainland China; agree an accessible transfer method and record usage permissions when the assets arrive.");
+  profile.finalApprover = profile.finalApprover || "Confirm final approver from the nominated contacts: Miu Ng, Shuning or Elaine Chan Yeeling.";
+  profile.followUps = appendSourceText(profile.followUps, "Obtain Grace’s direct contact details and confirm Jerry Tam’s exact 22 November interview time and agreed meeting point; filming next to the XPENG models is weather permitting. Agree a weather alternative. Confirm who is the final film approver and the expected review turnaround. Obtain the WeChat Channels QR image and the media assets through a transfer method accessible in mainland China; verify the previously sent logo and brand guide are in the collection.");
+  profile.reviewStatuses.contacts = "Submitted";
+  profile.reviewStatuses.spokespeople = "Submitted";
+  profile.reviewStatuses.messages = "Submitted";
+  profile.reviewStatuses.brand = "Submitted";
+  profile.reviewStatuses.filming = "Needs input";
+  profile.reviewStatuses.availability = "Needs input";
+  profile.reviewStatuses.media = "Needs input";
+  profile.reviewStatuses.approval = "Needs input";
+  return { record: { ...record, details: updatedDetails, profile, sourceUpdates: [...(record.sourceUpdates ?? []), xpengProductionUpdateId] }, changed: true };
+}
+
+function appendSourceText(current: string | undefined, addition: string) {
+  const value = current?.trim() ?? "";
+  return value.includes(addition) ? value : value ? `${value}\n\n${addition}` : addition;
+}
+
+function withSourceContacts(profile: SponsorProfile, contacts: SponsorContact[]) {
+  const existing = profile.contacts.filter((contact) => contact.name.trim() || contact.email.trim() || contact.phone.trim());
+  for (const contact of contacts) {
+    const alreadyAdded = existing.some((item) => {
+      const sameEmail = Boolean(item.email && contact.email && item.email.toLowerCase() === contact.email.toLowerCase());
+      return sameEmail || item.name.toLowerCase() === contact.name.toLowerCase();
+    });
+    if (!alreadyAdded) existing.push(contact);
+  }
+  return existing.length ? existing : [emptyContact];
+}
+
+function applyHopewellSourceUpdate(record: SponsorRecord) {
+  if (record.sourceUpdates?.includes(hopewellUpdateId)) return { record, changed: false };
+  const details = { ...emptyDetails, ...record.details };
+  const profile = { ...emptyProfile, ...record.profile, reviewStatuses: { ...emptyProfile.reviewStatuses, ...record.profile?.reviewStatuses } };
+  const notes = [
+    "25 November, 19:00–22:00: championship gala dinner at Crystal Ballroom, Hopewell Hotel. Hopewell is the Hospitality Partner; the gala dinner is at the hotel.",
+    "13 November email thread: sponsor films are for publication, not event screening. Approved films go to championship channels; Hopewell receives master files for its own channels.",
+    "The standard sponsor film package is included at no extra cost. Additional bespoke content is optional; agree scope and cost in advance before committing.",
+  ].join("\n");
+  const updatedDetails = {
+    ...details,
+    brandName: details.brandName || "Hopewell Hotel",
+    contactName: details.contactName || "Tiffany Lee",
+    contactPhone: details.contactPhone || "+852 2620 3800",
+    website: details.website || "https://www.hopewellhotel.com",
+    brief: appendSourceText(details.brief, hopewellMediaPackage),
+    notes: appendSourceText(details.notes, notes),
+  };
+  profile.submissionSource = profile.submissionSource || "Email thread with Hopewell Hotel and Hong Kong Dragon Association, 13 November 2026";
+  profile.submissionReceivedAt = profile.submissionReceivedAt || "2026-11-13";
+  profile.contacts = withSourceContacts(profile, [
+    { type: "Primary", name: "Tiffany Lee", role: "Assistant Director of Marketing Communications · Hopewell Hotel", email: "tiffanylee@hopewellhotel.com", phone: "+852 2620 3800" },
+    { type: "Event delivery contact", name: "Stella Ko", role: "RHKYC contact for deliverables during and after the event", email: "stella.ko@rhkyc.org.hk", phone: "" },
+  ]);
+  profile.interviewDuration = profile.interviewDuration || "Dedicated sponsor film: 60–90 seconds, with 30-second and 15-second edits in landscape, portrait and square formats; clean version without captions included.";
+  profile.filmingConfirmation = profile.filmingConfirmation || "Filming period: 21–29 November 2026. Exact date, time and location schedule to be proposed after Hopewell provides the requested inputs.";
+  profile.essentialFilmingMoments = appendSourceText(profile.essentialFilmingMoments, "Hopewell’s Hospitality Partner contribution and hospitality programme, including the 25 November gala dinner at Crystal Ballroom, Hopewell Hotel.");
+  profile.availabilityNotes = profile.availabilityNotes || "Event filming runs during the championship, 21–29 November 2026. Exact Hopewell filming slots are not confirmed.";
+  profile.approvalTurnaround = profile.approvalTurnaround || "Review coordinated through the event team; turnaround time not specified.";
+  profile.captionLanguages = profile.captionLanguages || "A version without captions is included; caption languages not specified.";
+  profile.usageRestrictions = appendSourceText(profile.usageRestrictions, "Written permission to use the completed sponsor films on Hopewell’s channels is included. The films are published after approval and are not screened at the event. Any bespoke additional content requires prior scope and cost agreement.");
+  profile.followUps = appendSourceText(profile.followUps, hopewellFollowUps);
+  profile.reviewStatuses.contacts = "Submitted";
+  profile.reviewStatuses.media = "Submitted";
+  profile.reviewStatuses.filming = "Needs input";
+  profile.reviewStatuses.availability = "Needs input";
+  profile.reviewStatuses.brand = "Needs input";
+  profile.reviewStatuses.messages = "Needs input";
+  profile.reviewStatuses.spokespeople = "Needs input";
+  profile.reviewStatuses.approval = "Needs input";
+  return { record: { ...record, details: updatedDetails, profile, sourceUpdates: [...(record.sourceUpdates ?? []), hopewellUpdateId] }, changed: true };
+}
+
+function applyBrugseZotSourceUpdate(record: SponsorRecord) {
+  if (record.sourceUpdates?.includes(brugseZotUpdateId)) return { record, changed: false };
+  const details = { ...emptyDetails, ...record.details };
+  const profile = { ...emptyProfile, ...record.profile, reviewStatuses: { ...emptyProfile.reviewStatuses, ...record.profile?.reviewStatuses } };
+  const updateNotes = [
+    "13 November: Nathalie Mortelmans confirms Brugse Zot will proceed with the included sponsor film at no additional cost. She will ask Marketing Manager Stieven Rogiers to provide the requested information and materials.",
+    "Nathalie says the event team can discuss details directly with Xavier Vanneste onsite.",
+  ].join("\n");
+  const updatedDetails = {
+    ...details,
+    brandName: details.brandName || "Brouwerij De Halve Maan · Brugse Zot",
+    contactName: details.contactName || "Nathalie Mortelmans",
+    contactPhone: details.contactPhone || "+32 50 444 920",
+    website: details.website || "https://www.halvemaan.be",
+    brief: appendSourceText(details.brief, brugseZotMediaPackage),
+    notes: appendSourceText(details.notes, updateNotes),
+  };
+  profile.submissionSource = profile.submissionSource || "Email thread with Nathalie Mortelmans and Virgile S. Bertrand, 13 November 2026";
+  profile.submissionReceivedAt = profile.submissionReceivedAt || "2026-11-13";
+  profile.contacts = withSourceContacts(profile, [
+    { type: "Primary", name: "Nathalie Mortelmans", role: "Management Assistant · Brouwerij De Halve Maan", email: "nm@halvemaan.be", phone: "+32 50 444 920" },
+    { type: "Production contact", name: "Stieven Rogiers", role: "Marketing Manager (to provide requested materials)", email: "sr@halvemaan.be", phone: "" },
+    { type: "Onsite contact", name: "Xavier Vanneste", role: "Available to discuss details onsite; role and direct details not supplied", email: "", phone: "" },
+  ]);
+  profile.storyPriorities = appendSourceText(profile.storyPriorities, "Suggested story: Brugse Zot’s Belgian heritage and arrival in Hong Kong; specially labelled event wines with sailing footage and the wines enjoyed at championship hospitality events; short interview. Xavier Vanneste or another chosen spokesperson was suggested, not yet confirmed.");
+  profile.spokespersonName = profile.spokespersonName || "Xavier Vanneste (suggested; confirm)";
+  profile.usageRestrictions = appendSourceText(profile.usageRestrictions, "Written permission to use the completed sponsor films on Brugse Zot’s channels is included. Rights/permissions for any separately supplied photos or footage still need confirmation. Optional bespoke extended content requires advance scope and cost agreement.");
+  profile.approvalTurnaround = profile.approvalTurnaround || "Review coordinated by the event team; turnaround time not specified.";
+  profile.captionLanguages = profile.captionLanguages || "A version without captions is included; caption languages not specified.";
+  profile.followUps = appendSourceText(profile.followUps, "Awaiting from Stieven / Brugse Zot: production contact details; confirm whether existing logo files are current and provide vector/high-resolution files; brand guidelines or N/A; 3–5 approved key messages and boilerplate; spokesperson confirmation, bio and photo; footage/photos with usage permissions; social links; preferred story moments and filming preferences; HKT availability, interview duration and day-of/backup contacts; approver, turnaround, backup approver, caption languages, name spellings and restrictions. Event team to propose a filming schedule after these details arrive.");
+  profile.reviewStatuses.contacts = "Submitted";
+  profile.reviewStatuses.media = "Submitted";
+  profile.reviewStatuses.spokespeople = "Needs input";
+  profile.reviewStatuses.brand = "Needs input";
+  profile.reviewStatuses.messages = "Needs input";
+  profile.reviewStatuses.filming = "Needs input";
+  profile.reviewStatuses.availability = "Needs input";
+  profile.reviewStatuses.approval = "Needs input";
+  return { record: { ...record, details: updatedDetails, profile, sourceUpdates: [...(record.sourceUpdates ?? []), brugseZotUpdateId] }, changed: true };
+}
+
+function applyChalmersSourceUpdate(record: SponsorRecord) {
+  if (record.sourceUpdates?.includes(chalmersUpdateId)) return { record, changed: false };
+  const details = { ...emptyDetails, ...record.details };
+  const profile = { ...emptyProfile, ...record.profile, reviewStatuses: { ...emptyProfile.reviewStatuses, ...record.profile?.reviewStatuses } };
+  const updateNotes = [
+    "15 November follow-up: Virgile is checking who can be interviewed and when, and whether Chalmers has footage for the short film.",
+    "14 November newsletter: sent to 400 contacts; 45 clicks to the Chalmers site confirmed. The competitor briefing news item was published and Chalmers was tagged in the matching Facebook post: https://www.dragonworld2027.com/news/competitor-briefing",
+    "Chalmers identified the USA as its largest export market, with Canada, South East Asia, the UK and Europe as target markets.",
+  ].join("\n");
+  const updatedDetails = {
+    ...details,
+    brandName: details.brandName || "Chalmers",
+    contactName: details.contactName || "Kim Chalmers",
+    website: details.website || "https://www.chalmers.com.au",
+    brief: appendSourceText(details.brief, chalmersMediaPackage),
+    notes: appendSourceText(details.notes, updateNotes),
+  };
+  profile.submissionSource = profile.submissionSource || "Email thread with Kim Chalmers and Virgile S. Bertrand, 9–15 November 2026";
+  profile.submissionReceivedAt = profile.submissionReceivedAt || "2026-11-15";
+  profile.contacts = withSourceContacts(profile, [
+    { type: "Primary", name: "Kim Chalmers", role: "Chalmers contact", email: "kim@chalmers.com.au", phone: "" },
+    { type: "Media and international website", name: "Thayer Eiby", role: "Media and international website point person; interview availability to confirm", email: "thayer@chalmers.com.au", phone: "" },
+    { type: "Additional contact", name: "Tennille Chalmers", role: "Chalmers team; media planning", email: "tennille@chalmers.com.au", phone: "" },
+  ]);
+  profile.storyPriorities = appendSourceText(profile.storyPriorities, "Suggested content: specially labelled event wines with sailing footage, wines enjoyed at championship hospitality events, and a short interview. Coordinate Instagram/Facebook tags. Priority markets: USA first, then Canada, South East Asia, UK and Europe.");
+  profile.preferredLocation = profile.preferredLocation || "Championship hospitality events; exact location and filming slot to be agreed.";
+  profile.filmingConfirmation = profile.filmingConfirmation || "Interview and filming slot not confirmed. Kim proposed a planning Zoom; Virgile is following up on who is available and when.";
+  profile.availabilityNotes = profile.availabilityNotes || "Kim noted she was unavailable Friday 13 November and proposed a Zoom later that week or early the following week; that proposed window has passed, so confirm current availability.";
+  profile.usageRestrictions = appendSourceText(profile.usageRestrictions, "Written permission for Chalmers to use the completed sponsor films on its channels is included. Confirm usage permission for any supplied existing footage and photographs.");
+  profile.approvalTurnaround = profile.approvalTurnaround || "Review coordinated by the event team; turnaround time not specified.";
+  profile.followUps = appendSourceText(profile.followUps, "Awaiting from Chalmers: confirm interview spokesperson and current HKT availability; advise whether footage is available for the short film; provide brand pack, handles, priority messages and filming preferences. Confirm usage permissions for existing photos/footage. Event team to propose a filming/content schedule after the details arrive.");
+  profile.reviewStatuses.contacts = "Submitted";
+  profile.reviewStatuses.media = "Submitted";
+  profile.reviewStatuses.spokespeople = "Needs input";
+  profile.reviewStatuses.brand = "Needs input";
+  profile.reviewStatuses.messages = "Needs input";
+  profile.reviewStatuses.filming = "Needs input";
+  profile.reviewStatuses.availability = "Needs input";
+  profile.reviewStatuses.approval = "Needs input";
+  return { record: { ...record, details: updatedDetails, profile, sourceUpdates: [...(record.sourceUpdates ?? []), chalmersUpdateId] }, changed: true };
+}
+
+function applyYanmarSourceUpdate(record: SponsorRecord) {
+  if (record.sourceUpdates?.includes(yanmarUpdateId)) return { record, changed: false };
+  const details = { ...emptyDetails, ...record.details };
+  const profile = { ...emptyProfile, ...record.profile, reviewStatuses: { ...emptyProfile.reviewStatuses, ...record.profile?.reviewStatuses } };
+  const notes = "12 September email: Yanmar’s Supporting Partner contract lists a press release and A4 programme-booklet advertisement. Michele Durkin requested advice on daily content sharing and expressed interest in a sponsor video at additional pricing. September submission dates have passed; completion/status is not recorded. A press-release draft has since been supplied. Its issue date is still a placeholder, and the draft needs review and approval before use.";
+  const updatedDetails = {
+    ...details,
+    brandName: details.brandName || "Yanmar",
+    contactName: details.contactName || "Michele Durkin",
+    website: details.website || "https://www.yanmar.com",
+    brief: appendSourceText(details.brief, yanmarPaidMediaScope),
+    notes: appendSourceText(details.notes, notes),
+  };
+  profile.submissionSource = profile.submissionSource || "Email from Abraham C.J. van Olphen, 12 September 2026";
+  profile.submissionReceivedAt = profile.submissionReceivedAt || "2026-09-12";
+  profile.contacts = withSourceContacts(profile, [
+    { type: "Primary", name: "Michele Durkin", role: "Yanmar contact", email: "michele_durkin@yanmar.com", phone: "" },
+    { type: "Additional", name: "Taro Kitamura", role: "Yanmar contact", email: "taro_kitamura@yanmar.com", phone: "" },
+  ]);
+  profile.brandGuidelines = appendSourceText(profile.brandGuidelines, "A4 advertising artwork requested for the programme booklet; confirm bleed requirements. Good-quality Yanmar sailing images requested for the press-release mockup.");
+  profile.filmingConfirmation = profile.filmingConfirmation || "Yanmar is interested in a bespoke sponsor video at additional pricing. Scope, production arrangements and quote must be agreed separately before work begins.";
+  profile.storyPriorities = appendSourceText(profile.storyPriorities, "The 12 September correspondence identifies YANMAR Racing, Yanmar’s longstanding Dragon-class relationship, and its Supporting Partner role at the 2027 Hong Kong Dragon World Championship as potential press-release themes.");
+  profile.keyMessages = appendSourceText(profile.keyMessages, "Draft press release supplied: Yanmar joins as a Supporting Partner, building on YANMAR Racing in the Dragon class since 2018 and support for the Dragon Gold Cup since 2019. It describes Yanmar’s wider sailing involvement and the Hong Kong championship as the first Dragon World Championship in Asia. This is draft copy, not an approved statement; verify claims and confirm Taro Kitamura and Abraham van Olphen’s quotes before publication. The issue date remains [issue date].");
+  profile.followUps = appendSourceText(profile.followUps, "Confirm whether the mid/end September press release and 30 September A4 programme-booklet artwork were completed. Review and approve the supplied press-release draft and replace its [issue date] placeholder; provide quality sailing images for the mockup; reconfirm handles and partner collaboration; prepare the Chinese release for Xiaohongshu; confirm A4 bleed requirements; and share daily reels/video/photo-sharing preferences. Scope and quote the separately paid sponsor video before production.");
+  profile.reviewStatuses.contacts = "Submitted";
+  profile.reviewStatuses.brand = "Needs input";
+  profile.reviewStatuses.messages = "Needs input";
+  profile.reviewStatuses.media = "Needs input";
+  profile.reviewStatuses.filming = "Needs input";
+  profile.reviewStatuses.spokespeople = "Needs input";
+  profile.reviewStatuses.approval = "Needs input";
+  return { record: { ...record, details: updatedDetails, profile, sourceUpdates: [...(record.sourceUpdates ?? []), yanmarUpdateId] }, changed: true };
+}
+
+function applyCodeZeroSourceUpdate(record: SponsorRecord) {
+  if (record.sourceUpdates?.includes(codeZeroUpdateId)) return { record, changed: false };
+  const details = { ...emptyDetails, ...record.details };
+  const profile = { ...emptyProfile, ...record.profile, reviewStatuses: { ...emptyProfile.reviewStatuses, ...record.profile?.reviewStatuses } };
+  const updateNotes = [
+    "11 November: Merle Louwinger introduced Indy Pocorni as the marketing contact and asked the event team to coordinate the content plan and practical arrangements with her.",
+    "Stella Ko will assist from the club side with deliverables during and after the event; Jeff Merrin (RHKYC General Manager) is also available for questions.",
+  ].join("\n");
+  const updatedDetails = {
+    ...details,
+    brandName: details.brandName || "CODE ZERO",
+    contactName: details.contactName || "Indy Pocorni",
+    website: details.website || "https://www.code-zero.com",
+    brief: appendSourceText(details.brief, codeZeroMediaPackage),
+    notes: appendSourceText(details.notes, updateNotes),
+  };
+  profile.submissionSource = profile.submissionSource || "Email thread with Merle Louwinger and Abraham C.J. van Olphen, 6–11 November 2026";
+  profile.submissionReceivedAt = profile.submissionReceivedAt || "2026-11-11";
+  profile.contacts = withSourceContacts(profile, [
+    { type: "Primary · marketing/content coordination", name: "Indy Pocorni", role: "Marketing · content plan and practical arrangements", email: "indy@code-zero.com", phone: "" },
+    { type: "Additional", name: "Marc Blees", role: "Potential interviewee; races in the Dragon fleet", email: "mblees@code-zero.com", phone: "" },
+    { type: "Additional", name: "Merle Louwinger", role: "Introduced Indy and supported the content discussion", email: "Merle@code-zero.com", phone: "+31 (0)85 27 323 75 · mobile +31 639105101" },
+    { type: "Event delivery contact", name: "Stella Ko", role: "RHKYC contact for deliverables during and after the event", email: "stella.ko@rhkyc.org.hk", phone: "" },
+  ]);
+  profile.storyPriorities = appendSourceText(profile.storyPriorities, "Suggested story: CODE ZERO as the sailing brand dressing the championship; show official event apparel in use and interview Marc Blees or a chosen spokesperson. Marc’s participation in the Dragon fleet is a possible personal angle, subject to his racing schedule.");
+  profile.spokespersonName = profile.spokespersonName || "Marc Blees (suggested; confirm)";
+  profile.filmingConfirmation = profile.filmingConfirmation || "Interview and filming slot not confirmed. Schedule around Marc Blees’s racing commitments if he is selected.";
+  profile.interviewDuration = profile.interviewDuration || "Included sponsor film: 60–90 seconds plus 30-second and 15-second edits in landscape, portrait and square formats; version without captions included.";
+  profile.usageRestrictions = appendSourceText(profile.usageRestrictions, "Written permission to use the completed sponsor film on CODE ZERO’s channels is included. Confirm permissions for any separately supplied photos or footage. Optional extended brand content requires scope and cost agreement in advance.");
+  profile.approvalTurnaround = profile.approvalTurnaround || "Review coordinated by the event team; turnaround time not specified.";
+  profile.captionLanguages = profile.captionLanguages || "A version without captions is included; caption languages not specified.";
+  profile.followUps = appendSourceText(profile.followUps, "Awaiting from Indy / CODE ZERO: production contact confirmation; priority messages, brand guidelines and social handles; preferred spokesperson and biography/photo; available apparel footage and usage permission; interview availability coordinated around Marc’s race schedule; filming preferences and approval details. Event team to send the proposed content/filming schedule after receiving these details.");
+  profile.reviewStatuses.contacts = "Submitted";
+  profile.reviewStatuses.media = "Submitted";
+  profile.reviewStatuses.spokespeople = "Needs input";
+  profile.reviewStatuses.brand = "Needs input";
+  profile.reviewStatuses.messages = "Needs input";
+  profile.reviewStatuses.filming = "Needs input";
+  profile.reviewStatuses.availability = "Needs input";
+  profile.reviewStatuses.approval = "Needs input";
+  return { record: { ...record, details: updatedDetails, profile, sourceUpdates: [...(record.sourceUpdates ?? []), codeZeroUpdateId] }, changed: true };
+}
+
+function applyCentralOceansSourceUpdate(record: SponsorRecord) {
+  if (record.sourceUpdates?.includes(centralOceansUpdateId)) return { record, changed: false };
+  const details = { ...emptyDetails, ...record.details };
+  const profile = { ...emptyProfile, ...record.profile, reviewStatuses: { ...emptyProfile.reviewStatuses, ...record.profile?.reviewStatuses } };
+  const updatedDetails = {
+    ...details,
+    brandName: details.brandName || "Central Oceans",
+    contactName: details.contactName || "Kamilah Mohd",
+    website: details.website || "https://centraloceans.com",
+    brief: appendSourceText(details.brief, centralOceansMediaPackage),
+    notes: appendSourceText(details.notes, "7 November: Bram van Olphen asked Kamilah Mohd to consider who would represent Central Oceans in an ICARUS interview. Interviewee, contact details, content priorities and availability are not yet recorded."),
+  };
+  profile.submissionSource = profile.submissionSource || "Email from Abraham C.J. van Olphen, 7 November 2026";
+  profile.submissionReceivedAt = profile.submissionReceivedAt || "2026-11-07";
+  profile.contacts = withSourceContacts(profile, [
+    { type: "Primary", name: "Kamilah Mohd", role: "Central Oceans contact; interviewee to be nominated", email: "", phone: "" },
+    { type: "Media and event coordination", name: "Abraham C.J. van Olphen", role: "Central Oceans; media and branding contact", email: "bram.van.olphen@centraloceans.com", phone: "+852 2892 9201" },
+  ]);
+  profile.interviewDuration = profile.interviewDuration || "Included sponsor film: 60–90 seconds, with 30-second and 15-second edits in landscape, portrait and square formats; version without captions included.";
+  profile.usageRestrictions = appendSourceText(profile.usageRestrictions, "Written permission to use the completed sponsor film on Central Oceans’ channels is included. Confirm permissions for any separately supplied footage or photos.");
+  profile.approvalTurnaround = profile.approvalTurnaround || "Review coordinated through the event team; turnaround time not specified.";
+  profile.captionLanguages = profile.captionLanguages || "A version without captions is included; caption languages not specified.";
+  profile.followUps = appendSourceText(profile.followUps, "Nominate the Central Oceans interviewee and provide their role, short biography/photo, current HKT availability and day-of contact. Share priority story moments, social handles and tagging/sharing preferences, plus any footage or photos and usage permissions. Confirm film approver and review details so the event team can propose the schedule.");
+  profile.reviewStatuses.contacts = "Needs input";
+  profile.reviewStatuses.media = "Submitted";
+  profile.reviewStatuses.spokespeople = "Needs input";
+  profile.reviewStatuses.filming = "Needs input";
+  profile.reviewStatuses.availability = "Needs input";
+  profile.reviewStatuses.approval = "Needs input";
+  return { record: { ...record, details: updatedDetails, profile, sourceUpdates: [...(record.sourceUpdates ?? []), centralOceansUpdateId] }, changed: true };
+}
+
+function applyShkSourceUpdate(record: SponsorRecord) {
+  if (record.sourceUpdates?.includes(shkUpdateId)) return { record, changed: false };
+  const details = { ...emptyDetails, ...record.details };
+  const profile = { ...emptyProfile, ...record.profile, reviewStatuses: { ...emptyProfile.reviewStatuses, ...record.profile?.reviewStatuses } };
+  const keyMessages = [
+    "1. A leader in alternative investment\nSun Hung Kai & Co. is a leader in alternative investment with deep roots in Hong Kong, spanning more than half a century. Through our alternative solutions platform, Sun Hung Kai Capital Partners, we provide dedicated alternative investment solutions and client services to institutional investors, family offices, and high-net-worth clients. Sailing and investing share a core philosophy: thorough preparation before setting sail, agility and skills to navigate changing conditions, and seamless teamwork to reach long-term success.",
+    "2. Our long-standing commitment to sailing\nSailing has long been a sport that Sun Hung Kai & Co. is deeply proud to support—at every level. From our own SHK Scallywag Racing Team competing in world-class regattas around the globe, to our Scallywag youth sailing programme, which has introduced more than 3,000 young people to the sport. Besides supporting Dragon World Championship, we are also a long-standing sponsor of major local regattas, including the Around the Island Race, Hong Kong Race Week, and the Open Dinghy Regatta.",
+    "3. Welcoming the Dragon World Championship to Hong Kong\nAs title sponsor, we are thrilled to welcome the Dragon World Championship to Asia for the very first time in its 97-year history, bringing sailors from more than 20 nations to Hong Kong. It is a fantastic opportunity to celebrate Hong Kong’s rich maritime heritage, while showcasing our home city as Asia's premier sailing destination.",
+  ].join("\n\n");
+  const boilerplate = [
+    "Sun Hung Kai & Co. Limited (“SHK & Co.”, SEHK: 86) is a principal-led alternative investment platform based in Hong Kong. Since 1969, with its roots in wealth management, SHK & Co. has built a unique investment capability by investing across a wide range of alternative asset classes including hedge funds, private equity, private credit, and various real assets, consistently generating solid long-term risk-adjusted returns. SHK & Co.'s vision is to realise the full potential of its alternative investment expertise through a strategy centred on alignment — creating value for both its own capital and that of external partners, including institutions and family offices, enhanced by its relationships with leading alternative investment managers. As at 30 June 2026, SHK & Co. held approximately HK$40.4 billion in total assets, with Total AUM* of HK$29.2 billion (~US$3.7 billion), reflecting 17.7% growth since the end of 2025. For more information, please visit:www.shkco.com / follow SHK & Co. on LinkedIn.",
+    "Founded in 2020, Sun Hung Kai Capital Partners Limited (“SHKCP”) is a Hong Kong SFC regulated subsidiary of SHK & Co., with Type 1, 4 and 9 licenses. For more information, please visit:www.shkcapital.com / follow SHKCP on LinkedIn.",
+    "* “Total AUM” refers to the total value of assets managed, advised, distributed or otherwise serviced by SHKCP, and also includes assets managed by seeding partners and external managers in which SHK & Co. has equity stakes. For details, please refer to the SHK & Co. website and our annual report. This AUM methodology differs from that of the AUM in our regulatory filings.",
+  ].join("\n\n");
+  const speakerBio = "Mr. Tony Edwards has served as Deputy Chief Executive Officer of Sun Hung Kai & Co. Limited since December 2023. He started his career in the 1990s, in Asian investment banking, and from 2000 onwards, he developed a track record of growing, managing and realigning investment management businesses, whilst at AllianceBernstein, Neuberger Berman, Robeco and Arisaig Partners. He was the Chief Operating Officer of Arisaig Partners and the Chief Executive Officer of Robeco Asia-Pacific. He has delivered high-performance outcomes across operational, distribution, investment and governance functions, in both large institutional, start-up and boutique investment managers. He is experienced at designing and managing change management to enable technology development, operational processes, sales and marketing engagement, and enhanced risk management, typically through the alignment of organisational priorities and culture. In business development he has worked with many global and local investment advisors and consultants, Asian and Middle Eastern sovereigns, central banks, Australian and Asian Institutional capital allocators, high-net-worth and retail client-channels, always with a strong personal belief in a colligate approach to accessing growth and investment success. In addition to building businesses, Mr. Edwards is experienced in traditional and alternative portfolio management, in both a global and local settings, public and private. He has also managed businesses within various license settings, including but not limited to the U.S. Securities and Exchange Commission (SEC), The Securities and Futures Commission of Hong Kong (SFC), The Australian Prudential Regulation Authority (APRA) and Monetary Authority of Singapore (MAS). Mr. Edwards holds a Bachelor of Science Degree in Business Information Technology from Central University of Lancashire and is a Chartered Director and Fellow of the Institute of Directors. He is also a director of certain subsidiaries of the Company.";
+  const detailsNotes = [
+    "12 November: Alison Yeung supplied the production contacts, approved key messages, company boilerplate, Tony Edwards’ biography, social links, filming preferences and film approvers.",
+    "Email says both SHK & Co. and SHK Capital Partners logos are attached. Actual logo files and brand guidelines were not included in the forwarded text. Alison says cleared photos are in a OneDrive shared folder; the actual URL/access details are not in the pasted message. Video footage may still need to be located and uploaded.",
+    "Alison asked whether the package was included or what it would cost. The reply described package contents but did not explicitly state the price; confirm the standard package cost before treating it as approved.",
+  ].join("\n");
+  const updatedDetails = {
+    ...details,
+    brandName: details.brandName || "Sun Hung Kai & Co. · Title Sponsor",
+    contactName: details.contactName || "Alison Yeung",
+    contactPhone: details.contactPhone || "+852 9675 7431",
+    website: details.website || "https://www.shkco.com",
+    brief: appendSourceText(details.brief, "Standard sponsor film proposed: 60–90 seconds plus 30-second and 15-second edits in landscape, portrait and square formats, clean version without captions, and written permission for SHK & Co. to use the films. Review coordinated by event team; final delivery within 15 days of closing ceremony. Optional additional coverage requires prior brief, production and cost agreement. Pricing was queried by SHK & Co. and remains to be confirmed in the supplied email thread."),
+    notes: appendSourceText(details.notes, detailsNotes),
+  };
+  profile.submissionSource = profile.submissionSource || "Email from Alison Yeung, 12 November 2026";
+  profile.submissionReceivedAt = profile.submissionReceivedAt || "2026-11-12";
+  profile.contacts = withSourceContacts(profile, [
+    { type: "Primary · final approver", name: "Alison Yeung", role: "VP Marketing & Communications · SHK & Co.", email: "alison.yeung@shkco.com", phone: "+852 9675 7431" },
+    { type: "Backup approver", name: "Anita Chong", role: "VP Marketing & Communications · SHK & Co.", email: "anita.chong@shkco.com", phone: "+852 9169 8618" },
+  ]);
+  profile.keyMessages = appendSourceText(profile.keyMessages, keyMessages);
+  profile.boilerplate = appendSourceText(profile.boilerplate, boilerplate);
+  profile.spokespersonName = profile.spokespersonName || "Tony Edwards";
+  profile.spokespersonTitle = profile.spokespersonTitle || "Deputy Chief Executive Officer, Sun Hung Kai & Co. Limited";
+  profile.spokespersonBiography = appendSourceText(profile.spokespersonBiography, speakerBio);
+  profile.socialLinks = appendSourceText(profile.socialLinks, "Sun Hung Kai & Co. LinkedIn: https://www.linkedin.com/company/10516545\nSun Hung Kai & Co. Facebook: https://www.facebook.com/SunHungKaiCo/\nSun Hung Kai Capital Partners LinkedIn: https://www.linkedin.com/company/89550738");
+  profile.storyPriorities = appendSourceText(profile.storyPriorities, "Feature SHK & Co.’s long-standing support for Hong Kong sailing and the people behind it; SHK Scallywag Racing Team and its youth programme; and what bringing the Dragon Worlds to Hong Kong means to the business and community. These points are supplied as approved key messages.");
+  profile.brandGuidelines = appendSourceText(profile.brandGuidelines, "Alison says both company logos (SHK & Co. and Sun Hung Kai Capital Partners) are attached. Confirm logo files are in the shared folder. Brand guidelines were requested but are not listed as supplied.");
+  profile.preferredLocation = "SHK & Co. Hong Kong office, 40/F Lee Garden One, 33 Hysan Avenue, Causeway Bay (preferred; Scallywag 100 model and team trophies onsite).";
+  profile.alternateLocation = "Royal Hong Kong Yacht Club, Kellett Island, Causeway Bay.";
+  profile.requestedDate = "2026-11-20";
+  profile.requestedTime = "15:00–17:00 HKT";
+  profile.alternateRequestedDate = "2026-11-20";
+  profile.alternateRequestedTime = "15:00–17:00 HKT";
+  profile.timezone = "HKT";
+  profile.filmingConfirmation = "Requested for Friday 20 November, 15:00–17:00 HKT, either at the preferred SHK & Co. office or at RHKYC Kellett Island. Confirm selected location and booking.";
+  profile.availabilityNotes = "Available window supplied: Friday 20 November 2026, 15:00–17:00 HKT at either of the two proposed locations. Interview duration and day-of contact not specified.";
+  profile.diaryContact = "Alison Yeung · +852 9675 7431; Anita Chong · +852 9169 8618";
+  profile.mediaClearance = appendSourceText(profile.mediaClearance, "Alison says the shared-folder photos are cleared for use. The OneDrive URL/access instructions are not included in the forwarded text. Video footage may still need to be found and uploaded.");
+  profile.finalApprover = "Alison Yeung · alison.yeung@shkco.com · +852 9675 7431";
+  profile.backupApprover = "Anita Chong · anita.chong@shkco.com · +852 9169 8618";
+  profile.approvalTurnaround = "Not supplied; confirm expected review turnaround.";
+  profile.followUps = appendSourceText(profile.followUps, "Confirm the standard media package price (Alison asked about cost; the reply did not state a price). Confirm the selected 20 November filming location and slot, interview duration and day-of contact. Provide/confirm a brand guide; make the two logos and OneDrive photos accessible to production; locate/upload any video footage; confirm review turnaround, caption languages, name/title spellings and usage restrictions.");
+  profile.reviewStatuses.contacts = "Submitted";
+  profile.reviewStatuses.messages = "Submitted";
+  profile.reviewStatuses.boilerplate = "Submitted";
+  profile.reviewStatuses.spokespeople = "Submitted";
+  profile.reviewStatuses.story = "Submitted";
+  profile.reviewStatuses.availability = "Submitted";
+  profile.reviewStatuses.filming = "Needs input";
+  profile.reviewStatuses.brand = "Needs input";
+  profile.reviewStatuses.media = "Needs input";
+  profile.reviewStatuses.approval = "Needs input";
+  return { record: { ...record, details: updatedDetails, profile, sourceUpdates: [...(record.sourceUpdates ?? []), shkUpdateId] }, changed: true };
+}
+
+function applySponsorSourceUpdate(record: SponsorRecord, sponsorSlug: string) {
+  if (sponsorSlug === "xpeng") {
+    const initial = applyXpengSourceUpdate(record, sponsorSlug);
+    return applyXpengProductionUpdate(initial.record);
+  }
+  if (sponsorSlug === "hopewell-hotel") return applyHopewellSourceUpdate(record);
+  if (sponsorSlug === "brugse-zot") return applyBrugseZotSourceUpdate(record);
+  if (sponsorSlug === "chalmers") return applyChalmersSourceUpdate(record);
+  if (sponsorSlug === "yanmar") return applyYanmarSourceUpdate(record);
+  if (sponsorSlug === "code-zero") return applyCodeZeroSourceUpdate(record);
+  if (sponsorSlug === "central-oceans") return applyCentralOceansSourceUpdate(record);
+  if (sponsorSlug === "sun-hung-kai-and-co") return applyShkSourceUpdate(record);
+  return { record, changed: false };
+}
+
 export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { sponsorSlug: string; sponsorName: string; editable: boolean }) {
   const key = `sponsor:${sponsorSlug}`;
   const [record, setRecord] = useState<SponsorRecord>(() => normalizeRecord(null));
@@ -206,7 +624,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
     const remote = normalizeRecord(cloudRecord);
     const local = normalizeRecord(localRecord);
     function activateRecord(baseRecord: SponsorRecord, mode: StorageMode, successMessage: string) {
-      const sourceUpdate = applyXpengSourceUpdate(baseRecord, sponsorSlug);
+      const sourceUpdate = applySponsorSourceUpdate(baseRecord, sponsorSlug);
       let selected = sourceUpdate.record;
       setStorageMode(mode);
       setRecord(selected);
@@ -249,7 +667,6 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
     }
 
     activateRecord(remote, "cloud", cloudRecord ? "Sponsor collection loaded." : "Start this sponsor’s private collection.");
-    if (cloudRecord && !remote.sourceUpdates?.includes(xpengUpdateId)) void saveLocalSponsorRecord(key, remote).catch(() => undefined);
   }, [key, sponsorSlug, editable]);
 
   useEffect(() => {

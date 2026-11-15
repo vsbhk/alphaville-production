@@ -35,6 +35,10 @@ const eventCalendar: CalendarDay[] = [
   ] },
   { event: "Asia Pacific Championship", date: "Fri 20 Nov", activities: [
     { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
+    { title: "SHK & Co. sponsor filming · requested", time: "15:00–17:00 HKT", location: "Preferred: 40/F Lee Garden One, Causeway Bay · alternate: RHKYC Kellett Island", runOfShow: [
+      { title: "Preferred location and filming setup", detail: "SHK & Co. prefers its Hong Kong office, which has a Scallywag 100 boat model and the team’s major championship trophies." },
+      { title: "Alternative location", detail: "Royal Hong Kong Yacht Club, Kellett Island, Causeway Bay. Confirm the selected location and final booking; the filming window is a request." },
+    ] },
     { title: "After-sailing drinks", time: "17:00–18:30", location: "Clearwater Bay Golf & Country Club" },
     ...dailyMediaDeadlines,
   ] },
@@ -103,6 +107,8 @@ const eventCalendar: CalendarDay[] = [
   { event: "World Championship", date: "Wed 25 Nov", activities: [
     { title: "Championship racing · first warning signal", time: "11:00", location: "Waters off the Ninepins" },
     { title: "Championship gala dinner", time: "19:00–22:00", location: "Crystal Ballroom, Hopewell Hotel", runOfShow: [
+      { title: "Hopewell Hospitality Partner coverage", detail: "Hopewell has asked the event team to capture hospitality programme moments, including the gala dinner at its hotel. Sponsor films are for publication after approval, not screening during the event." },
+      { title: "Hopewell sponsor film package", detail: "Included at no extra cost: a 60–90-second sponsor film, 30-second and 15-second edits in landscape, portrait and square formats, a version without captions and written permission for Hopewell’s own channels. Master files will be supplied; final delivery is within 15 days of the 29 November closing ceremony, by mid-December. Event team coordinates review." },
       { title: "XPENG booth confirmed", detail: "XPENG confirms a booth at the gala dinner and needs the booth dimensions to prepare its backdrop. Event organiser to provide the confirmed width and depth." },
     ] },
     ...dailyMediaDeadlines,
