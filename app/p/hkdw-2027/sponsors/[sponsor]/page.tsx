@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { ProjectNav } from "@/components/ProjectNav";
 import { AlphavilleHeader } from "@/components/AlphavilleBrand";
 import { SponsorWorkspace } from "@/components/SponsorWorkspace";
+import { SponsorMissingInformation } from "@/components/SponsorMissingInformation";
 import { projectSponsors } from "@/lib/sponsors";
 import { auth } from "@/auth";
 import Link from "next/link";
@@ -79,6 +80,8 @@ export default async function SponsorWorkspacePage({
           <p className="font-semibold">Private sponsor collection</p>
           <p className="mt-2 break-words text-[var(--muted)]">Collect this sponsor’s information and files here. When it is complete, download a ZIP and share it with Icarus yourself.</p>
         </aside>
+
+        <SponsorMissingInformation sponsorName={sponsor.name} />
 
         <SponsorWorkspace key={sponsor.slug} sponsorSlug={sponsor.slug} sponsorName={sponsor.name} editable={canEdit} />
 

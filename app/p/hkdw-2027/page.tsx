@@ -168,7 +168,7 @@ export default async function ProjectOverviewPage() {
               <a href="https://www.racingrulesofsailing.org/documents/13241/event" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-sm font-semibold text-[var(--accent)] underline decoration-[var(--line-strong)] underline-offset-4">APC Official Notice Board</a>
             </div>
           </div>
-          <p className="mb-4 max-w-3xl text-sm leading-6 text-[var(--muted)]">Published event dates and times are shown in Hong Kong time (HKT). Expand a day and add a supplier beside each event that needs coverage. These assignments are for planning and do not confirm a supplier booking; record agreed work times and meeting points in the private production calendar below.</p>
+          <p className="mb-4 max-w-3xl text-sm leading-6 text-[var(--muted)]">Published programme times are shown in Hong Kong time (HKT). Expand a day to assign a service provider and enter their coverage start and end times beside each activity. These are planning assignments, not confirmed bookings; use the production calendar below for the agreed meeting point and shoot details.</p>
           <div className="mb-4 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">Filming period</p>
             <p className="mt-2 text-lg font-semibold">Tuesday 17 November – Sunday 29 November 2026</p>

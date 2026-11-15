@@ -3,15 +3,22 @@
 import { FormEvent, useEffect, useState } from "react";
 import { loadWorkspaceData, saveWorkspaceData } from "@/lib/workspace-sync";
 
-type ChecklistTask = { id: string; title: string; done: boolean };
+type ChecklistTask = { id: string; title: string; done: boolean; href?: string; action?: string };
 
 const STORAGE_KEY = "hkdw-2027-overview-tasks-v1";
 const initialTasks: ChecklistTask[] = [
-  { id: "sponsor-chaser", title: "Review sponsor pages for missing information and prepare copy-and-paste chaser emails", done: false },
-  { id: "xpeng-follow-up", title: "Remind XPENG to confirm the interview time and meeting point", done: false },
-  { id: "daily-plans", title: "Complete daily activity plans", done: false },
-  { id: "sponsor-approval", title: "Track sponsor material approvals", done: false },
+  { id: "sponsor-chaser", title: "Review sponsor pages for missing information and prepare copy-and-paste chaser emails", done: false, href: "/p/hkdw-2027/sponsors#roster-title", action: "Review sponsors" },
+  { id: "xpeng-follow-up", title: "Remind XPENG to confirm the interview time and meeting point", done: false, href: "/p/hkdw-2027/sponsors/xpeng?followup=xpeng-interview-info#missing-information", action: "Open XPENG follow-up" },
+  { id: "daily-plans", title: "Complete daily activity plans", done: false, href: "/p/hkdw-2027#calendar-title", action: "Open calendar" },
+  { id: "sponsor-approval", title: "Track sponsor material approvals", done: false, href: "/p/hkdw-2027/sponsors#roster-title", action: "Review sponsor pages" },
 ];
+
+function restoreTaskActions(saved: ChecklistTask[]) {
+  return saved.map((task) => {
+    const starter = initialTasks.find((item) => item.id === task.id);
+    return starter ? { ...starter, ...task, href: starter.href, action: starter.action } : task;
+  });
+}
 
 export function ProjectActionChecklist({ editable }: { editable: boolean }) {
   const [tasks, setTasks] = useState<ChecklistTask[]>(initialTasks);
@@ -27,12 +34,12 @@ export function ProjectActionChecklist({ editable }: { editable: boolean }) {
         const shared = await loadWorkspaceData<ChecklistTask[]>("overview-tasks");
         if (cancelled) return;
         if (Array.isArray(shared)) {
-          setTasks(shared);
+          setTasks(restoreTaskActions(shared));
           setSyncMessage("Shared project checklist loaded.");
         } else {
           try {
             const local = window.localStorage.getItem(STORAGE_KEY);
-            if (local) setTasks(JSON.parse(local) as ChecklistTask[]);
+            if (local) setTasks(restoreTaskActions(JSON.parse(local) as ChecklistTask[]));
           } catch { /* Keep the starter tasks if the browser copy cannot be read. */ }
           setSyncMessage("Checklist ready. Changes will be shared when saved.");
         }
@@ -41,7 +48,7 @@ export function ProjectActionChecklist({ editable }: { editable: boolean }) {
         if (cancelled) return;
         try {
           const local = window.localStorage.getItem(STORAGE_KEY);
-          if (local) setTasks(JSON.parse(local) as ChecklistTask[]);
+          if (local) setTasks(restoreTaskActions(JSON.parse(local) as ChecklistTask[]));
         } catch { /* Keep the starter tasks if the browser copy cannot be read. */ }
         setSyncMessage("Cloud storage is unavailable. Checklist changes stay in this browser.");
         setCloudReady(false);
@@ -89,6 +96,7 @@ export function ProjectActionChecklist({ editable }: { editable: boolean }) {
               className="h-5 w-5 shrink-0 accent-[var(--accent)]"
             />
             <span className={`min-w-0 flex-1 text-sm leading-6 ${task.done ? "text-[var(--muted)] line-through" : "text-[var(--foreground)]"}`}>{task.title}</span>
+            {task.href && <a href={task.href} className="inline-flex min-h-11 shrink-0 items-center rounded-md border border-[var(--line-strong)] bg-white px-3 text-xs font-semibold text-[var(--accent)] underline underline-offset-4">{task.action ?? "Open"}</a>}
             {editable && <button type="button" disabled={!ready} onClick={() => setTasks((current) => current.filter((item) => item.id !== task.id))} className="min-h-10 shrink-0 px-2 text-xs font-semibold text-[var(--muted)] underline underline-offset-4 disabled:opacity-50" aria-label={`Remove task: ${task.title}`}>Remove</button>}
           </li>
         ))}

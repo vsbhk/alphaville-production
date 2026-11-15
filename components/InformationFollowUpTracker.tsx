@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { loadWorkspaceData, saveWorkspaceData } from "@/lib/workspace-sync";
+import { projectSponsors } from "@/lib/sponsors";
 
 type FollowUpStatus = "To request" | "Chaser sent" | "Awaiting reply" | "Received";
 type FollowUp = { id: string; owner: string; missing: string; status: FollowUpStatus };
@@ -19,6 +20,12 @@ const initialFollowUps: FollowUp[] = [
 
 function chaserDraft(item: FollowUp) {
   return `Subject: HKDW 2027 production follow-up\n\nHello ${item.owner},\n\nWe’re preparing the production materials for the Hong Kong Dragon Championship. Could you please provide or confirm the following?\n\n${item.missing}\n\nPlease let us know if anything is not available yet.\n\nMany thanks`;
+}
+
+function sponsorHref(owner: string, id: string) {
+  const normalize = (value: string) => value.toLowerCase().replace(/\s*\([^)]*\)/g, "").replace(/[^a-z0-9]/g, "");
+  const sponsor = projectSponsors.find((candidate) => normalize(candidate.name) === normalize(owner));
+  return sponsor ? `/p/hkdw-2027/sponsors/${sponsor.slug}?followup=${encodeURIComponent(id)}#missing-information` : null;
 }
 
 export function InformationFollowUpTracker({ editable }: { editable: boolean }) {
@@ -111,6 +118,7 @@ export function InformationFollowUpTracker({ editable }: { editable: boolean }) 
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
             <button type="button" onClick={() => void copyChaser(item)} disabled={!ready || !item.owner.trim() || !item.missing.trim()} className="min-h-10 rounded-md border border-[var(--line-strong)] bg-white px-3 text-xs font-semibold disabled:opacity-50">Copy chaser draft</button>
+            {sponsorHref(item.owner, item.id) && <a href={sponsorHref(item.owner, item.id)!} className="inline-flex min-h-10 items-center rounded-md border border-[var(--line-strong)] bg-white px-3 text-xs font-semibold text-[var(--accent)] underline underline-offset-4">Open sponsor page · highlight missing info</a>}
             {editable && <button type="button" onClick={() => setItems((current) => current.filter((row) => row.id !== item.id))} disabled={!ready} className="min-h-10 px-2 text-xs font-semibold text-[var(--muted)] underline underline-offset-4 disabled:opacity-50">Remove</button>}
             <details className="basis-full">
               <summary className="min-h-10 cursor-pointer py-2 text-xs font-semibold text-[var(--accent)] underline underline-offset-4">Preview email text</summary>

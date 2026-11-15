@@ -9,6 +9,19 @@ export type CalendarDay = { event: string; date: string; activities: CalendarAge
 
 const STORAGE_KEY = "hkdw-2027-event-coverage-v1";
 const suppliers = ["ICARUS Sports", "Kevin Rio", "Takumi Images", "Graham Uden"];
+type CoverageAssignment = { supplier: string; start: string; end: string };
+type CoveragePlan = Record<string, CoverageAssignment[]>;
+
+function normalizeAssignments(saved: Record<string, unknown> | null): CoveragePlan {
+  if (!saved) return {};
+  return Object.fromEntries(Object.entries(saved).map(([key, value]) => [key, Array.isArray(value)
+    ? value.flatMap((item) => typeof item === "string"
+      ? [{ supplier: item, start: "", end: "" }]
+      : item && typeof item === "object" && typeof (item as CoverageAssignment).supplier === "string"
+        ? [{ supplier: (item as CoverageAssignment).supplier, start: (item as CoverageAssignment).start ?? "", end: (item as CoverageAssignment).end ?? "" }]
+        : [])
+    : []]));
+}
 
 function dayKey(day: CalendarDay) {
   return `${day.event}|${day.date}`;
@@ -16,34 +29,34 @@ function dayKey(day: CalendarDay) {
 
 export function EventProgramme({ days, editable = false }: { days: CalendarDay[]; editable?: boolean }) {
   const [view, setView] = useState<"vertical" | "panels">("vertical");
-  const [assignments, setAssignments] = useState<Record<string, string[]>>({});
+  const [assignments, setAssignments] = useState<CoveragePlan>({});
   const [ready, setReady] = useState(false);
   const [cloudReady, setCloudReady] = useState(false);
-  const [syncMessage, setSyncMessage] = useState("Loading supplier assignments…");
+  const [syncMessage, setSyncMessage] = useState("Loading coverage assignments…");
   const panelsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
     async function initialize() {
       try {
-        const shared = await loadWorkspaceData<Record<string, string[]>>("event-coverage");
+        const shared = await loadWorkspaceData<Record<string, unknown>>("event-coverage");
         if (cancelled) return;
-        if (shared) setAssignments(shared);
+        if (shared) setAssignments(normalizeAssignments(shared));
         else {
           try {
             const local = window.localStorage.getItem(STORAGE_KEY);
-            if (local) setAssignments(JSON.parse(local) as Record<string, string[]>);
+            if (local) setAssignments(normalizeAssignments(JSON.parse(local) as Record<string, unknown>));
           } catch { /* Use the unassigned event list if the browser copy cannot be read. */ }
         }
         setCloudReady(true);
-        setSyncMessage(shared ? "Supplier assignments loaded." : "Assign a supplier to each event that needs coverage.");
+        setSyncMessage(shared ? "Provider assignments and coverage times loaded." : "Assign a provider and coverage time to each activity that needs coverage.");
       } catch {
         if (cancelled) return;
         try {
           const local = window.localStorage.getItem(STORAGE_KEY);
-          if (local) setAssignments(JSON.parse(local) as Record<string, string[]>);
+          if (local) setAssignments(normalizeAssignments(JSON.parse(local) as Record<string, unknown>));
         } catch { /* Keep the events available without saved assignments. */ }
-        setSyncMessage("Cloud storage is unavailable. Supplier assignments stay in this browser.");
+      setSyncMessage("Cloud storage is unavailable. Provider assignments and coverage times stay in this browser.");
       }
       if (!cancelled) setReady(true);
     }
@@ -57,10 +70,10 @@ export function EventProgramme({ days, editable = false }: { days: CalendarDay[]
     if (!cloudReady) return;
     const timeout = window.setTimeout(() => {
       void saveWorkspaceData("event-coverage", assignments)
-        .then(() => setSyncMessage("Supplier assignments saved to your private workspace."))
+        .then(() => setSyncMessage("Provider assignments and coverage times saved to your private workspace."))
         .catch(() => {
           setCloudReady(false);
-          setSyncMessage("Cloud storage is unavailable. Supplier assignments stay in this browser.");
+          setSyncMessage("Cloud storage is unavailable. Provider assignments and coverage times stay in this browser.");
         });
     }, 500);
     return () => window.clearTimeout(timeout);
@@ -70,12 +83,16 @@ export function EventProgramme({ days, editable = false }: { days: CalendarDay[]
     if (!supplier) return;
     setAssignments((current) => ({
       ...current,
-      [eventId]: current[eventId]?.includes(supplier) ? current[eventId] : [...(current[eventId] ?? []), supplier],
+      [eventId]: current[eventId]?.some((item) => item.supplier === supplier) ? current[eventId] : [...(current[eventId] ?? []), { supplier, start: "", end: "" }],
     }));
   }
 
   function removeSupplier(eventId: string, supplier: string) {
-    setAssignments((current) => ({ ...current, [eventId]: (current[eventId] ?? []).filter((name) => name !== supplier) }));
+    setAssignments((current) => ({ ...current, [eventId]: (current[eventId] ?? []).filter((item) => item.supplier !== supplier) }));
+  }
+
+  function updateAssignment(eventId: string, supplier: string, field: "start" | "end", value: string) {
+    setAssignments((current) => ({ ...current, [eventId]: (current[eventId] ?? []).map((item) => item.supplier === supplier ? { ...item, [field]: value } : item) }));
   }
 
   function movePanels(direction: -1 | 1) {
@@ -115,7 +132,7 @@ export function EventProgramme({ days, editable = false }: { days: CalendarDay[]
                     </span>
                   </summary>
                   <div className="border-t border-[var(--line)] px-4 py-4 sm:pl-[calc(180px+1.25rem)] sm:pr-5 sm:py-5">
-                <AgendaItems dayKey={dayKey(day)} activities={day.activities} assignments={assignments} editable={editable} ready={ready} onAddSupplier={addSupplier} onRemoveSupplier={removeSupplier} />
+                <AgendaItems dayKey={dayKey(day)} activities={day.activities} assignments={assignments} editable={editable} ready={ready} onAddSupplier={addSupplier} onRemoveSupplier={removeSupplier} onUpdateAssignment={updateAssignment} />
                   </div>
                 </details>
               </li>
@@ -133,14 +150,14 @@ export function EventProgramme({ days, editable = false }: { days: CalendarDay[]
               <article key={`${day.event}-${day.date}`} className="w-[min(86vw,22rem)] shrink-0 snap-start rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4 sm:w-[22rem] sm:p-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--muted)]">{day.event}</p>
                 <h3 className="mt-2 border-b border-[var(--line)] pb-3 text-lg font-semibold leading-6 text-[var(--foreground)]">{day.date}</h3>
-                <AgendaItems dayKey={dayKey(day)} activities={day.activities} assignments={assignments} editable={editable} ready={ready} onAddSupplier={addSupplier} onRemoveSupplier={removeSupplier} compact />
+                <AgendaItems dayKey={dayKey(day)} activities={day.activities} assignments={assignments} editable={editable} ready={ready} onAddSupplier={addSupplier} onRemoveSupplier={removeSupplier} onUpdateAssignment={updateAssignment} compact />
               </article>
             ))}
           </div>
           <p className="mt-1 text-xs text-[var(--muted)]">Scroll sideways or use the arrows to move between dates.</p>
         </div>
       )}
-      <p role="status" className="mt-3 text-xs leading-5 text-[var(--muted)]">{editable ? syncMessage : "Supplier assignments are read-only."}</p>
+      <p role="status" className="mt-3 text-xs leading-5 text-[var(--muted)]">{editable ? syncMessage : "Provider assignments and coverage times are read-only."}</p>
     </section>
   );
 }
@@ -153,15 +170,17 @@ function AgendaItems({
   ready,
   onAddSupplier,
   onRemoveSupplier,
+  onUpdateAssignment,
   compact = false,
 }: {
   activities: CalendarAgendaItem[];
   dayKey: string;
-  assignments: Record<string, string[]>;
+  assignments: CoveragePlan;
   editable: boolean;
   ready: boolean;
   onAddSupplier: (eventId: string, supplier: string) => void;
   onRemoveSupplier: (eventId: string, supplier: string) => void;
+  onUpdateAssignment: (eventId: string, supplier: string, field: "start" | "end", value: string) => void;
   compact?: boolean;
 }) {
   return (
@@ -183,10 +202,17 @@ function AgendaItems({
             </details>}
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <span className="text-xs font-medium text-[var(--muted)]">Coverage:</span>
-              {(assignments[`${day}|${activity.title}|${index}`] ?? []).map((supplier) => (
-                <span key={supplier} className="inline-flex min-h-8 items-center gap-2 rounded-md border border-[var(--line)] bg-[var(--background)] px-2.5 text-xs font-medium text-[var(--foreground)]">
-                  {supplier}
-                  {editable && <button type="button" onClick={() => onRemoveSupplier(`${day}|${activity.title}|${index}`, supplier)} aria-label={`Remove ${supplier} from ${activity.title}`} className="font-semibold text-[var(--muted)]">×</button>}
+              {(assignments[`${day}|${activity.title}|${index}`] ?? []).map((assignment) => (
+                <span key={assignment.supplier} className="inline-flex min-h-9 flex-wrap items-center gap-2 rounded-md border border-[var(--line)] bg-[var(--background)] px-2.5 py-1 text-xs font-medium text-[var(--foreground)]">
+                  <span>{assignment.supplier}</span>
+                  {editable ? <>
+                    <label className="sr-only" htmlFor={`start-${encodeURIComponent(day)}-${index}-${encodeURIComponent(assignment.supplier)}`}>Coverage start time for {assignment.supplier} on {activity.title}</label>
+                    <input id={`start-${encodeURIComponent(day)}-${index}-${encodeURIComponent(assignment.supplier)}`} type="time" value={assignment.start} onChange={(event) => onUpdateAssignment(`${day}|${activity.title}|${index}`, assignment.supplier, "start", event.target.value)} disabled={!ready} className="h-8 rounded border border-[var(--line-strong)] bg-white px-1.5 text-xs disabled:opacity-50" />
+                    <span aria-hidden="true" className="text-[var(--muted)]">to</span>
+                    <label className="sr-only" htmlFor={`end-${encodeURIComponent(day)}-${index}-${encodeURIComponent(assignment.supplier)}`}>Coverage end time for {assignment.supplier} on {activity.title}</label>
+                    <input id={`end-${encodeURIComponent(day)}-${index}-${encodeURIComponent(assignment.supplier)}`} type="time" value={assignment.end} onChange={(event) => onUpdateAssignment(`${day}|${activity.title}|${index}`, assignment.supplier, "end", event.target.value)} disabled={!ready} className="h-8 rounded border border-[var(--line-strong)] bg-white px-1.5 text-xs disabled:opacity-50" />
+                    <button type="button" onClick={() => onRemoveSupplier(`${day}|${activity.title}|${index}`, assignment.supplier)} aria-label={`Remove ${assignment.supplier} from ${activity.title}`} className="px-1 font-semibold text-[var(--muted)]">×</button>
+                  </> : <span className="text-[var(--muted)]">{assignment.start && assignment.end ? `${assignment.start}–${assignment.end}` : "Time to be assigned"}</span>}
                 </span>
               ))}
               {editable ? <label className="sr-only" htmlFor={`supplier-${encodeURIComponent(day)}-${index}`}>Add supplier to {activity.title}</label> : null}
