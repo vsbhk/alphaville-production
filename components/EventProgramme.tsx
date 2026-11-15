@@ -27,18 +27,28 @@ export function EventProgramme({ days }: { days: CalendarDay[] }) {
 
       {view === "vertical" ? (
         <div className="overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--surface)]">
-          <div className="grid grid-cols-[minmax(0,1fr)] border-b border-[var(--line)] bg-[var(--background)] px-4 py-3 sm:grid-cols-[180px_minmax(0,1fr)] sm:px-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--muted)]">Date and event</p>
-            <p className="mt-2 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--muted)] sm:mt-0">Programme</p>
+          <div className="grid grid-cols-[minmax(0,1fr)] border-b border-[var(--line)] bg-[var(--background)] px-4 py-3 sm:px-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--muted)]">Schedule by day</p>
           </div>
           <ol className="divide-y divide-[var(--line)]">
             {days.map((day) => (
-              <li key={`${day.event}-${day.date}`} className="grid gap-3 px-4 py-4 sm:grid-cols-[180px_minmax(0,1fr)] sm:gap-5 sm:px-5 sm:py-5">
-                <div>
-                  <p className="text-sm font-semibold text-[var(--foreground)]">{day.date}</p>
-                  <p className="mt-1 text-xs font-medium text-[var(--muted)]">{day.event}</p>
-                </div>
-                <AgendaItems activities={day.activities} />
+              <li key={`${day.event}-${day.date}`}>
+                <details className="group">
+                  <summary className="flex min-h-20 cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--accent)] [&::-webkit-details-marker]:hidden sm:px-5">
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold text-[var(--foreground)]">{day.date}</span>
+                      <span className="mt-1 block text-xs font-medium text-[var(--muted)]">{day.event}</span>
+                    </span>
+                    <span className="flex shrink-0 items-center gap-3 text-xs font-medium text-[var(--muted)]">
+                      <span>{day.activities.length} {day.activities.length === 1 ? "schedule item" : "schedule items"}</span>
+                      <span aria-hidden="true" className="text-base text-[var(--foreground)] group-open:hidden">+</span>
+                      <span aria-hidden="true" className="hidden text-base text-[var(--foreground)] group-open:inline">−</span>
+                    </span>
+                  </summary>
+                  <div className="border-t border-[var(--line)] px-4 py-4 sm:pl-[calc(180px+1.25rem)] sm:pr-5 sm:py-5">
+                    <AgendaItems activities={day.activities} />
+                  </div>
+                </details>
               </li>
             ))}
           </ol>
