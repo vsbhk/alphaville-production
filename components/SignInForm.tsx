@@ -23,6 +23,7 @@ export function SignInForm({ googleReady, nextPath, authError, onDark = false }:
     >
       Continue with Google
     </button>
+    {!googleReady && <p role="status" className={`text-center text-xs leading-4 ${onDark ? "text-white/75" : "text-[var(--muted)]"}`}>Google sign-in is not configured yet. Contact the workspace administrator.</p>}
     {notice && <p role="status" aria-live="polite" className={`text-center text-xs leading-4 ${onDark ? "text-white/75" : "text-[var(--muted)]"}`}>{notice}</p>}
   </div>;
 }

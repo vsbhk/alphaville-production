@@ -3,7 +3,7 @@ type ProjectSection = "overview" | "sponsors" | "production" | "deliverables";
 const links: { id: ProjectSection; label: string; href: string }[] = [
   { id: "overview", label: "Overview", href: "/p/hkdw-2027" },
   { id: "sponsors", label: "Sponsors", href: "/p/hkdw-2027/sponsors" },
-  { id: "production", label: "Production", href: "/p/hkdw-2027/providers/icarus" },
+  { id: "production", label: "Production preview", href: "/p/hkdw-2027/providers/icarus" },
   { id: "deliverables", label: "Deliverables", href: "/p/hkdw-2027/deliverables" },
 ];
 
