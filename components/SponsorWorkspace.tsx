@@ -73,6 +73,7 @@ const xpengUpdateId = "xpeng-social-and-event-update-2026-11";
 const xpengProductionUpdateId = "xpeng-production-inputs-update-2026-11";
 const hopewellUpdateId = "hopewell-media-and-gala-update-2026-11";
 const brugseZotUpdateId = "brugse-zot-media-update-2026-11";
+const brugseZotResponseUpdateId = "brugse-zot-response-update-2026-11-17";
 const chalmersUpdateId = "chalmers-media-update-2026-11";
 const yanmarUpdateId = "yanmar-paid-media-update-2026-11";
 const yanmarVideoPaymentUpdateId = "yanmar-video-payment-update-2026-11-16";
@@ -359,6 +360,31 @@ function applyBrugseZotSourceUpdate(record: SponsorRecord) {
   profile.reviewStatuses.availability = "Needs input";
   profile.reviewStatuses.approval = "Needs input";
   return { record: { ...record, details: updatedDetails, profile, sourceUpdates: [...(record.sourceUpdates ?? []), brugseZotUpdateId] }, changed: true };
+}
+
+function applyBrugseZotResponseUpdate(record: SponsorRecord) {
+  if (record.sourceUpdates?.includes(brugseZotResponseUpdateId)) return { record, changed: false };
+  const details = { ...emptyDetails, ...record.details };
+  const profile = { ...emptyProfile, ...record.profile, reviewStatuses: { ...emptyProfile.reviewStatuses, ...record.profile?.reviewStatuses } };
+  const oldFollowUp = "Awaiting from Stieven / Brugse Zot: production contact details; confirm whether existing logo files are current and provide vector/high-resolution files; brand guidelines or N/A; 3–5 approved key messages and boilerplate; spokesperson confirmation, bio and photo; footage/photos with usage permissions; social links; preferred story moments and filming preferences; HKT availability, interview duration and day-of/backup contacts; approver, turnaround, backup approver, caption languages, name spellings and restrictions. Event team to propose a filming schedule after these details arrive.";
+  const updateNote = "Stieven’s follow-up received: see the brand, social links, story, filming and approval fields for details. Brandbook file and footage request response remain outstanding.";
+  details.notes = appendSourceText(details.notes, updateNote);
+  profile.brandGuidelines = appendSourceText(profile.brandGuidelines, "Stieven says the Brugse Zot brandbook is attached. The received Brugse Zot logos are correct; ask Stieven if updated vector or high-resolution files are required.");
+  profile.socialLinks = appendSourceText(profile.socialLinks, "Instagram: https://www.instagram.com/brugse_zot/\nFacebook: https://www.facebook.com/brugsezotbruges/\nLinkedIn: https://www.linkedin.com/company/brouwerijdehalvemaan/");
+  profile.storyPriorities = appendSourceText(profile.storyPriorities, "Stieven says Xavier will discuss approved key messages, the reason Brugse Zot supports the championship, and filming moments onsite. Stieven asks what type of existing footage would be useful.");
+  profile.spokespersonName = profile.spokespersonName || "Xavier Vanneste (onsite discussion planned; spokesperson status to confirm)";
+  profile.finalApprover = "Stieven Rogiers (sr@halvemaan.be)";
+  profile.approvalTurnaround = "Stieven is available for feedback over the coming weeks in the European time zone; turnaround time not specified.";
+  profile.followUps = appendSourceText((profile.followUps || "").replace(oldFollowUp, "").trim(), "Attach the brandbook to the sponsor collection. Tell Stieven if updated vector/high-resolution logos are needed. Reply with the requested footage types and preferred transfer method/permissions. Discuss approved key messages, spokesperson confirmation and filming/story details with Xavier onsite. Confirm HKT availability, interview duration, day-of contact, weather/absence alternative, approval turnaround, backup approver, caption languages, name/title spellings and usage restrictions.");
+  profile.reviewStatuses.brand = "Submitted";
+  profile.reviewStatuses.contacts = "Submitted";
+  profile.reviewStatuses.story = "Needs input";
+  profile.reviewStatuses.messages = "Needs input";
+  profile.reviewStatuses.media = "Needs input";
+  profile.reviewStatuses.filming = "Needs input";
+  profile.reviewStatuses.availability = "Needs input";
+  profile.reviewStatuses.approval = "Needs input";
+  return { record: { ...record, details, profile, sourceUpdates: [...(record.sourceUpdates ?? []), brugseZotResponseUpdateId] }, changed: true };
 }
 
 function applyChalmersSourceUpdate(record: SponsorRecord) {
@@ -685,13 +711,16 @@ function applyLeeKumKeeSourceUpdate(record: SponsorRecord) {
   return { record: { ...record, details: updatedDetails, profile, sourceUpdates: [...(record.sourceUpdates ?? []), leeKumKeeUpdateId] }, changed: true };
 }
 
-function applySponsorSourceUpdate(record: SponsorRecord, sponsorSlug: string) {
+function applySponsorSourceUpdates(record: SponsorRecord, sponsorSlug: string) {
   if (sponsorSlug === "xpeng") {
     const initial = applyXpengSourceUpdate(record, sponsorSlug);
     return applyXpengProductionUpdate(initial.record);
   }
   if (sponsorSlug === "hopewell-hotel") return applyHopewellSourceUpdate(record);
-  if (sponsorSlug === "brugse-zot") return applyBrugseZotSourceUpdate(record);
+  if (sponsorSlug === "brugse-zot") {
+    const source = applyBrugseZotSourceUpdate(record);
+    return applyBrugseZotResponseUpdate(source.record);
+  }
   if (sponsorSlug === "chalmers") return applyChalmersSourceUpdate(record);
   if (sponsorSlug === "yanmar") {
     const source = applyYanmarSourceUpdate(record);
@@ -706,6 +735,44 @@ function applySponsorSourceUpdate(record: SponsorRecord, sponsorSlug: string) {
   }
   if (sponsorSlug === "lee-kum-kee") return applyLeeKumKeeSourceUpdate(record);
   return { record, changed: false };
+}
+
+function deduplicateParagraphs(value: string) {
+  const seen = new Set<string>();
+  return value.split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter((paragraph) => {
+    if (!paragraph || seen.has(paragraph)) return false;
+    seen.add(paragraph);
+    return true;
+  }).join("\n\n");
+}
+
+function cleanRecordRedundancy(record: SponsorRecord) {
+  let changed = false;
+  const details = { ...emptyDetails, ...record.details };
+  for (const field of Object.keys(details) as Array<keyof SponsorDetails>) {
+    const current = details[field];
+    const cleaned = deduplicateParagraphs(current);
+    if (cleaned !== current) {
+      details[field] = cleaned;
+      changed = true;
+    }
+  }
+  const profile = { ...emptyProfile, ...record.profile, reviewStatuses: { ...emptyProfile.reviewStatuses, ...record.profile?.reviewStatuses } };
+  for (const [field, current] of Object.entries(profile)) {
+    if (typeof current !== "string") continue;
+    const cleaned = deduplicateParagraphs(current);
+    if (cleaned !== current) {
+      (profile as unknown as Record<string, unknown>)[field] = cleaned;
+      changed = true;
+    }
+  }
+  return { record: changed ? { ...record, details, profile } : record, changed };
+}
+
+function applySponsorSourceUpdate(record: SponsorRecord, sponsorSlug: string) {
+  const sourceResult = applySponsorSourceUpdates(record, sponsorSlug);
+  const cleaned = cleanRecordRedundancy(sourceResult.record);
+  return { record: cleaned.record, changed: sourceResult.changed || cleaned.changed };
 }
 
 export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { sponsorSlug: string; sponsorName: string; editable: boolean }) {
@@ -759,7 +826,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
       setRecord(selected);
       setDetails(selected.details ?? emptyDetails);
       setProfile({ ...emptyProfile, ...selected.profile });
-      setMessage(sourceUpdate.changed ? "New XPENG account and event details loaded; saving the source update…" : successMessage);
+      setMessage(sourceUpdate.changed ? "Sponsor record updates loaded; saving the source update…" : successMessage);
       setReady(true);
       if (!sourceUpdate.changed || !editable) return;
 
@@ -769,16 +836,16 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
       if (mode === "cloud") {
         void saveWorkspaceData(key, updated)
           .then(() => saveLocalSponsorRecord(key, updated).catch(() => undefined))
-          .then(() => setMessage("XPENG social accounts and event arrangements saved to the private workspace."))
+          .then(() => setMessage("Sponsor record updates saved to the private workspace."))
           .catch(() => {
             setStorageMode("local");
             void saveLocalSponsorRecord(key, updated).catch(() => undefined);
-            setMessage("XPENG details are in this browser draft; Google Sheets could not be updated. Sync the draft when available.");
+            setMessage("Sponsor updates are in this browser draft; Google Sheets could not be updated. Sync the draft when available.");
           });
       } else {
         void saveLocalSponsorRecord(key, updated)
-          .then(() => setMessage("XPENG details saved in this browser draft. Sync them to Google Sheets when available."))
-          .catch(() => setMessage("XPENG details are loaded in this page but could not be saved in the browser."));
+          .then(() => setMessage("Sponsor updates saved in this browser draft. Sync them to Google Sheets when available."))
+          .catch(() => setMessage("Sponsor updates are loaded in this page but could not be saved in the browser."));
       }
     }
 
