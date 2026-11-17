@@ -75,6 +75,8 @@ const hopewellUpdateId = "hopewell-media-and-gala-update-2026-11";
 const brugseZotUpdateId = "brugse-zot-media-update-2026-11";
 const chalmersUpdateId = "chalmers-media-update-2026-11";
 const yanmarUpdateId = "yanmar-paid-media-update-2026-11";
+const yanmarVideoPaymentUpdateId = "yanmar-video-payment-update-2026-11-16";
+const yanmarFilmingUpdateId = "yanmar-filming-details-2026-11-17";
 const codeZeroUpdateId = "code-zero-media-update-2026-11";
 const centralOceansUpdateId = "central-oceans-media-update-2026-11";
 const shkUpdateId = "shk-title-sponsor-media-update-2026-11";
@@ -435,6 +437,46 @@ function applyYanmarSourceUpdate(record: SponsorRecord) {
   return { record: { ...record, details: updatedDetails, profile, sourceUpdates: [...(record.sourceUpdates ?? []), yanmarUpdateId] }, changed: true };
 }
 
+function applyYanmarVideoPaymentUpdate(record: SponsorRecord) {
+  if (record.sourceUpdates?.includes(yanmarVideoPaymentUpdateId)) return { record, changed: false };
+  const details = { ...emptyDetails, ...record.details };
+  const profile = { ...emptyProfile, ...record.profile, reviewStatuses: { ...emptyProfile.reviewStatuses, ...record.profile?.reviewStatuses } };
+  const notes = "16 November 2026 email thread: Yanmar requested a bespoke event highlight video using footage captured by the official production team, with a 1.5–2-minute main edit and optional 30-second and 15-second social edits. Yanmar supplied a storyboard as general reference and granted Virgile access to its reference video. Bram replied that the onsite media team would propose a suitable package and Virgile would respond. Proposal, scope, pricing and approval remain pending; Yanmar’s request is a separately paid media project, outside the standard included sponsor-film package. Yanmar also says it transferred the sponsorship fee on 20 October and asks for receipt confirmation; receipt is not confirmed in the supplied thread.";
+  const updatedDetails = {
+    ...details,
+    brief: appendSourceText(details.brief, "Yanmar bespoke highlight video request (16 Nov 2026): use event footage captured by the official production team; main film approximately 1.5–2 minutes, with optional 30-second and 15-second social edits. Use Yanmar’s storyboard as a general reference and reference video for tone/style (Virgile has access). Await Virgile’s proposed package, scope and quote; do not begin production before separate approval."),
+    notes: appendSourceText(details.notes, notes),
+  };
+  profile.filmingConfirmation = appendSourceText(profile.filmingConfirmation, "16 November 2026: Yanmar requested a 1.5–2-minute bespoke highlight video using official event footage, plus optional 30-second and 15-second social edits. Storyboard is a general reference; Virgile was granted access to the reference video. Bram said the onsite media team would propose a fitting package and Virgile would respond. Scope, quote and approval are pending; this remains separately paid and outside the included sponsor-film package.");
+  profile.storyPriorities = appendSourceText(profile.storyPriorities, "Yanmar highlight video: capture race and venue atmosphere, Yanmar branding/signage, Yanmar-sponsored activities including the Yanmar dinner, and other natural scenes showing Yanmar’s involvement. Follow the supplied storyboard as general reference and use the reference video for tone/style.");
+  profile.followUps = appendSourceText(profile.followUps, "Virgile to send Yanmar a proposed highlight-video package, scope and quote; confirm whether the 1.5–2-minute main film and 30-second/15-second social edits are feasible using official event footage, and agree review/finalization arrangements before production. Separately confirm receipt of the sponsorship fee Yanmar says it transferred on 20 October 2026; no receipt confirmation appears in the supplied thread.");
+  return { record: { ...record, details: updatedDetails, profile, sourceUpdates: [...(record.sourceUpdates ?? []), yanmarVideoPaymentUpdateId] }, changed: true };
+}
+
+function applyYanmarFilmingUpdate(record: SponsorRecord) {
+  if (record.sourceUpdates?.includes(yanmarFilmingUpdateId)) return { record, changed: false };
+  const details = { ...emptyDetails, ...record.details };
+  const profile = { ...emptyProfile, ...record.profile, reviewStatuses: { ...emptyProfile.reviewStatuses, ...record.profile?.reviewStatuses } };
+  const sourceNote = "17 November 2026 email from Ayako Osawa: YANMAR’s main filming contact is Ayako Osawa, with Kosuke Demichi as backup. Spokesperson: Taro Kitamura. The supplied key messages emphasize YANMAR’s longstanding Dragon-class relationship, shared passion for sailing, and support for Asian growth, including the planned Biwako Dragon Invitation Cup II in 2028. For 27 November: 09:00 breakfast with RHKYC Commodore; 10:00 depart to watch race; 11:00 race start; 17:30 Daily Prizegiving; 19:00–20:30 BSYC / Yanmar Invitation Dinner at RHKYC Kellett Island, Regatta Room. Requested filming priorities are race footage, YANMAR branding, Daily Prizegiving and Invitation Dinner. Ayako is checking with Nikki about YANMAR logo exposure on the Daily Prizegiving backdrop. Ayako asks whether WhatsApp works for on-site communication; no confirmation or contact details supplied.";
+  details.notes = appendSourceText(details.notes, sourceNote);
+  profile.contacts = withSourceContacts(profile, [
+    { type: "Primary", name: "Ayako Osawa", role: "Main contact for filming", email: "", phone: "" },
+    { type: "Backup", name: "Kosuke Demichi", role: "Backup filming contact", email: "", phone: "" },
+  ]);
+  profile.keyMessages = appendSourceText(profile.keyMessages, "YANMAR-supplied messages (17 November 2026): Longstanding relationship with the Dragon community — YANMAR’s relationship with the Dragon class has been built through years of active participation and continued support. More than sponsorship: a shared passion for sailing — YANMAR supports sailing as a fellow member of the sailing community, sharing its passion for the sport, teamwork and connection. Supporting the continued growth of sailing in Asia — the Hong Kong championship, together with the planned Biwako Dragon Invitation Cup II in 2028, reflects YANMAR’s continued commitment to creating opportunities for Dragon sailing in Asia.");
+  profile.spokespersonName = profile.spokespersonName || "Taro Kitamura";
+  profile.storyPriorities = appendSourceText(profile.storyPriorities, "YANMAR’s supplied filming priorities for 27 November: race footage, YANMAR branding, Daily Prizegiving and the Yanmar Invitation Dinner. Key messages: a longstanding relationship with the Dragon community through active participation and continued support; sailing as a shared passion and community; and continued opportunities for Dragon sailing in Asia, including the planned Biwako Dragon Invitation Cup II in 2028.");
+  profile.filmingConfirmation = appendSourceText(profile.filmingConfirmation, "27 November 2026 schedule supplied by Ayako Osawa (HKT): 09:00 breakfast with RHKYC Commodore; 10:00 depart to watch the race; 11:00 race start; 17:30 Daily Prizegiving; 19:00–20:30 BSYC / Yanmar Invitation Dinner at RHKYC Kellett Island, Regatta Room. YANMAR logo exposure on the Daily Prizegiving backdrop is being checked with Nikki; confirmation pending.");
+  profile.followUps = appendSourceText(profile.followUps, "Confirm YANMAR logo exposure on the Daily Prizegiving backdrop; reply to Ayako Osawa about using WhatsApp for on-site communication and exchange contact details; obtain contact details for Ayako Osawa and Kosuke Demichi; confirm Taro Kitamura’s title, bio and preferred name styling; confirm filming access, interview arrangements and required approvals or usage restrictions.");
+  profile.reviewStatuses.contacts = "Submitted";
+  profile.reviewStatuses.messages = "Submitted";
+  profile.reviewStatuses.spokespeople = "Submitted";
+  profile.reviewStatuses.story = "Submitted";
+  profile.reviewStatuses.filming = "Needs input";
+  profile.reviewStatuses.availability = "Needs input";
+  return { record: { ...record, details, profile, sourceUpdates: [...(record.sourceUpdates ?? []), yanmarFilmingUpdateId] }, changed: true };
+}
+
 function applyCodeZeroSourceUpdate(record: SponsorRecord) {
   if (record.sourceUpdates?.includes(codeZeroUpdateId)) return { record, changed: false };
   const details = { ...emptyDetails, ...record.details };
@@ -651,7 +693,11 @@ function applySponsorSourceUpdate(record: SponsorRecord, sponsorSlug: string) {
   if (sponsorSlug === "hopewell-hotel") return applyHopewellSourceUpdate(record);
   if (sponsorSlug === "brugse-zot") return applyBrugseZotSourceUpdate(record);
   if (sponsorSlug === "chalmers") return applyChalmersSourceUpdate(record);
-  if (sponsorSlug === "yanmar") return applyYanmarSourceUpdate(record);
+  if (sponsorSlug === "yanmar") {
+    const source = applyYanmarSourceUpdate(record);
+    const video = applyYanmarVideoPaymentUpdate(source.record);
+    return applyYanmarFilmingUpdate(video.record);
+  }
   if (sponsorSlug === "code-zero") return applyCodeZeroSourceUpdate(record);
   if (sponsorSlug === "central-oceans") return applyCentralOceansSourceUpdate(record);
   if (sponsorSlug === "sun-hung-kai-and-co") {
