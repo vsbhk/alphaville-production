@@ -1130,12 +1130,25 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
     setError("");
     try {
       const files = new Map<string, StoredSponsorFile>();
-      for (const asset of record.assets) {
-        if (!asset.fileId) continue;
-        const stored = await loadSponsorFile(asset.fileId);
-        if (stored) files.set(asset.fileId, stored);
+      const archiveAssets = [...record.assets];
+      for (const [assetIndex, asset] of record.assets.entries()) {
+        if (asset.fileId) {
+          const stored = await loadSponsorFile(asset.fileId);
+          if (stored) {
+            files.set(asset.fileId, stored);
+            continue;
+          }
+        }
+        if (!asset.dropboxPath) continue;
+        const response = await fetch(`/api/dropbox/download?sponsor=${encodeURIComponent(sponsorSlug)}&path=${encodeURIComponent(asset.dropboxPath)}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`Could not include “${asset.fileName || asset.title}” from Dropbox. Sync the folder or try again.`);
+        const blob = await response.blob();
+        const id = `dropbox-${assetIndex}`;
+        const name = asset.fileName || asset.dropboxPath.split("/").pop() || asset.title;
+        files.set(id, { id, file: blob, name, type: blob.type, lastModified: Date.now() });
+        archiveAssets[assetIndex] = { ...asset, fileId: id, fileName: name };
       }
-      const archive = await createSponsorArchive({ sponsorName, sponsorSlug, details: record.details ?? emptyDetails, profile: record.profile, assets: record.assets, files });
+      const archive = await createSponsorArchive({ sponsorName, sponsorSlug, details: record.details ?? emptyDetails, profile: record.profile, assets: archiveAssets, files });
       const url = URL.createObjectURL(archive);
       const anchor = document.createElement("a");
       anchor.href = url;
@@ -1451,7 +1464,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
             <div>
               <h3 className="text-sm font-semibold">Files and references</h3>
               <p className="mt-1 text-sm leading-6 text-[var(--muted)]">Add source files and file links for the final handoff. Dropbox checks automatically when this page opens and when you return to it.</p>
-              {record.assets.some((asset) => asset.fileId) && <p className="mt-2 text-xs leading-5 text-[var(--muted)]">Uploaded files are stored only in this browser. Download the ZIP from the browser where each file was added; the shared record contains the file list, not the file contents.</p>}
+          {record.assets.some((asset) => asset.fileId) && <p className="mt-2 text-xs leading-5 text-[var(--muted)]">Browser-stored uploads are included when you download the ZIP from the browser where they were added. Dropbox files are downloaded into the ZIP when available; external links remain references.</p>}
             </div>
             <div className="flex flex-wrap gap-2">
               {editable && <button type="button" onClick={() => void syncDropboxContents()} disabled={!ready || saving || syncingDropbox || !dropboxConfigured} className="min-h-11 border border-[var(--line-strong)] px-4 text-sm font-semibold disabled:opacity-50">{syncingDropbox ? "Checking Dropbox…" : "Sync Dropbox contents"}</button>}
@@ -1539,7 +1552,7 @@ export function SponsorWorkspace({ sponsorSlug, sponsorName, editable }: { spons
         </div>
       </section>
 
-      <p className="text-xs leading-5 text-[var(--muted)]">The ZIP contains the sponsor information and any browser-local files. Dropbox files and external links are listed as references; their contents are not copied. Nothing is sent to Icarus from this page.</p>
+      <p className="text-xs leading-5 text-[var(--muted)]">The ZIP contains sponsor information, available browser-stored uploads and Dropbox files. External links are listed as references. Nothing is sent to Icarus from this page.</p>
     </div>
   );
 }
